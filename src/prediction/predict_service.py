@@ -1,171 +1,149 @@
 """
-predict_service.py
-==================
-Inference service for the LSTM latency forecasting model.
+src/prediction/predict_service.py  —  Owner: Charles
+=====================================================
+Online inference contract consumed by Rani's pipeline (backend/services/pipeline.py).
 
-Public API
-----------
-  predict_latency(window: list[dict]) -> dict
+    predictor = LatencyPredictor.load()            # once at startup
+    result = predictor.predict(window)             # window = 20 NetworkObservation dicts
 
-The model and scaler are loaded ONCE at module import time for performance.
-On AWS migration this becomes a thin wrapper around boto3.invoke_endpoint()
-to a SageMaker hosted endpoint — the function signature and return dict
-shape remain unchanged.
+Input  (each of exactly 20 items, oldest -> newest):
+    {"timestamp": ISO-8601 or unix seconds, "rtt_avg_ms": float|None, "rtt_min_ms": float|None,
+     "rtt_max_ms": float|None, "jitter_ms": float|None, "loss_pct": float 0-100}
+    rtt_* may be None only for a round with loss_pct == 100.
 
-Network Degradation Risk Classification
-----------------------------------------
-  predicted_latency_ms < 75   → "LOW"
-  75 ≤ predicted_latency_ms < 150 → "MEDIUM"
-  predicted_latency_ms ≥ 150  → "HIGH"
+Output (PredictionResult.to_dict()):
+    predicted_rtt_ms, risk (LOW <75 | MEDIUM <150 | HIGH), method, model_version,
+    horizon_s, inference_ms, last_observed_rtt_ms
+
+`method` is ALWAYS explicit:
+    "lstm"                  the trained network produced the value
+    "persistence_fallback"  model artifacts missing/unloadable -> last observed RTT is used.
+                            Never presented as a model prediction (the old code silently
+                            returned last_latency * 1.1 and reported it as the LSTM's output).
 """
+from __future__ import annotations
 
-import os
-import sys
+import json
+import logging
+import math
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Sequence
+
 import numpy as np
-import joblib
 
-# Resolve project root so this file can be run from any directory
-_HERE = os.path.dirname(os.path.abspath(__file__))
-_ROOT = os.path.abspath(os.path.join(_HERE, "..", ".."))
+from src.prediction.features import RAW_COLUMNS, WINDOW, Scaler, target_from_model, transform_raw
+from src.prediction.model import NumpyLSTM
 
-MODEL_PATH  = os.path.join(_HERE, "model.h5")
-SCALER_PATH = os.path.join(_ROOT, "data", "processed", "scaler.pkl")
+ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_MODEL_DIR = ROOT / "models" / "latency_lstm"
+RISK_THRESHOLDS_MS = (75.0, 150.0)
+log = logging.getLogger("predict_service")
 
-WINDOW_SIZE  = 20
-FEATURE_COLS = [
-    "bandwidth_mbps",
-    "packet_loss_pct",
-    "jitter_ms",
-    "signal_strength_dbm",
-    "current_latency_ms",
-]
 
-# ---------------------------------------------------------------------------
-# Load model & scaler once at import time (not per-call)
-# ---------------------------------------------------------------------------
-def _load_model():
-    """Load Keras model, gracefully return None if model file is missing."""
-    try:
+class PredictionInputError(ValueError):
+    """Raised for malformed windows. The API maps it to HTTP 422."""
+
+
+@dataclass
+class PredictionResult:
+    predicted_rtt_ms: float
+    risk: str
+    method: str
+    model_version: str
+    horizon_s: int
+    inference_ms: float
+    last_observed_rtt_ms: float
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def classify_risk(ms: float) -> str:
+    return "LOW" if ms < RISK_THRESHOLDS_MS[0] else "MEDIUM" if ms < RISK_THRESHOLDS_MS[1] else "HIGH"
+
+
+def _to_unix(ts: Any) -> float:
+    if isinstance(ts, (int, float)) and not isinstance(ts, bool):
+        return float(ts)
+    if isinstance(ts, datetime):
+        return ts.timestamp()
+    if isinstance(ts, str):
+        return datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
+    raise PredictionInputError(f"bad timestamp {ts!r}")
+
+
+def validate_window(window: Sequence[dict]) -> tuple[np.ndarray, np.ndarray]:
+    if not isinstance(window, (list, tuple)) or len(window) != WINDOW:
+        raise PredictionInputError(f"window must contain exactly {WINDOW} observations, got "
+                                   f"{len(window) if hasattr(window, '__len__') else type(window).__name__}")
+    ts = np.array([_to_unix(o.get("timestamp")) for o in window])
+    if np.any(np.diff(ts) <= 0):
+        raise PredictionInputError("timestamps must be strictly increasing (oldest -> newest)")
+    raw = np.full((WINDOW, len(RAW_COLUMNS)), np.nan)
+    for i, o in enumerate(window):
+        loss = o.get("loss_pct")
+        if not isinstance(loss, (int, float)) or not 0 <= loss <= 100:
+            raise PredictionInputError(f"observation {i}: loss_pct must be 0-100")
+        for j, c in enumerate(RAW_COLUMNS):
+            v = o.get(c)
+            if v is None:
+                if c == "loss_pct" or (c != "jitter_ms" and loss < 100):
+                    raise PredictionInputError(f"observation {i}: {c} is required unless loss_pct == 100")
+                continue
+            if not isinstance(v, (int, float)) or math.isnan(v) or v < 0 or v > 5000:
+                raise PredictionInputError(f"observation {i}: {c}={v!r} out of range 0-5000")
+            raw[i, j] = float(v)
+    if np.isnan(raw[:, 0]).all():
+        raise PredictionInputError("window has no successful round (100 % loss everywhere)")
+    return raw, ts
+
+
+class LatencyPredictor:
+    def __init__(self, net: NumpyLSTM | None, scaler: Scaler | None, meta: dict, load_error: str | None = None):
+        self.net, self.scaler, self.meta, self.load_error = net, scaler, meta, load_error
+
+    @classmethod
+    def load(cls, model_dir: Path | str = DEFAULT_MODEL_DIR) -> "LatencyPredictor":
+        model_dir = Path(model_dir)
         try:
-            from tensorflow.keras.models import load_model as keras_load
-        except ImportError:
-            from keras.models import load_model as keras_load
-        if os.path.exists(MODEL_PATH):
-            return keras_load(MODEL_PATH)
+            meta = json.loads((model_dir / "preprocessing.json").read_text())
+            return cls(NumpyLSTM(model_dir / "weights.npz"), Scaler.from_dict(meta["scaler"]), meta)
+        except Exception as exc:  # explicit, visible degraded mode
+            log.warning("LSTM artifacts unavailable in %s (%s); using persistence_fallback", model_dir, exc)
+            return cls(None, None, {"model_version": "none"}, load_error=str(exc))
+
+    @property
+    def model_loaded(self) -> bool:
+        return self.net is not None
+
+    @property
+    def model_version(self) -> str:
+        return self.meta.get("model_version", "none")
+
+    def predict(self, window: Sequence[dict]) -> PredictionResult:
+        raw, ts = validate_window(window)
+        last = float(raw[~np.isnan(raw[:, 0]), 0][-1])
+        t0 = time.perf_counter()
+        if self.net is not None:
+            feats = transform_raw(raw, ts)
+            y = self.scaler.y_inverse(self.net.predict(self.scaler.x(feats)[None, ...]))
+            if self.meta.get("target_mode") == "residual":
+                y = y + feats[-1, 0]  # add back log1p(last RTT)
+            pred = float(target_from_model(y)[0])
+            method, version = "lstm", self.model_version
         else:
-            print(f"[predict_service] WARNING: model.h5 not found at {MODEL_PATH}. "
-                  "Run train.py first. Using dummy predictions.")
-            return None
-    except Exception as e:
-        print(f"[predict_service] WARNING: Could not load model — {e}. Using dummy predictions.")
-        return None
+            pred, method, version = last, "persistence_fallback", "none"
+        pred = max(0.0, pred)
+        return PredictionResult(predicted_rtt_ms=round(pred, 3), risk=classify_risk(pred), method=method,
+                                model_version=version, horizon_s=240,
+                                inference_ms=round((time.perf_counter() - t0) * 1000, 3),
+                                last_observed_rtt_ms=round(last, 3))
 
-
-def _load_scaler():
-    """Load fitted MinMaxScaler from disk."""
-    if os.path.exists(SCALER_PATH):
-        return joblib.load(SCALER_PATH)
-    print(f"[predict_service] WARNING: scaler.pkl not found at {SCALER_PATH}. "
-          "Run preprocessing.py first.")
-    return None
-
-
-_MODEL  = _load_model()
-_SCALER = _load_scaler()
-
-
-# ---------------------------------------------------------------------------
-# Public inference function
-# ---------------------------------------------------------------------------
-def predict_latency(window: list) -> dict:
-    """
-    Predict network latency and degradation risk for a rolling telemetry window.
-
-    Parameters
-    ----------
-    window : list[dict]
-        Exactly 20 telemetry dicts, ordered oldest → newest.
-        Each dict must contain at minimum the keys in FEATURE_COLS plus 'device_id'.
-
-    Returns
-    -------
-    dict with keys:
-        device_id               : str   — from the last item in window
-        predicted_latency_ms    : float — back-transformed to real milliseconds
-        network_degradation_risk: str   — "LOW" | "MEDIUM" | "HIGH"
-        forecast_horizon_seconds: int   — always 30
-    """
-    if len(window) != WINDOW_SIZE:
-        raise ValueError(f"predict_latency() requires exactly {WINDOW_SIZE} records, got {len(window)}.")
-
-    device_id = window[-1].get("device_id", "UNKNOWN")
-
-    # --- Extract numeric features in training column order ---
-    raw = np.array(
-        [[record[col] for col in FEATURE_COLS] for record in window],
-        dtype=np.float32
-    )  # shape: (20, 5)
-
-    # --- Scale using the fitted scaler ---
-    if _SCALER is not None:
-        scaled = _SCALER.transform(raw)   # shape: (20, 5)
-    else:
-        # Fallback: no scaler — use raw values (predictions will be unreliable)
-        scaled = raw
-
-    X = scaled.reshape(1, WINDOW_SIZE, len(FEATURE_COLS))  # (1, 20, 5)
-
-    # --- Run model inference ---
-    if _MODEL is not None:
-        pred_scaled = float(_MODEL.predict(X, verbose=0).flatten()[0])
-
-        # Inverse-transform: only need to invert the latency column
-        # Scaler was fit on all 5 features; we create a dummy row for inverse
-        dummy = np.zeros((1, len(FEATURE_COLS)), dtype=np.float32)
-        latency_idx = FEATURE_COLS.index("current_latency_ms")
-        dummy[0, latency_idx] = pred_scaled
-        pred_ms = float(_SCALER.inverse_transform(dummy)[0, latency_idx])
-    else:
-        # No model: simulate based on last raw latency value
-        pred_ms = float(window[-1].get("current_latency_ms", 50.0)) * 1.1
-
-    pred_ms = max(0.0, pred_ms)
-
-    # --- Classify risk ---
-    if pred_ms < 75:
-        risk = "LOW"
-    elif pred_ms < 150:
-        risk = "MEDIUM"
-    else:
-        risk = "HIGH"
-
-    return {
-        "device_id":                device_id,
-        "predicted_latency_ms":     round(pred_ms, 2),
-        "network_degradation_risk": risk,
-        "forecast_horizon_seconds": 30,
-    }
-
-
-# ---------------------------------------------------------------------------
-# Quick manual test
-# ---------------------------------------------------------------------------
-if __name__ == "__main__":
-    import random
-    # Build a dummy window of 20 records
-    dummy_window = [
-        {
-            "device_id":           "ECG-101",
-            "bandwidth_mbps":      random.uniform(30, 100),
-            "packet_loss_pct":     random.uniform(0, 2),
-            "jitter_ms":           random.uniform(2, 15),
-            "signal_strength_dbm": random.uniform(-80, -50),
-            "current_latency_ms":  random.uniform(10, 50),
-        }
-        for _ in range(20)
-    ]
-
-    result = predict_latency(dummy_window)
-    print("[predict_service] Demo prediction result:")
-    for k, v in result.items():
-        print(f"  {k}: {v}")
+    def info(self) -> dict:
+        return {"loaded": self.model_loaded, "model_version": self.model_version, "load_error": self.load_error,
+                "window": WINDOW, "features": self.meta.get("features"), "architecture": self.meta.get("architecture"),
+                "training": self.meta.get("training"), "trained_at": self.meta.get("trained_at"),
+                "risk_thresholds_ms": RISK_THRESHOLDS_MS}

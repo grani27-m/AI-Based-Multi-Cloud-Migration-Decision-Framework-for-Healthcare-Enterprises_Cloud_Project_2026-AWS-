@@ -1,147 +1,117 @@
 """
-train.py
-========
-Training script for the LSTM latency forecasting model.
-Designed to run locally or in Google Colab (CPU or GPU).
+src/prediction/train.py  —  Owner: Charles
+===========================================
+Train the stacked LSTM on the REAL RIPE Atlas windows built by dataset.py.
 
-Usage
------
-  python train.py
-  # or in Colab: !python train.py
+    python -m src.prediction.train [--epochs 30] [--batch 512] [--seed 42]
 
-Outputs
--------
-  src/prediction/model.h5          — saved trained model
-  results/graphs/training_loss.png — training + validation loss curves
-  results/graphs/pred_vs_actual.png — predicted vs actual latency on test set
+Artifacts written to models/latency_lstm/
+    model.keras            full Keras model (for retraining / SageMaker)
+    weights.npz            framework-free weights used by the API (NumpyLSTM)
+    preprocessing.json     features, window, scaler (fitted on TRAIN only), version, data hash
+    training_history.json  per-epoch loss/MAE on train and validation
 """
+from __future__ import annotations
 
-import os
-import sys
+import argparse
+import hashlib
+import json
+import logging
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
 import numpy as np
-import matplotlib.pyplot as plt
 
-# Allow running from anywhere in the project tree
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+from src.prediction.features import FEATURES, TARGET, WINDOW, Scaler, last_log_rtt, target_from_model
+from src.prediction.model import DENSE, DROPOUT, UNITS, build_keras_model, export_numpy_weights
 
-try:
+ROOT = Path(__file__).resolve().parents[2]
+WINDOWS = ROOT / "dataset" / "processed" / "windows_w20.npz"
+OUT = ROOT / "models" / "latency_lstm"
+log = logging.getLogger("train")
+
+
+def file_sha256(p: Path) -> str:
+    h = hashlib.sha256()
+    with p.open("rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--epochs", type=int, default=30)
+    ap.add_argument("--batch", type=int, default=512)
+    ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--patience", type=int, default=4)
+    ap.add_argument("--target-mode", choices=["level", "residual"], default="residual")
+    ap.add_argument("--loss", choices=["mse", "huber"], default="huber")
+    ap.add_argument("--lr", type=float, default=1e-3)
+    ap.add_argument("--out", default=str(OUT))
+    a = ap.parse_args(argv)
+    out_dir = Path(a.out)
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
     import tensorflow as tf
-    from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-except ImportError:
-    import tensorflow as tf
-    from keras.callbacks import EarlyStopping, ModelCheckpoint
+    tf.keras.utils.set_random_seed(a.seed)
 
-from src.prediction.model import build_lstm_model
+    d = np.load(WINDOWS)
+    Xtr, ytr, Xva, yva = d["X_train"], d["y_train"], d["X_val"], d["y_val"]
+    if a.target_mode == "residual":  # predict change of log-RTT relative to the last observation
+        ytr = (ytr - last_log_rtt(Xtr)).astype(np.float32)
+        yva = (yva - last_log_rtt(Xva)).astype(np.float32)
+    log.info("train windows %s  val windows %s  target=%s loss=%s lr=%g", Xtr.shape, Xva.shape,
+             a.target_mode, a.loss, a.lr)
+    scaler = Scaler.fit(Xtr.reshape(-1, Xtr.shape[-1]), ytr)  # TRAIN ONLY
+    Xtr_s, Xva_s = scaler.x(Xtr), scaler.x(Xva)
+    ytr_s, yva_s = scaler.y(ytr), scaler.y(yva)
 
-# ---------------------------------------------------------------------------
-# Paths
-# ---------------------------------------------------------------------------
-PROCESSED_DIR = os.path.join("data", "processed")
-GRAPHS_DIR    = os.path.join("results", "graphs")
-MODEL_OUT     = os.path.join("src", "prediction", "model.h5")
+    model = build_keras_model(lr=a.lr, loss=a.loss)
+    cb = [tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=a.patience, restore_best_weights=True)]
+    t0 = time.time()
+    hist = model.fit(Xtr_s, ytr_s, validation_data=(Xva_s, yva_s), epochs=a.epochs, batch_size=a.batch,
+                     shuffle=True, callbacks=cb, verbose=2)
+    secs = time.time() - t0
 
-os.makedirs(GRAPHS_DIR, exist_ok=True)
+    # validation MAE in milliseconds (model selection uses VALIDATION only, never test)
+    pv = scaler.y_inverse(model.predict(Xva_s, batch_size=4096, verbose=0)[:, 0])
+    if a.target_mode == "residual":
+        pv = pv + last_log_rtt(Xva)
+    val_mae_ms = float(np.mean(np.abs(target_from_model(pv) - d["y_ms_val"])))
+    val_pers_ms = float(np.mean(np.abs(d["last_ms_val"] - d["y_ms_val"])))
+    log.info("validation MAE %.3f ms (persistence %.3f ms)", val_mae_ms, val_pers_ms)
 
-
-def load_data():
-    """Load pre-built .npy arrays from preprocessing step."""
-    X_train = np.load(os.path.join(PROCESSED_DIR, "X_train.npy"))
-    y_train = np.load(os.path.join(PROCESSED_DIR, "y_train.npy"))
-    X_test  = np.load(os.path.join(PROCESSED_DIR, "X_test.npy"))
-    y_test  = np.load(os.path.join(PROCESSED_DIR, "y_test.npy"))
-    return X_train, X_test, y_train, y_test
-
-
-def plot_training_loss(history, out_path: str):
-    """Save training + validation MSE loss curve."""
-    plt.figure(figsize=(10, 5))
-    plt.plot(history.history["loss"],     label="Train Loss (MSE)", linewidth=2)
-    plt.plot(history.history["val_loss"], label="Val Loss (MSE)",   linewidth=2, linestyle="--")
-    plt.title("LSTM Training Loss — Network Latency Forecasting", fontsize=14)
-    plt.xlabel("Epoch")
-    plt.ylabel("Mean Squared Error")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(out_path, dpi=150)
-    plt.close()
-    print(f"[train] Training loss curve saved → {out_path}")
-
-
-def plot_pred_vs_actual(y_true: np.ndarray, y_pred: np.ndarray, out_path: str):
-    """Save predicted-vs-actual latency line chart on test set."""
-    # Show only first 500 samples for clarity
-    n = min(500, len(y_true))
-    plt.figure(figsize=(14, 5))
-    plt.plot(y_true[:n], label="Actual Latency (scaled)",    linewidth=1.5, color="#2196F3")
-    plt.plot(y_pred[:n], label="Predicted Latency (scaled)", linewidth=1.5, color="#FF5722", linestyle="--")
-    plt.title("Predicted vs Actual Network Latency — Test Set (first 500 samples)", fontsize=14)
-    plt.xlabel("Time Step")
-    plt.ylabel("Latency (MinMax scaled)")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(out_path, dpi=150)
-    plt.close()
-    print(f"[train] Predicted vs actual chart saved → {out_path}")
-
-
-def main():
-    print("[train] Loading data...")
-    X_train, X_test, y_train, y_test = load_data()
-
-    window_size  = X_train.shape[1]
-    num_features = X_train.shape[2]
-    print(f"[train] X_train shape: {X_train.shape}  |  window_size={window_size}, num_features={num_features}")
-
-    # --- Build model ---
-    model = build_lstm_model(window_size=window_size, num_features=num_features)
-    model.summary()
-
-    # --- Callbacks ---
-    early_stop = EarlyStopping(
-        monitor="val_loss",
-        patience=5,
-        restore_best_weights=True,
-        verbose=1
-    )
-    checkpoint = ModelCheckpoint(
-        filepath=MODEL_OUT,
-        monitor="val_loss",
-        save_best_only=True,
-        verbose=1
-    )
-
-    # --- Train ---
-    print("\n[train] Starting training (up to 50 epochs, EarlyStopping patience=5)...")
-    history = model.fit(
-        X_train, y_train,
-        epochs=50,
-        batch_size=32,
-        validation_split=0.1,
-        callbacks=[early_stop, checkpoint],
-        verbose=1,
-    )
-
-    # --- Evaluate ---
-    print("\n[train] Evaluating on test set...")
-    test_loss, test_mae = model.evaluate(X_test, y_test, verbose=0)
-    test_rmse = np.sqrt(test_loss)
-
-    print(f"\n{'='*55}")
-    print(f"| Metric              | Value                      |")
-    print(f"{'='*55}")
-    print(f"| Test MAE  (scaled)  | {test_mae:.6f}                 |")
-    print(f"| Test RMSE (scaled)  | {test_rmse:.6f}                 |")
-    print(f"| Epochs run          | {len(history.history['loss']):>6}                      |")
-    print(f"{'='*55}")
-
-    # --- Generate graphs ---
-    y_pred = model.predict(X_test).flatten()
-    plot_training_loss(history, os.path.join(GRAPHS_DIR, "training_loss.png"))
-    plot_pred_vs_actual(y_test, y_pred, os.path.join(GRAPHS_DIR, "pred_vs_actual.png"))
-
-    print(f"\n[train] Model saved → {MODEL_OUT}")
-    print("[train] Done. Paste the metrics table above into the report.")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    model.save(out_dir / "model.keras")
+    export_numpy_weights(model, out_dir / "weights.npz")
+    best = int(np.argmin(hist.history["val_loss"]))
+    version = datetime.now(timezone.utc).strftime("lstm-%Y%m%d-%H%M")
+    meta = {
+        "model_version": version,
+        "architecture": {"type": "stacked LSTM", "units": UNITS, "dense": DENSE, "dropout": DROPOUT,
+                         "params": int(model.count_params())},
+        "window": WINDOW, "features": FEATURES, "target_mode": a.target_mode,
+        "target": f"next {TARGET}: log1p, " + ("minus log1p(last RTT), " if a.target_mode == "residual" else "")
+                  + "standardised",
+        "horizon": "one measurement interval (240 s for RIPE Atlas built-in pings)",
+        "scaler": scaler.to_dict(), "scaler_fitted_on": "training windows only",
+        "training": {"epochs_run": len(hist.history["loss"]), "best_epoch": best + 1, "batch": a.batch,
+                     "seed": a.seed, "optimizer": f"Adam({a.lr:g})", "loss": a.loss,
+                     "val_mae_ms": val_mae_ms, "val_persistence_mae_ms": val_pers_ms, "seconds": round(secs, 1),
+                     "train_windows": int(len(ytr)), "val_windows": int(len(yva)),
+                     "tensorflow": tf.__version__},
+        "data": {"windows_file": str(WINDOWS.relative_to(ROOT)), "windows_sha256": file_sha256(WINDOWS),
+                 "source": "RIPE Atlas built-in pings msm 1001/1004, see dataset/metadata"},
+        "trained_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    (out_dir / "preprocessing.json").write_text(json.dumps(meta, indent=2))
+    (out_dir / "training_history.json").write_text(json.dumps(
+        {k: [float(v) for v in vals] for k, vals in hist.history.items()}, indent=2))
+    log.info("saved %s (best epoch %d, %.0fs)", version, best + 1, secs)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

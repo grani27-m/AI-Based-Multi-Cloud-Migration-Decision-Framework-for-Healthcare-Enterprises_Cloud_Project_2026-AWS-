@@ -1,3 +1,0 @@
-# conftest.py — makes pytest discover src as a package
-import sys, os
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
