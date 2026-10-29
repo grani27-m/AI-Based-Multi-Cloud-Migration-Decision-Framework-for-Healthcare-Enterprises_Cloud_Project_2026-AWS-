@@ -156,7 +156,7 @@ class Alert(Base):
     severity: Mapped[str] = mapped_column(String(10), index=True)  # CRITICAL | WARNING
     kind: Mapped[str] = mapped_column(String(32))  # emergency_override | network_veto | execution_failure
     message: Mapped[str] = mapped_column(Text)
-    # triggered -> (delivered | partially_delivered | failed | not_configured | not_notified)
+    # triggered -> dispatching -> (delivered | partially_delivered | failed | not_configured | not_notified)
     status: Mapped[str] = mapped_column(String(24), default="triggered", index=True)
     created_at: Mapped[datetime] = mapped_column(TS, default=utcnow, index=True)
     delivered_at: Mapped[Optional[datetime]] = mapped_column(TS, nullable=True)

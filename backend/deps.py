@@ -28,9 +28,7 @@ def get_db(request: Request) -> Iterator[Session]:
         yield s
 
 
-def get_principal(
-    request: Request, creds: HTTPAuthorizationCredentials | None = Depends(_bearer), db: Session = Depends(get_db)
-) -> Principal:
+def get_principal(request: Request, creds: HTTPAuthorizationCredentials | None = Depends(_bearer)) -> Principal:
     unauthorized = HTTPException(
         status.HTTP_401_UNAUTHORIZED, "invalid or missing bearer token", headers={"WWW-Authenticate": "Bearer"}
     )
@@ -45,8 +43,12 @@ def get_principal(
         ) from None
     except jwt.PyJWTError:
         raise unauthorized from None
-    u = db.get(User, p.user_id)
-    if u is None or not u.is_active or u.role != p.role:  # deactivated users / changed roles lose access at once
+    # Own short session (not the request-scoped one): on SQLite every transaction takes the write lock, so the
+    # auth check must not keep a transaction open while the pipeline runs its own transactions.
+    with request.app.state.db.session() as db:
+        u = db.get(User, p.user_id)
+        active = u is not None and u.is_active and u.role == p.role
+    if not active:  # deactivated users / changed roles lose access at once
         raise unauthorized
     return p
 

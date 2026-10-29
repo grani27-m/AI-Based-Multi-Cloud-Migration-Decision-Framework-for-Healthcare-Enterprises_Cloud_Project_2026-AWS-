@@ -32,10 +32,18 @@ def make_engine(url: str) -> Engine:
 
         @event.listens_for(eng, "connect")
         def _pragmas(dbapi_conn, _):  # enforce FKs, allow concurrent readers
+            dbapi_conn.isolation_level = None  # let SQLAlchemy emit BEGIN itself (see below)
             cur = dbapi_conn.cursor()
             cur.execute("PRAGMA foreign_keys=ON")
             cur.execute("PRAGMA journal_mode=WAL")
             cur.close()
+
+        @event.listens_for(eng, "begin")
+        def _begin_immediate(conn):
+            # Take SQLite's write lock at the start of every transaction. Writers are then serialised by the
+            # database itself, which (a) keeps the audit hash chain linear and (b) avoids lock-ordering
+            # deadlocks between concurrent request and background-alert transactions.
+            conn.exec_driver_sql("BEGIN IMMEDIATE")
 
         return eng
     return create_engine(url, pool_pre_ping=True, pool_size=10, max_overflow=20)

@@ -28,6 +28,7 @@ import smtplib
 import time
 from datetime import datetime, timezone
 from email.mime.text import MIMEText
+from types import SimpleNamespace
 from typing import Callable
 
 import httpx
@@ -161,74 +162,100 @@ def dispatch_alert(
     channels: list[Channel] | None = None,
     backoff_s: float = 1.0,
 ) -> str:
-    """Deliver one alert through every configured channel and persist every attempt."""
+    """Deliver one alert through every configured channel and persist every attempt.
+
+    Three short phases so that no database transaction is open during network I/O:
+      1. claim the alert (triggered -> dispatching) - makes dispatch idempotent;
+      2. call the providers (no DB session held);
+      3. store every attempt, the final status and an audit entry in one transaction.
+    """
     channels = channels if channels is not None else default_channels(settings)
     secrets_ = [settings.telegram_bot_token, settings.smtp_password, settings.alert_webhook_url]
-    with session_factory() as db:
+    with session_factory() as db:  # phase 1
         alert = db.get(Alert, alert_id)
-        if alert is None or alert.status != "triggered":
-            return alert.status if alert else "missing"
-        if alert.severity not in settings.alert_notify_severities:
-            alert.status = "not_notified"
-        else:
-            outcomes = []
-            for ch in channels:
-                if not ch.configured():
-                    db.add(
-                        AlertDelivery(
-                            alert_id=alert.id,
-                            channel=ch.name,
-                            attempt=0,
-                            status="skipped",
-                            detail="channel not configured",
-                        )
+        if alert is None:
+            return "missing"
+        if alert.status != "triggered":
+            return alert.status
+        notify = alert.severity in settings.alert_notify_severities
+        alert.status = "dispatching" if notify else "not_notified"
+        snapshot = SimpleNamespace(
+            id=alert.id, message=alert.message, severity=alert.severity, kind=alert.kind, device_id=alert.device_id
+        )
+        if not notify:
+            write_audit(
+                db,
+                "alert-service",
+                "alert_dispatched",
+                f"alert/{alert.id}",
+                {"status": "not_notified", "severity": alert.severity, "kind": alert.kind},
+            )
+            return "not_notified"
+
+    attempts: list[dict] = []  # phase 2 - network calls only
+    outcomes: list[bool] = []
+    for ch in channels:
+        if not ch.configured():
+            attempts.append(
+                dict(channel=ch.name, attempt=0, status="skipped", detail="channel not configured", latency_ms=0.0)
+            )
+            continue
+        ok = False
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            t0 = time.perf_counter()
+            try:
+                detail = ch.send(snapshot)
+                ok = True
+                attempts.append(
+                    dict(
+                        channel=ch.name,
+                        attempt=attempt,
+                        status="sent",
+                        detail=detail,
+                        latency_ms=(time.perf_counter() - t0) * 1000,
                     )
-                    continue
-                ok = False
-                for attempt in range(1, MAX_ATTEMPTS + 1):
-                    t0 = time.perf_counter()
-                    try:
-                        detail = ch.send(alert)
-                        ok = True
-                        db.add(
-                            AlertDelivery(
-                                alert_id=alert.id,
-                                channel=ch.name,
-                                attempt=attempt,
-                                status="sent",
-                                detail=detail,
-                                latency_ms=(time.perf_counter() - t0) * 1000,
-                            )
-                        )
-                        break
-                    except Exception as exc:
-                        db.add(
-                            AlertDelivery(
-                                alert_id=alert.id,
-                                channel=ch.name,
-                                attempt=attempt,
-                                status="failed",
-                                detail=_sanitise(f"{type(exc).__name__}: {exc}", secrets_),
-                                latency_ms=(time.perf_counter() - t0) * 1000,
-                            )
-                        )
-                        if attempt < MAX_ATTEMPTS:
-                            time.sleep(backoff_s * attempt)
-                outcomes.append(ok)
-            if not outcomes:
-                alert.status = "not_configured"
-            elif all(outcomes):
-                alert.status, alert.delivered_at = "delivered", datetime.now(timezone.utc)
-            elif any(outcomes):
-                alert.status, alert.delivered_at = "partially_delivered", datetime.now(timezone.utc)
-            else:
-                alert.status = "failed"
+                )
+                break
+            except Exception as exc:
+                attempts.append(
+                    dict(
+                        channel=ch.name,
+                        attempt=attempt,
+                        status="failed",
+                        detail=_sanitise(f"{type(exc).__name__}: {exc}", secrets_),
+                        latency_ms=(time.perf_counter() - t0) * 1000,
+                    )
+                )
+                if attempt < MAX_ATTEMPTS:
+                    time.sleep(backoff_s * attempt)
+        outcomes.append(ok)
+
+    if not outcomes:
+        status = "not_configured"
+    elif all(outcomes):
+        status = "delivered"
+    elif any(outcomes):
+        status = "partially_delivered"
+    else:
+        status = "failed"
+    with session_factory() as db:  # phase 3
+        alert = db.get(Alert, alert_id)
+        for a in attempts:
+            db.add(AlertDelivery(alert_id=alert_id, **a))
+        alert.status = status
+        if status in ("delivered", "partially_delivered"):
+            alert.delivered_at = datetime.now(timezone.utc)
         write_audit(
             db,
             "alert-service",
             "alert_dispatched",
-            f"alert/{alert.id}",
-            {"status": alert.status, "severity": alert.severity, "kind": alert.kind},
+            f"alert/{alert_id}",
+            {
+                "status": status,
+                "severity": alert.severity,
+                "kind": alert.kind,
+                "channels": sorted({a["channel"] for a in attempts if a["status"] == "sent"}),
+            },
         )
-        log.info("alert %s -> %s", alert.id, alert.status)
-        return alert.status
+    log.info("alert %s -> %s", alert_id, status)
+    return status

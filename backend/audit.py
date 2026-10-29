@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import threading
 from datetime import datetime, timezone
 
 from sqlalchemy import select, text
@@ -29,7 +28,9 @@ from sqlalchemy.orm import Session
 from backend.models import AuditLog
 
 GENESIS = "0" * 64
-_lock = threading.Lock()  # serialises writers inside one process (SQLite); Postgres uses an advisory lock
+# Concurrency: on PostgreSQL a transaction-scoped advisory lock serialises chain appends; on SQLite every
+# transaction starts with BEGIN IMMEDIATE (backend/db.py). No Python-level lock is used on purpose: mixing one
+# with database locks caused a lock-ordering deadlock (found in the evidence run, see reports/SECURITY_AND_TEST_REPORT.md).
 
 
 def digest(prev: str, ts: str, actor: str, action: str, resource: str, detail: dict) -> str:
@@ -45,23 +46,22 @@ def digest(prev: str, ts: str, actor: str, action: str, resource: str, detail: d
 def write_audit(db: Session, actor: str, action: str, resource: str, detail: dict | None = None) -> AuditLog:
     """Append one entry in the caller's transaction. NEVER put patient data or secrets in detail."""
     detail = json.loads(json.dumps(detail or {}, default=str))
-    with _lock:
-        if db.bind is not None and db.bind.dialect.name == "postgresql":
-            db.execute(text("SELECT pg_advisory_xact_lock(724001)"))
-        last = db.execute(select(AuditLog.hash).order_by(AuditLog.id.desc()).limit(1)).scalar_one_or_none()
-        prev = last or GENESIS
-        ts = datetime.now(timezone.utc).isoformat()
-        row = AuditLog(
-            ts=ts,
-            actor=actor,
-            action=action,
-            resource=resource,
-            detail=detail,
-            prev_hash=prev,
-            hash=digest(prev, ts, actor, action, resource, detail),
-        )
-        db.add(row)
-        db.flush()
+    if db.bind is not None and db.bind.dialect.name == "postgresql":
+        db.execute(text("SELECT pg_advisory_xact_lock(724001)"))
+    last = db.execute(select(AuditLog.hash).order_by(AuditLog.id.desc()).limit(1)).scalar_one_or_none()
+    prev = last or GENESIS
+    ts = datetime.now(timezone.utc).isoformat()
+    row = AuditLog(
+        ts=ts,
+        actor=actor,
+        action=action,
+        resource=resource,
+        detail=detail,
+        prev_hash=prev,
+        hash=digest(prev, ts, actor, action, resource, detail),
+    )
+    db.add(row)
+    db.flush()
     return row
 
 
