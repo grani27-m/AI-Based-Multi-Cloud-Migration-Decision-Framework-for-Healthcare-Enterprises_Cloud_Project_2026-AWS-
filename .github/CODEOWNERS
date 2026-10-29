@@ -1,0 +1,25 @@
+# Ownership map (usernames from the project report §12.2). GitHub requests a review from the owner of every changed path.
+# Charles Jehanabad (24BIT0522) - datasets, prediction
+/data_ingestion/            @itscharles4
+/src/prediction/            @itscharles4
+/dataset/                   @itscharles4
+/models/                    @itscharles4
+/results/model/             @itscharles4
+/team_work/charles/         @itscharles4
+# Tanmay Kapoor (24BIT0079) - decision engine
+/src/decision/              @TanmayKaps06
+/infra/aws/lambda_decision/ @TanmayKaps06
+/results/routing/           @TanmayKaps06
+/team_work/tanmay/          @TanmayKaps06
+# Rani Gupta (24BIT0543) - execution, backend, database, security, UI, ops
+/src/execution/             @grani27-m
+/backend/                   @grani27-m
+/migrations/                @grani27-m
+/frontend/                  @grani27-m
+/scripts/                   @grani27-m
+/infra/                     @grani27-m
+/monitoring/                @grani27-m
+/Dockerfile                 @grani27-m
+/docker-compose.yml         @grani27-m
+/.github/workflows/         @grani27-m
+/team_work/rani/            @grani27-m

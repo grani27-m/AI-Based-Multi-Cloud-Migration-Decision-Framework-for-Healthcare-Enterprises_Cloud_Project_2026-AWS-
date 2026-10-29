@@ -1,0 +1,27 @@
+{
+  "api": "http://127.0.0.1:8000",
+  "concurrent_users": 25,
+  "requests": 400,
+  "errors": 0,
+  "status_codes": {
+    "201": 400
+  },
+  "duration_s": 6.16,
+  "throughput_rps": 64.98,
+  "latency_ms": {
+    "mean": 312.2,
+    "p50": 172.2,
+    "p95": 1310.0,
+    "p99": 2418.9,
+    "max": 3410.8
+  },
+  "objective_3_p95_below_200ms": false,
+  "commit": "b725e54",
+  "environment": {
+    "python": "3.13.18",
+    "machine": "x86_64",
+    "cpus": 2,
+    "note": "client and server on the same host"
+  },
+  "measured_at": "2026-10-29T06:08:17Z"
+}

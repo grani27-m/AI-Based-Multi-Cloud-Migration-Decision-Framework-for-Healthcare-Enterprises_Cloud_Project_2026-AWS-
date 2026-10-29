@@ -1,0 +1,74 @@
+# PostgreSQL 16 (docker postgres:16-alpine) evidence, 2026-10-29T06:12:07Z
+## alembic on empty PostgreSQL
+DETAIL:  drop cascades to table alembic_version
+drop cascades to table audit_log
+drop cascades to table devices
+drop cascades to table users
+drop cascades to table telemetry_events
+drop cascades to table alerts
+drop cascades to table predictions
+drop cascades to table alert_deliveries
+drop cascades to table routing_decisions
+drop cascades to table execution_records
+No new upgrade operations detected.
+## scripts.smoke_test on PostgreSQL
+{
+  "database": "postgresql",
+  "simulate": {
+    "processed": 30,
+    "duplicates": 0,
+    "failed": 0,
+    "by_destination": {
+      "CLOUD": 21,
+      "EDGE": 9
+    },
+    "by_reason": {
+      "ahp_decision": 21,
+      "network_degradation_veto": 4,
+      "override_critical_patient": 5
+    }
+  },
+  "replay": {
+    "processed": 20,
+    "duplicates": 0,
+    "failed": 0,
+    "by_destination": {
+      "CLOUD": 18,
+      "EDGE": 2
+    },
+    "by_reason": {
+      "ahp_decision": 20
+    }
+  },
+  "events_total": 50,
+  "reasons": {
+    "override_critical_patient": 5,
+    "network_degradation_veto": 4,
+    "prediction_unavailable_safe_default": 0,
+    "ahp_decision": 41
+  },
+  "reconciliation": {
+    "events_equal_sum_of_statuses": true,
+    "reasons_sum_equals_decisions": true,
+    "events_equal_decisions_plus_failed_before_decision_plus_in_flight": true,
+    "failed_before_decision": 0,
+    "in_flight": 0,
+    "note": "Events without a decision are those rejected/failed before routing or still being processed. Alerts 'delivered' counts only alerts with at least one successful channel delivery."
+  },
+  "audit": {
+    "valid": true,
+    "checked": 119,
+    "first_broken_id": null,
+    "problem": null,
+    "head_hash": "be01fcc9e73aaa1d994414e01eabb623a41f37351679ab2fc3b6e13f2820845d",
+    "verified_at": "2026-10-29T06:12:13.463795+00:00",
+    "verified_by": "smoke-104a7b"
+  },
+  "ok": true
+}
+## row counts
+ events | predictions | decisions | executions | alerts | audit | migration 
+--------+-------------+-----------+------------+--------+-------+-----------
+     50 |          50 |        50 |         50 |      9 |   119 | 0001
+(1 row)
+

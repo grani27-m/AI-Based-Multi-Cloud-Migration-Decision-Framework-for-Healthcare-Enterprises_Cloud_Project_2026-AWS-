@@ -41,14 +41,14 @@ export default function Overview() {
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
           <Kpi label="Events" value={fmtCount(s.events.total)} icon={Activity} accent="var(--cloud)"
             sub={`${fmtCount(s.events.by_status.completed ?? 0)} completed · ${fmtCount(s.events.by_status.failed ?? 0)} failed`} />
-          <Kpi label="Routed to EDGE" value={fmtCount(s.decisions.edge.count)} icon={Cpu} accent="var(--edge)" sub={fmtPct(s.decisions.edge.pct)} />
-          <Kpi label="Routed to CLOUD" value={fmtCount(s.decisions.cloud.count)} icon={Cloud} accent="var(--cloud)" sub={fmtPct(s.decisions.cloud.pct)} />
-          <Kpi label="Emergency overrides" value={fmtCount(s.decisions.by_reason.override_critical_patient)} icon={AlertTriangle}
-            accent="var(--emergency)" sub={`${fmtCount(s.decisions.by_reason.network_degradation_veto)} network vetoes`} />
-          <Kpi label="Alerts triggered" value={fmtCount(s.alerts.triggered)} icon={BellRing} accent="var(--veto)"
-            sub={`${fmtCount(s.alerts.delivered)} delivered · ${fmtCount(s.alerts.failed)} failed · ${fmtCount(s.alerts.not_configured)} no channel`} />
-          <Kpi label="Prediction method" value={fmtCount(s.predictions.by_method.lstm ?? 0)} icon={ShieldCheck} accent="var(--ok)"
-            sub={`LSTM · ${fmtCount(s.predictions.by_method.persistence_fallback ?? 0)} fallback`} />
+          <Kpi label="EDGE" value={fmtCount(s.decisions.edge.count)} icon={Cpu} accent="var(--edge)" sub={fmtPct(s.decisions.edge.pct)} />
+          <Kpi label="CLOUD" value={fmtCount(s.decisions.cloud.count)} icon={Cloud} accent="var(--cloud)" sub={fmtPct(s.decisions.cloud.pct)} />
+          <Kpi label="Overrides" value={fmtCount(s.decisions.by_reason.override_critical_patient)} icon={AlertTriangle}
+            accent="var(--emergency)" sub={`emergency · ${fmtCount(s.decisions.by_reason.network_degradation_veto)} network vetoes`} />
+          <Kpi label="Alerts" value={fmtCount(s.alerts.triggered)} icon={BellRing} accent="var(--veto)"
+            sub={`triggered · ${fmtCount(s.alerts.delivered)} delivered · ${fmtCount(s.alerts.failed)} failed`} />
+          <Kpi label="LSTM forecasts" value={fmtCount(s.predictions.by_method.lstm ?? 0)} icon={ShieldCheck} accent="var(--ok)"
+            sub={`${fmtCount(s.predictions.by_method.persistence_fallback ?? 0)} persistence fallback`} />
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
@@ -66,7 +66,7 @@ export default function Overview() {
                 <ReferenceLine y={75} stroke="var(--veto)" strokeDasharray="4 4" />
                 <ReferenceLine y={150} stroke="var(--emergency)" strokeDasharray="4 4" />
                 <ReferenceLine y={300} stroke="var(--emergency)" label={{ value: 'veto 300 ms', fontSize: 10, fill: 'var(--emergency)' }} />
-                <Line dataKey="last_rtt_ms" name="observed (last)" stroke="var(--muted)" dot={false} strokeWidth={1} isAnimationActive={false} />
+                <Line dataKey="last_rtt_ms" name="observed (last)" stroke="var(--veto)" dot={false} strokeWidth={1.2} strokeDasharray="3 2" isAnimationActive={false} />
                 <Line dataKey="predicted_rtt_ms" name="LSTM forecast" stroke="var(--cloud)" dot={false} strokeWidth={1.6} isAnimationActive={false} />
                 <Scatter dataKey="edge" name="routed to EDGE" fill="var(--edge)" isAnimationActive={false} />
               </ComposedChart>
@@ -92,7 +92,7 @@ export default function Overview() {
               <BarChart layout="vertical" data={Object.entries(s.decisions.by_reason).map(([k, v]) => ({ k: fmtReason(k), v, raw: k }))}
                 margin={{ left: 20 }}>
                 <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--muted)' }} allowDecimals={false} />
-                <YAxis type="category" dataKey="k" width={150} tick={{ fontSize: 11, fill: 'var(--text)' }} />
+                <YAxis type="category" dataKey="k" width={170} tick={{ fontSize: 11, fill: 'var(--text)' }} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Bar dataKey="v" name="decisions" isAnimationActive={false}>
                   {Object.keys(s.decisions.by_reason).map(k => <Cell key={k} fill={k === 'override_critical_patient' ? 'var(--emergency)'

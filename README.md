@@ -1,111 +1,105 @@
-# Telemedicine Workload Offloader
+# AI-Based Multi-Cloud Migration Decision Framework for Healthcare Enterprises
 
-**AI-Based Multi-Cloud Migration Decision Framework for Healthcare Enterprises using Multi-Criteria Decision Intelligence**
+**BCSE355L Cloud Architecture Design · VIT Vellore · Team 11 · Course instructor: Dr. Priya V**
 
-BCSE355L Cloud Architecture Design · Course Instructor: Dr. Priya V · Vellore Institute of Technology, Vellore
-
-| Student | Register no. | Branch | Focus |
+| Member | Reg. no. | Part | Folder |
 |---|---|---|---|
-| Charles Jehanabad | 24BIT0522 | `feature/student1` | AI prediction, datasets, device simulation |
-| Tanmay Kapoor | 24BIT0079 | `feature/student2` | MCDM decision engine (AHP, override, tests) |
-| Rani Gupta | 24BIT0543 | `feature/student3` | Execution layer, security, alerts, dashboard |
+| Charles Jehanabad | 24BIT0522 | Real datasets, preprocessing, LSTM latency prediction | [`team_work/charles`](team_work/charles/README.md) |
+| Tanmay Kapoor | 24BIT0079 | AHP / MCDM decision engine, safety vetoes | [`team_work/tanmay`](team_work/tanmay/README.md) |
+| Rani Gupta | 24BIT0543 | Execution, backend, database, security, alerts, dashboard, ops | [`team_work/rani`](team_work/rani/README.md) |
 
-## What it does
-
-For every IoMT reading, the system decides whether to process it at the **hospital edge** or in the **cloud**:
-
-1. An **LSTM** predicts the next network latency from the last 20 readings (trained on 2,830,022 real RIPE Atlas measurements).
-2. **Stage A – hard vetoes:** criticality ≥ 9.0 (emergency override) or predicted latency ≥ 300 ms (network veto) always route to the edge.
-3. **Stage B – AHP scoring:** weights 0.6396 (criticality), 0.2583 (latency), 0.1021 (cloud cost); consistency ratio 0.037.
-4. The **execution layer** runs the edge or cloud node, stores the result, raises Telegram/e-mail alerts for emergencies and appends a SHA-256 hash-chained audit record.
-5. A **dashboard** shows live routing results.
-
-Research prototype: simulated and public data only; HIPAA-aligned design, not certified; not clinically validated.
-
-## Repository structure (course guideline) and task allocation
+For every IoMT reading the system decides whether to process it at the **hospital edge** or in the **cloud**:
 
 ```
-Telemedicine_Cloud_Project_2026/
-├── README.md, LICENSE, .gitignore          # README: Student 3 · LICENSE/.gitignore/requirements: Student 2
-├── docs/
-│   ├── Project_Report.docx                 # all students
-│   ├── Literature_Survey.docx              # P1–P5 Student 1 · P6–P10 Student 2 · P11–P15 Student 3
-│   ├── Research_Gap_Student1.docx
-│   ├── Research_Gap_Student2.docx
-│   ├── Research_Gap_Student3.docx
-│   ├── Objectives.docx
-│   └── Novelty.docx
-├── architecture/
-│   ├── AWS_Architecture.png                # Figure 1
-│   ├── System_Architecture.png             # Figure 2
-│   └── Workflow.png                        # Figure 3
-├── dataset/
-│   ├── raw/  processed/
-│   └── dataset_description.pdf             # Student 1
-├── src/
-│   ├── frontend/                           # dashboard – Student 3
-│   ├── backend/
-│   │   ├── decision/                       # AHP, override, network veto, tests – Student 2
-│   │   ├── APIs/  Database/  Authentication/   # Student 3
-│   │   └── mqtt/                           # MQTT consumer – Student 3
-│   ├── ml_model/                           # preprocessing, train, predict, model – Student 1
-│   └── aws/
-│       ├── edge_node/  cloud_node/         # Greengrass / Lambda stand-ins – Student 3
-│       ├── alerts/  audit/  logging/       # Student 3
-│       └── lambda_handler.py               # Student 2
-├── results/                                # graphs (S1 model, S2 routing chart), screenshots, accuracy.xlsx, test/load results (S3)
-└── presentation/                           # review slides – all
+reading (20-round network window + vitals) ──► LSTM forecast of next RTT (Charles)
+   ──► Stage A safety vetoes + Stage B AHP scoring (Tanmay)
+   ──► edge / cloud execution with retry + fallback, persistence, hash-chained audit, alerts (Rani)
+   ──► React dashboard reading the authenticated API
 ```
 
-## Branches and workflow
+Research prototype — real public data, no patient identities, HIPAA-*aligned* design, not certified or clinically validated.
+AWS services are designed and scripted but **not deployed** (see [`reports/AWS_DEPLOYMENT_REPORT.md`](reports/AWS_DEPLOYMENT_REPORT.md)).
 
-```
-main
- └── develop
-      ├── feature/student1   (Charles)
-      ├── feature/student2   (Tanmay Kapoor)
-      └── feature/student3   (Rani Gupta)
-```
+## Verified results (details in `reports/`)
 
-* Each student commits only to their own feature branch (about 20–30 meaningful commits, regular weekly commits).
-* Raise a pull request from the feature branch into `develop`; a teammate reviews it before merge (at least 2 pull requests per student).
-* Never commit directly to `main` or `develop`. Resolve merge conflicts in the pull request.
-* When `develop` is stable, merge it into `main` and tag the release, e.g. `v1.0-Phase1`.
+| | |
+|---|---|
+| Real network data | **756,495** RIPE Atlas ping results (msm 1001/1004, 20 Indian probes, 2 Sep – 28 Oct 2026) → 753,410 clean rows, SHA-256 manifest |
+| Real vital signs | **53** PhysioNet BIDMC ICU recordings, checksums verified |
+| Forecaster (held-out test, 113,077 windows) | **LSTM MAE 1.307 ms vs persistence 1.633 ms** (−20 %), RMSE 6.515 vs 7.994 ms |
+| AHP weights (verified) | criticality 0.6370 · latency 0.2583 · cost 0.1047, CR 0.0332 |
+| Tests | **122 passed** (unit + integration + e2e + concurrency), lint clean, frontend build OK |
+| Database | SQLite and PostgreSQL 16, one Alembic migration, persistence across restart verified |
+| Load (p95 of ingestion) | 23 ms (1 sender, SQLite) · 39 ms (1) / 203 ms (10 senders) on PostgreSQL, 4 workers, 2 vCPU |
 
-## Run locally
+Status of every requirement, including what is blocked or partial: [`reports/FINAL_STATUS.md`](reports/FINAL_STATUS.md).
+What changed from the repository as received: [`INITIAL_PROJECT_AUDIT.md`](INITIAL_PROJECT_AUDIT.md).
 
-> Paths below match the current code layout; update them if folders are renamed to the structure above.
+## Quick start (local, SQLite, ~5 minutes)
+Prerequisites: Python 3.11+ (tested 3.13), Node 20+ (tested 22).
 
 ```bash
-cp .env.example .env                                      # fill in your own values; never commit .env
-pip install -r requirements.txt
-python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload   # API
-python src/api/simulate_stream.py                         # simulated IoMT stream
-python -m streamlit run dashboard/app.py                  # dashboard at http://localhost:8501
-pytest -q                                                 # automated tests
-docker compose up -d                                      # full stack (API, database, Redis, MQTT, Prometheus, Grafana)
+cp .env.example .env
+#   set SECRET_KEY (python -c "import secrets;print(secrets.token_hex(32))"),
+#   BOOTSTRAP_ADMIN_PASSWORD and DEVICE_PASSWORD
+pip install -r requirements-dev.txt
+cd frontend && npm ci && npm run build && cd ..          # the API serves the built dashboard
+uvicorn backend.app:create_app --factory --port 8000      # migrates DB, creates admin
+# second terminal:
+python -m scripts.create_user --username sim-device --role device --password-env DEVICE_PASSWORD
+python -m scripts.stream_events --mode replay --count 100 --rate 5        # real data
+python -m scripts.stream_events --mode simulate --scenario emergency --count 3
+```
+Open **http://localhost:8000** (dashboard) and **http://localhost:8000/docs** (API). Frontend development with hot reload:
+`cd frontend && npm run dev` → http://localhost:5173.
+
+### With Docker (PostgreSQL)
+```bash
+cp .env.example .env     # also set POSTGRES_PASSWORD
+docker compose up --build                 # http://localhost:8000
+docker compose exec api python -m scripts.create_user --username sim-device --role device --password-env DEVICE_PASSWORD
 ```
 
-## AWS services (target architecture)
+### Tests
+```bash
+pytest -q                 # 122 tests, ~20 s, uses SQLite temp databases and the committed model
+ruff check . && ruff format --check .
+```
 
-| Component now | AWS target | Status |
-|---|---|---|
-| MQTT broker (Mosquitto) | AWS IoT Core | Planned |
-| FastAPI `/ingest` | Amazon API Gateway | Planned |
-| LSTM model | Amazon SageMaker | Planned |
-| AHP routing function | AWS Lambda (`lambda_handler.py`) | Handler written, not deployed |
-| Edge node | AWS IoT Greengrass | Planned |
-| Hot / cold storage | Amazon DynamoDB / Amazon S3 | Planned |
-| JWT + roles | Amazon Cognito + IAM | Planned |
-| Telegram / e-mail alerts | Amazon SNS | Planned |
-| Prometheus | Amazon CloudWatch | Planned |
-| Dashboard | Amazon QuickSight | Planned |
+### Rebuild the data and the model from scratch
+```bash
+pip install -r requirements-train.txt
+python -m data_ingestion.ripe_atlas download && python -m data_ingestion.ripe_atlas verify
+python -m data_ingestion.physionet_bidmc download && python -m data_ingestion.physionet_bidmc build
+python -m src.prediction.dataset build
+python -m src.prediction.train --target-mode residual --loss huber --lr 1e-3 --epochs 20 --patience 3
+python -m src.prediction.evaluate
+```
 
-## Status
-
-* **Implemented locally:** prediction layer, decision engine, execution layer, authentication, audit chain, alerts, dashboard prototype, Docker Compose, CI (lint, test, Docker build).
-* **Not yet done:** AWS deployment, forecast accuracy against baselines, load test, Grafana dashboards.
+## Repository map
+| Path | Content |
+|---|---|
+| `data_ingestion/` | RIPE Atlas + BIDMC downloaders, real-data replay, labelled simulator |
+| `src/prediction/` | parsing, features, splits, LSTM, training, evaluation, inference service |
+| `src/decision/` | AHP, vetoes, router, partial-NEWS2 criticality |
+| `src/execution/` | edge/cloud adapters, retrying executor |
+| `backend/` | FastAPI app, schema, security, audit, alerts, pipeline, routers |
+| `migrations/` | Alembic |
+| `frontend/` | React dashboard |
+| `dataset/`, `models/`, `results/` | data with provenance, trained model, evaluation, logs, screenshots, load tests |
+| `infra/aws/` | SAM template, Lambda handler, deploy/teardown, service status |
+| `integration/` | API contract, database schema + ER diagram, end-to-end tests |
+| `reports/` | dataset, model, routing, security/test, AWS, contributions, final status |
+| `team_work/` | one folder per member: README, module inventory, test plan, evidence index |
+| `architecture/` | report figures + `Implemented_Architecture.png`, `ER_Diagram.png` |
+| `docs/` | report documents, literature survey; `docs/archive/` = superseded drafts with unverified claims |
 
 ## Security
+No credentials are stored in this repository; configuration comes from `.env` (git-ignored). See
+[`team_work/rani/SECURITY_NOTES.md`](team_work/rani/SECURITY_NOTES.md) for controls, tests and limitations.
 
-No credentials, tokens or personal data are stored in this repository. Configuration comes from environment variables (`.env` is git-ignored).
+## How this version was produced
+Integrated on 2026-10-29 with AI assistance from the team's repository and report; see
+[`reports/TEAM_CONTRIBUTIONS.md`](reports/TEAM_CONTRIBUTIONS.md) and [`docs/GITHUB_PUBLISHING.md`](docs/GITHUB_PUBLISHING.md).
+
+Data credits: RIPE NCC (RIPE Atlas); Pimentel et al. 2016 and PhysioNet (BIDMC, ODC-By 1.0).

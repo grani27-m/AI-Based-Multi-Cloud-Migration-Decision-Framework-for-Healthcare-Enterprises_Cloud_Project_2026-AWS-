@@ -34,7 +34,7 @@ cd frontend && npm ci && npm run dev                       # http://localhost:51
 ## What was wrong before, and what changed
 | Before (verified in the received code) | Now |
 |---|---|
-| Two competing backends; the PostgreSQL one crashed on every `/ingest` (`AuditLog` built with non-existent fields) | One FastAPI app; 121 automated tests incl. end-to-end |
+| Two competing backends; the PostgreSQL one crashed on every `/ingest` (`AuditLog` built with non-existent fields) | One FastAPI app; 122 automated tests incl. end-to-end |
 | Two unrelated schemas; migration did not match models | One schema, one Alembic migration, `alembic check` = no drift, tested upgrade/downgrade |
 | Mock auth: in-memory UUID tokens, SHA-256 passwords, hard-coded `admin/hospital123` shown on the login page | JWT (iss/aud/exp), PBKDF2, 4 roles, permission table, no default credentials |
 | Edge "alert" = `print()`; no failure handling | Adapters with retries, CLOUD→EDGE fallback, persisted attempt log, CRITICAL alert on EDGE failure |

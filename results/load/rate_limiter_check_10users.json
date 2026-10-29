@@ -1,0 +1,25 @@
+{
+  "api": "http://127.0.0.1:8000",
+  "concurrent_users": 10,
+  "requests": 300,
+  "errors": 167,
+  "duration_s": 2.55,
+  "throughput_rps": 117.79,
+  "latency_ms": {
+    "mean": 145.4,
+    "p50": 57.4,
+    "p95": 596.9,
+    "p99": 1373.3,
+    "max": 1468.0
+  },
+  "objective_3_p95_below_200ms": false,
+  "commit": "b725e54",
+  "environment": {
+    "python": "3.13.18",
+    "machine": "x86_64",
+    "cpus": 2,
+    "note": "client and server on the same host"
+  },
+  "measured_at": "2026-10-29T06:07:37Z",
+  "note": "Run against the default RATE_LIMIT_PER_MINUTE=600 with ONE device account: the 167 'errors' are HTTP 429 responses from the per-user rate limiter (API log: 'Too Many Requests'), i.e. the limiter working. Latency figures from this run are not used."
+}

@@ -7,4 +7,4 @@
 | Engine is the one used in production paths | `backend/services/pipeline.py` imports `decide`; `infra/aws/lambda_decision/handler.py` imports `decide` |
 | Decision distribution on real replayed data | `reports/ROUTING_EVALUATION_REPORT.md`, `results/routing/replay_run.json` |
 | All tests pass | `results/tests/pytest_output.txt` |
-| Screenshot | `results/screenshots/decision_lab.png` |
+| Screenshot | `results/screenshots/07_decision_lab.png` |

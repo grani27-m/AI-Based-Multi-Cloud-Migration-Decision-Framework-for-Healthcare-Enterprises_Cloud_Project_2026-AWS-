@@ -12,7 +12,7 @@ with hard clinical-safety vetoes that no score can override.
 | `src/decision/router.py` | `DecisionInput` → `decide()` → `DecisionResult` (destination, reason, veto, scores, contributions, explanation); input validation; safe default when no forecast; backward-compatible `route_decision()` |
 | `src/decision/criticality.py` | partial NEWS2 (RR, SpO₂, HR) → 0–10 criticality from real BIDMC vitals |
 | `infra/aws/lambda_decision/handler.py` | the same engine as an AWS Lambda / API Gateway handler |
-| `tests/unit/test_decision.py`, `tests/unit/test_lambda_handler.py` | 40 tests |
+| `tests/unit/test_decision.py`, `tests/unit/test_lambda_handler.py` | 40 tests (37 + 3) |
 
 ## How to run / test
 ```bash

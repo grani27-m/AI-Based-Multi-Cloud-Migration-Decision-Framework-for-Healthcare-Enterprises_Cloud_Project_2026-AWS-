@@ -71,6 +71,9 @@ def main(argv=None) -> int:
     wall = time.perf_counter() - t0
     lat = [ms for code, ms in res if code in (200, 201)]
     errors = sum(1 for code, _ in res if code not in (200, 201))
+    codes: dict[str, int] = {}
+    for code, _ in res:
+        codes[str(code)] = codes.get(str(code), 0) + 1
     try:
         commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
     except Exception:
@@ -80,6 +83,7 @@ def main(argv=None) -> int:
         "concurrent_users": a.users,
         "requests": len(res),
         "errors": errors,
+        "status_codes": codes,
         "duration_s": round(wall, 2),
         "throughput_rps": round(len(res) / wall, 2),
         "latency_ms": {
