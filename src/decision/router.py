@@ -1,166 +1,140 @@
 """
-router.py
-=========
-Main routing decision function for the telemedicine workload offloader.
+src/decision/router.py  —  Owner: Tanmay Kapoor
+=================================================
+The decision contract used by Rani's pipeline and by the AWS Lambda handler.
 
-This module is intentionally a PURE PYTHON function — no AWS SDK imports,
-no FastAPI imports.  This means it can be:
-  - Called directly from Python (tests, local pipeline)
-  - Wrapped by a thin Lambda handler with zero changes to this logic
-  - Unit tested without any cloud infrastructure
+    from src.decision.router import DecisionInput, decide
+    result = decide(DecisionInput(device_id="ECG-101", criticality=4.2,
+                                  predicted_latency_ms=38.0, cloud_cost_index=0.35))
+    result.to_dict()
 
-AWS migration note
-------------------
-When deploying to AWS, create a separate lambda_handler.py that does:
-  from src.decision.router import route_decision
-  def lambda_handler(event, context):
-      body = json.loads(event["body"])
-      return route_decision(**body)
+Two stages
+    Stage A  hard vetoes (override_rules.py) -> EDGE, no scoring
+    Stage B  AHP-weighted scores for the two alternatives, higher score wins
 
-Scoring formula explained
---------------------------
-After AHP weight derivation we have three weights:
-  w_crit (≈0.64), w_lat (≈0.26), w_cost (≈0.10)
+Stage B formula (kept from the team's original design and documented as a design choice):
+    n_c = criticality/10, n_l = min(latency/500, 1), n_k = cost index (0-1)
+    EDGE  = w_c * n_c^2       + w_l * n_l       + w_k * n_k
+    CLOUD = w_c * (1-n_c)^2   + w_l * (1-n_l)   + w_k * (1-n_k)
+The square on criticality makes mid/high criticality favour EDGE more strongly than a
+linear AHP sum would. Ties go to EDGE (the clinically safer side).
 
-The routing uses two layers of logic:
-
-Layer 1 — Hard vetoes (before AHP scoring):
-  a) Emergency override: criticality ≥ 9.0 → force EDGE (clinical safety)
-  b) Network degradation veto: predicted_latency_ms ≥ 300ms → force EDGE
-     Rationale: at ≥300ms the cloud path is unreliable for ANY medical data;
-     even routine data must be buffered locally during severe congestion.
-
-Layer 2 — AHP scoring (when no veto fires):
-  EDGE score  = w_crit * norm_criticality^2  (square amplifies high criticality)
-              + w_lat  * norm_latency          (high latency → edge)
-              + w_cost * norm_cost
-
-  CLOUD score = w_crit * (1-norm_criticality)^2
-              + w_lat  * (1-norm_latency)
-              + w_cost * (1-norm_cost)
-
-  Whichever score is higher determines routing (reason = "ahp_decision").
+Invalid input never produces a silent decision: DecisionInputError is raised (HTTP 422).
+A missing latency forecast with a valid criticality returns EDGE with
+reason "prediction_unavailable_safe_default".
 """
+from __future__ import annotations
 
-import sys
+import math
 import os
+from dataclasses import asdict, dataclass, field
+from typing import Optional
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+from src.decision.ahp import weight_set
+from src.decision.override_rules import (EMERGENCY_CRITICALITY_THRESHOLD, LATENCY_VETO_MS,
+                                         check_emergency_override, check_network_veto)
 
-from src.decision.ahp            import get_ahp_weights, normalize_criteria, DEFAULT_PAIRWISE_MATRIX
-from src.decision.override_rules import check_emergency_override
-
-
-def route_decision(
-    device_id:                  str,
-    patient_criticality_score:  float,
-    predicted_latency_ms:       float,
-    current_cloud_cost_index:   float,
-) -> dict:
-    """
-    Make an edge-vs-cloud routing decision for a single telemetry event.
-
-    Parameters
-    ----------
-    device_id                 : str    Device identifier (e.g. "ECG-101").
-    patient_criticality_score : float  0–10 scale; 10 = cardiac arrest.
-    predicted_latency_ms      : float  LSTM-predicted network latency in ms.
-    current_cloud_cost_index  : float  0–1 normalised cloud cost/load index.
-
-    Returns
-    -------
-    dict with keys:
-        device_id         : str
-        routing_decision  : "EDGE" | "CLOUD"
-        reason            : "override_critical_patient" | "ahp_decision"
-        cloud_score       : float | None  (None if override fired)
-        edge_score        : float | None  (None if override fired)
-    """
-    # ── Step 1: Emergency override check (clinical safety veto) ─────────────
-    if check_emergency_override(patient_criticality_score):
-        return {
-            "device_id":        device_id,
-            "routing_decision": "EDGE",
-            "reason":           "override_critical_patient",
-            "cloud_score":      None,
-            "edge_score":       None,
-        }
-
-    # ── Step 1b: Network degradation veto ────────────────────────────────────
-    # At predicted_latency ≥ 300ms the cloud path is unreliable for ANY
-    # medical data.  Even routine data must be buffered locally during
-    # severe network congestion.  This is the "prediction instead of reaction"
-    # novelty — we veto BEFORE routing, not after a timeout.
-    LATENCY_VETO_MS = 300.0
-    if predicted_latency_ms >= LATENCY_VETO_MS:
-        return {
-            "device_id":        device_id,
-            "routing_decision": "EDGE",
-            "reason":           "network_degradation_veto",
-            "cloud_score":      None,
-            "edge_score":       None,
-        }
-
-    # ── Step 2: Derive AHP weights ────────────────────────────────────────────
-    weights = get_ahp_weights(DEFAULT_PAIRWISE_MATRIX)
-    w_crit, w_lat, w_cost = weights[0], weights[1], weights[2]
-
-    # ── Step 3: Normalise inputs to [0, 1] ───────────────────────────────────
-    norm_crit, norm_lat, norm_cost = normalize_criteria(
-        patient_criticality_score,
-        predicted_latency_ms,
-        current_cloud_cost_index,
-    )
-
-    # ── Step 4: Compute weighted scores ──────────────────────────────────────
-    #
-    # EDGE score: rises when criticality is HIGH, latency is HIGH, cost is HIGH.
-    #   - norm_crit is SQUARED so that mid-to-high criticality (0.6+) clearly
-    #     dominates; low criticality (0.1) contributes very little.
-    #   - This ensures that a patient with score 6/10 gets routed to EDGE
-    #     even at moderate latency — protecting patients who are "serious but
-    #     not yet Code Blue".
-    edge_score  = (w_crit * (norm_crit ** 2)
-                 + w_lat  * norm_lat
-                 + w_cost * norm_cost)
-
-    # CLOUD score: symmetric inverse — low criticality and low latency
-    # both favour the cheaper cloud path.
-    cloud_score = (w_crit * ((1.0 - norm_crit) ** 2)
-                 + w_lat  * (1.0 - norm_lat)
-                 + w_cost * (1.0 - norm_cost))
-
-    # ── Step 5: Pick the higher score ────────────────────────────────────────
-    routing_decision = "EDGE" if edge_score >= cloud_score else "CLOUD"
-    reason           = "ahp_decision"
-
-    return {
-        "device_id":        device_id,
-        "routing_decision": routing_decision,
-        "reason":           reason,
-        "cloud_score":      round(cloud_score, 4),
-        "edge_score":       round(edge_score,  4),
-    }
+ENGINE_VERSION = "ahp-2stage-1.1"
+LATENCY_NORMALISATION_MS = 500.0
+WEIGHT_SET = os.environ.get("AHP_WEIGHT_SET", "eigenvector")
+REASONS = ("override_critical_patient", "network_degradation_veto", "prediction_unavailable_safe_default",
+           "ahp_decision")
 
 
-if __name__ == "__main__":
-    # Quick demo
-    scenarios = [
-        ("ECG-101", 9.5, 210.5, 0.4),   # Critical patient → override
-        ("ECG-102", 1.0, 20.0,  0.2),   # Routine, good network → cloud
-        ("O2-201",  5.0, 300.0, 0.5),   # Moderate, high latency → edge?
-        ("WEARABLE-301", 7.0, 80.0, 0.7),  # High criticality, moderate latency
-    ]
+class DecisionInputError(ValueError):
+    pass
 
-    print(f"{'Device':<16} {'Crit':>6} {'Lat':>8} {'Cost':>6} → {'Decision':<8} {'Reason'}")
-    print("-" * 75)
-    for args in scenarios:
-        result = route_decision(*args)
-        print(
-            f"{result['device_id']:<16}"
-            f" {args[1]:>6.1f}"
-            f" {args[2]:>8.1f}ms"
-            f" {args[3]:>6.2f}"
-            f" → {result['routing_decision']:<8}"
-            f" {result['reason']}"
-        )
+
+@dataclass
+class DecisionInput:
+    device_id: str
+    criticality: float
+    predicted_latency_ms: Optional[float]
+    cloud_cost_index: float
+
+    def validate(self) -> None:
+        if not isinstance(self.device_id, str) or not self.device_id.strip():
+            raise DecisionInputError("device_id is required")
+        for name, v, lo, hi in (("criticality", self.criticality, 0.0, 10.0),
+                                ("cloud_cost_index", self.cloud_cost_index, 0.0, 1.0)):
+            if not isinstance(v, (int, float)) or isinstance(v, bool) or math.isnan(v) or not lo <= v <= hi:
+                raise DecisionInputError(f"{name} must be a number in [{lo}, {hi}], got {v!r}")
+        p = self.predicted_latency_ms
+        if p is not None and (not isinstance(p, (int, float)) or math.isnan(p) or p < 0):
+            raise DecisionInputError(f"predicted_latency_ms must be >= 0 or null, got {p!r}")
+
+
+@dataclass
+class DecisionResult:
+    device_id: str
+    destination: str            # EDGE | CLOUD
+    reason: str                 # one of REASONS
+    veto: str                   # none | emergency | network | missing_prediction
+    edge_score: Optional[float]
+    cloud_score: Optional[float]
+    weights: dict
+    weight_set: str
+    normalised: dict
+    contributions: dict = field(default_factory=dict)
+    thresholds: dict = field(default_factory=dict)
+    engine_version: str = ENGINE_VERSION
+    explanation: str = ""
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def normalise(criticality: float, latency_ms: float, cost: float) -> dict:
+    return {"criticality": criticality / 10.0, "latency": min(latency_ms / LATENCY_NORMALISATION_MS, 1.0),
+            "cost": min(max(cost, 0.0), 1.0)}
+
+
+def decide(inp: DecisionInput, weight_set_name: str | None = None) -> DecisionResult:
+    inp.validate()
+    ws = weight_set(weight_set_name or WEIGHT_SET)
+    w = ws["weights"]
+    thresholds = {"emergency_criticality": EMERGENCY_CRITICALITY_THRESHOLD, "latency_veto_ms": LATENCY_VETO_MS}
+    base = dict(device_id=inp.device_id, weights=w, weight_set=ws["name"], thresholds=thresholds)
+
+    if check_emergency_override(inp.criticality):
+        return DecisionResult(destination="EDGE", reason="override_critical_patient", veto="emergency",
+                              edge_score=None, cloud_score=None, normalised={},
+                              explanation=f"Criticality {inp.criticality:.2f} >= {EMERGENCY_CRITICALITY_THRESHOLD}: "
+                                          "emergency override forces local EDGE processing; AHP not evaluated.",
+                              **base)
+    if inp.predicted_latency_ms is None:
+        return DecisionResult(destination="EDGE", reason="prediction_unavailable_safe_default",
+                              veto="missing_prediction", edge_score=None, cloud_score=None, normalised={},
+                              explanation="No latency forecast available; routed to EDGE as the safe default.",
+                              **base)
+    if check_network_veto(inp.predicted_latency_ms):
+        return DecisionResult(destination="EDGE", reason="network_degradation_veto", veto="network",
+                              edge_score=None, cloud_score=None, normalised={},
+                              explanation=f"Predicted latency {inp.predicted_latency_ms:.1f} ms >= {LATENCY_VETO_MS} ms: "
+                                          "cloud path considered unreliable; EDGE forced.",
+                              **base)
+
+    n = normalise(inp.criticality, inp.predicted_latency_ms, inp.cloud_cost_index)
+    edge_c = {"criticality": w["criticality"] * n["criticality"] ** 2, "latency": w["latency"] * n["latency"],
+              "cost": w["cost"] * n["cost"]}
+    cloud_c = {"criticality": w["criticality"] * (1 - n["criticality"]) ** 2,
+               "latency": w["latency"] * (1 - n["latency"]), "cost": w["cost"] * (1 - n["cost"])}
+    edge, cloud = sum(edge_c.values()), sum(cloud_c.values())
+    dest = "EDGE" if edge >= cloud else "CLOUD"
+    diff = {k: edge_c[k] - cloud_c[k] for k in edge_c}
+    driver = max(diff, key=lambda k: abs(diff[k]) if (diff[k] >= 0) == (dest == "EDGE") else -1)
+    return DecisionResult(destination=dest, reason="ahp_decision", veto="none", edge_score=round(edge, 6),
+                          cloud_score=round(cloud, 6), normalised={k: round(v, 6) for k, v in n.items()},
+                          contributions={"edge": {k: round(v, 6) for k, v in edge_c.items()},
+                                         "cloud": {k: round(v, 6) for k, v in cloud_c.items()}},
+                          explanation=f"AHP score EDGE {edge:.3f} vs CLOUD {cloud:.3f}; {dest} chosen, "
+                                      f"mainly driven by {driver}.",
+                          **base)
+
+
+def route_decision(device_id: str, patient_criticality_score: float, predicted_latency_ms: float,
+                   current_cloud_cost_index: float) -> dict:
+    """Backwards-compatible wrapper with the original function signature and keys."""
+    r = decide(DecisionInput(device_id, patient_criticality_score, predicted_latency_ms, current_cloud_cost_index))
+    return {"device_id": r.device_id, "routing_decision": r.destination, "reason": r.reason,
+            "cloud_score": r.cloud_score, "edge_score": r.edge_score}

@@ -1,173 +1,127 @@
 """
-ahp.py
-======
-Analytic Hierarchy Process (AHP) helper for the 3-criteria routing decision.
+src/decision/ahp.py  —  Owner: Tanmay Kapoor (24BIT0079)
+=========================================================
+Analytic Hierarchy Process (Saaty, 1980) for the three routing criteria:
+    C1 patient criticality, C2 predicted network latency, C3 cloud cost.
 
-What is AHP?
-------------
-AHP (Analytic Hierarchy Process, developed by Thomas Saaty) is a structured
-mathematical method for multi-criteria decision making.  It works by:
-  1. Defining the criteria to compare (here: Criticality, Latency, Cost).
-  2. Asking "how much more important is criterion A than criterion B?" for every
-     pair, filling a square pairwise comparison matrix.
-  3. Deriving a normalised weight vector (how important each criterion is overall)
-     using the eigenvector of that matrix.
-  4. Checking that the human judgements are consistent (Consistency Ratio < 0.1).
+Pure Python (no numpy) so the identical file runs in AWS Lambda without layers.
 
-Why AHP for routing?
---------------------
-Unlike binary threshold rules ("if latency > 100ms go to edge"), AHP balances
-THREE criteria simultaneously and is fully explainable — important for clinical
-and regulatory audits.
+Verified numbers for the project's pairwise matrix  [[1,3,5],[1/3,1,3],[1/5,1/3,1]]
+(reproduced by `python -m src.decision.ahp` and tests/unit/test_decision.py):
 
-Criteria used
--------------
-  C1 — Patient Criticality Score  (0-10 scale, 10 = cardiac arrest)
-  C2 — Predicted Latency          (ms, from the LSTM forecasting module)
-  C3 — Cloud Compute Cost Index   (0-1 normalised index)
+    method                          C1       C2       C3      lambda_max  CR (RI=0.58)
+    principal eigenvector (Saaty)   0.6370   0.2583   0.1047  3.0385      0.0332
+    column normalisation (old code) 0.6333   0.2605   0.1062  -           0.0334
+    reported in project report      0.6396   0.2583   0.1021  -           0.037
 
-Weights rationale (from literature survey)
-------------------------------------------
-  Criticality is "moderately more important" than Latency  → ratio 3
-  Criticality is "much more important" than Cost           → ratio 5
-  Latency is "moderately more important" than Cost         → ratio 3
+The reported C1/C3 values cannot be produced from this matrix by any standard AHP
+method, and CR 0.037 is obtained only with the alternative random index RI=0.52.
+The engine therefore uses the principal eigenvector by default (WEIGHT_SET="eigenvector");
+the report's numbers stay available as WEIGHT_SET="report" so results can be compared
+(see reports/ROUTING_EVALUATION_REPORT.md, which shows how many decisions differ).
 """
+from __future__ import annotations
 
-import numpy as np
+from typing import Sequence
 
-# ---------------------------------------------------------------------------
-# Default pairwise comparison matrix  [C1 vs C1, C1 vs C2, C1 vs C3]
-#                                     [C2 vs C1, C2 vs C2, C2 vs C3]
-#                                     [C3 vs C1, C3 vs C2, C3 vs C3]
-# ---------------------------------------------------------------------------
-DEFAULT_PAIRWISE_MATRIX: list = [
-    [1,   3,   5  ],   # Criticality vs (Criticality, Latency, Cost)
-    [1/3, 1,   3  ],   # Latency     vs (Criticality, Latency, Cost)
-    [1/5, 1/3, 1  ],   # Cost        vs (Criticality, Latency, Cost)
+DEFAULT_PAIRWISE_MATRIX: list[list[float]] = [
+    [1.0, 3.0, 5.0],        # criticality vs (criticality, latency, cost)
+    [1 / 3, 1.0, 3.0],      # latency
+    [1 / 5, 1 / 3, 1.0],    # cost
 ]
-
-# Random Index for n=3 (standard AHP lookup table value)
-_RI_3 = 0.58
-
-
-def get_ahp_weights(pairwise_matrix: list) -> list:
-    """
-    Derive normalised AHP criterion weights from a 3×3 pairwise comparison matrix.
-
-    Algorithm (eigenvector approximation — standard in AHP literature):
-      Step 1: Normalise each column by dividing every element by the column sum.
-      Step 2: Average each row of the normalised matrix → that row's weight.
-
-    Parameters
-    ----------
-    pairwise_matrix : list[list[float]]
-        3×3 matrix where element [i][j] = "how much more important is i than j?"
-        Diagonal must be 1.0.  Element [j][i] must equal 1 / [i][j].
-
-    Returns
-    -------
-    list[float]
-        Normalised weight vector summing to 1.0.
-        Index 0 = Criticality weight, 1 = Latency weight, 2 = Cost weight.
-    """
-    M = np.array(pairwise_matrix, dtype=float)
-
-    # Step 1 — Column normalisation
-    col_sums = M.sum(axis=0)
-    M_norm   = M / col_sums
-
-    # Step 2 — Row averages = weights
-    weights = M_norm.mean(axis=1).tolist()
-    return weights
+CRITERIA = ("criticality", "latency", "cost")
+# Saaty's random consistency index
+RANDOM_INDEX = {1: 0.0, 2: 0.0, 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49}
+REPORTED_WEIGHTS = (0.6396, 0.2583, 0.1021)
+REPORTED_CR = 0.037
+CR_LIMIT = 0.10
 
 
-def consistency_ratio(pairwise_matrix: list, weights: list) -> float:
-    """
-    Compute the AHP Consistency Ratio (CR) for a 3-criterion problem.
-
-    A CR < 0.10 confirms the pairwise judgements are acceptably consistent
-    (i.e., human ratings don't contradict themselves too much).
-
-    Formula
-    -------
-      λ_max = (1/n) * Σ (M · w)_i / w_i
-      CI    = (λ_max - n) / (n - 1)
-      CR    = CI / RI          where RI = 0.58 for n = 3
-
-    Parameters
-    ----------
-    pairwise_matrix : list[list[float]]
-    weights         : list[float]  Weights from get_ahp_weights().
-
-    Returns
-    -------
-    float  Consistency Ratio (should be < 0.10).
-    """
-    M = np.array(pairwise_matrix, dtype=float)
-    w = np.array(weights,         dtype=float)
-    n = len(w)
-
-    # Weighted sum vector
-    Mw       = M @ w
-    lambdas  = Mw / w        # element-wise ratio
-    lambda_max = float(lambdas.mean())
-
-    CI = (lambda_max - n) / (n - 1)
-    CR = CI / _RI_3
-    return CR
+class AHPError(ValueError):
+    pass
 
 
-def normalize_criteria(
-    criticality: float,
-    latency_ms: float,
-    cost_index: float,
-) -> tuple:
-    """
-    Normalize the three raw input criteria to a comparable [0, 1] scale.
-
-    Semantics
-    ---------
-    criticality : 0-10 scale → divide by 10.
-                  Higher value = higher urgency to route to EDGE.
-
-    latency_ms  : 0-500ms scale → divide by 500.
-                  Higher value = network is degraded → stronger signal to use EDGE.
-                  (So: high normalised latency "votes" for EDGE — direction is correct.)
-
-    cost_index  : Already 0-1.  Higher value = cloud is expensive → slight preference for EDGE.
-
-    Parameters
-    ----------
-    criticality : float  Patient criticality score (0-10).
-    latency_ms  : float  Predicted latency in milliseconds.
-    cost_index  : float  Cloud compute cost index (0-1).
-
-    Returns
-    -------
-    tuple(float, float, float)  (norm_criticality, norm_latency, norm_cost)
-    """
-    norm_criticality = min(criticality / 10.0, 1.0)
-    norm_latency     = min(latency_ms  / 500.0, 1.0)
-    norm_cost        = min(max(cost_index, 0.0), 1.0)
-    return norm_criticality, norm_latency, norm_cost
+def validate_matrix(m: Sequence[Sequence[float]], tol: float = 1e-6) -> None:
+    n = len(m)
+    if n < 2 or any(len(r) != n for r in m):
+        raise AHPError("pairwise matrix must be square with n >= 2")
+    for i in range(n):
+        if abs(m[i][i] - 1.0) > tol:
+            raise AHPError(f"diagonal element [{i}][{i}] must be 1")
+        for j in range(n):
+            if m[i][j] <= 0:
+                raise AHPError(f"element [{i}][{j}] must be positive")
+            if abs(m[i][j] * m[j][i] - 1.0) > 1e-3:
+                raise AHPError(f"matrix is not reciprocal at [{i}][{j}]")
 
 
-# ---------------------------------------------------------------------------
-# Demo
-# ---------------------------------------------------------------------------
+def principal_eigenvector(m: Sequence[Sequence[float]], iters: int = 1000, tol: float = 1e-12):
+    """Power iteration. Returns (weights summing to 1, lambda_max)."""
+    validate_matrix(m)
+    n = len(m)
+    w = [1.0 / n] * n
+    for _ in range(iters):
+        v = [sum(m[i][j] * w[j] for j in range(n)) for i in range(n)]
+        s = sum(v)
+        v = [x / s for x in v]
+        if max(abs(a - b) for a, b in zip(v, w)) < tol:
+            w = v
+            break
+        w = v
+    mw = [sum(m[i][j] * w[j] for j in range(n)) for i in range(n)]
+    lam = sum(mw[i] / w[i] for i in range(n)) / n
+    return w, lam
+
+
+def column_normalisation_weights(m: Sequence[Sequence[float]]) -> list[float]:
+    """Approximation used by the original repository code (kept for comparison only)."""
+    validate_matrix(m)
+    n = len(m)
+    cols = [sum(m[i][j] for i in range(n)) for j in range(n)]
+    return [sum(m[i][j] / cols[j] for j in range(n)) / n for i in range(n)]
+
+
+def consistency(m: Sequence[Sequence[float]], weights: Sequence[float], ri: float | None = None) -> dict:
+    n = len(m)
+    mw = [sum(m[i][j] * weights[j] for j in range(n)) for i in range(n)]
+    lam = sum(mw[i] / weights[i] for i in range(n)) / n
+    ci = (lam - n) / (n - 1)
+    ri = RANDOM_INDEX[n] if ri is None else ri
+    cr = ci / ri if ri else 0.0
+    return {"lambda_max": lam, "ci": ci, "ri": ri, "cr": cr, "consistent": cr < CR_LIMIT}
+
+
+def weight_set(name: str = "eigenvector", m: Sequence[Sequence[float]] = DEFAULT_PAIRWISE_MATRIX) -> dict:
+    """Return {'name','weights':{criterion: w},'cr'} for the requested weight set."""
+    if name == "eigenvector":
+        w, _ = principal_eigenvector(m)
+    elif name == "column_normalisation":
+        w = column_normalisation_weights(m)
+    elif name == "report":
+        w = list(REPORTED_WEIGHTS)
+    else:
+        raise AHPError(f"unknown weight set {name!r}")
+    c = consistency(m, w)
+    if not c["consistent"]:
+        raise AHPError(f"pairwise judgements inconsistent: CR={c['cr']:.3f} >= {CR_LIMIT}")
+    return {"name": name, "weights": dict(zip(CRITERIA, w)), "cr": c["cr"], "lambda_max": c["lambda_max"]}
+
+
+def ahp_report(m: Sequence[Sequence[float]] = DEFAULT_PAIRWISE_MATRIX) -> dict:
+    eig, lam = principal_eigenvector(m)
+    col = column_normalisation_weights(m)
+    c = consistency(m, eig)
+    return {
+        "matrix": [list(r) for r in m],
+        "eigenvector": {"weights": dict(zip(CRITERIA, eig)), "lambda_max": lam, "ci": c["ci"],
+                        "cr_ri_0_58": c["cr"], "cr_ri_0_52": c["ci"] / 0.52},
+        "column_normalisation": {"weights": dict(zip(CRITERIA, col)), "cr_ri_0_58": consistency(m, col)["cr"]},
+        "reported": {"weights": dict(zip(CRITERIA, REPORTED_WEIGHTS)), "cr": REPORTED_CR},
+        "note": "Reported C1/C3 weights are not reproducible from the documented matrix; CR 0.037 corresponds "
+                "to RI=0.52. Default engine uses the principal eigenvector.",
+    }
+
+
 if __name__ == "__main__":
-    weights = get_ahp_weights(DEFAULT_PAIRWISE_MATRIX)
-    cr      = consistency_ratio(DEFAULT_PAIRWISE_MATRIX, weights)
-
-    print("AHP Weight Derivation for DEFAULT_PAIRWISE_MATRIX")
-    print("=" * 50)
-    criteria = ["Patient Criticality", "Predicted Latency", "Compute Cost"]
-    for name, w in zip(criteria, weights):
-        print(f"  {name:<25} : {w:.4f}  ({w*100:.1f}%)")
-    print(f"\n  Consistency Ratio (CR) : {cr:.4f}  {'✓ PASS (< 0.10)' if cr < 0.1 else '✗ FAIL (>= 0.10)'}")
-
-    print("\nNormalized criteria demo:")
-    nc, nl, nco = normalize_criteria(8.5, 210.5, 0.4)
-    print(f"  criticality=8.5 → {nc:.3f}")
-    print(f"  latency=210.5ms → {nl:.3f}")
-    print(f"  cost=0.4        → {nco:.3f}")
+    import json
+    print(json.dumps(ahp_report(), indent=2))
