@@ -111,7 +111,7 @@ python -m pytest tests/unit/test_aws_deployment.py -q
 ### Stage 1 — one-time account setup (root, then never again)  · not billable
 Only after Stage 0 is reviewed. Detailed commands will be given then; in short:
 1. Enable root MFA if it is off; delete root access keys if any exist.
-2. CloudShell → *Actions → Upload file* → `hcf-aws-deploy-kit.zip`; `unzip -q hcf-aws-deploy-kit.zip -d hcf && cd hcf`.
+2. CloudShell → *Actions → Upload file* → `hcf-aws-deploy-kit.zip`; `unzip -q hcf-aws-deploy-kit.zip && cd hcf-aws-deploy-kit`.
 3. `aws cloudformation deploy --region eu-north-1 --stack-name hcf-bootstrap --template-file deploy/aws/bootstrap.yaml --capabilities CAPABILITY_NAMED_IAM`
 4. `bash deploy/aws/scripts/admin_create_budget.sh <your-email> 15`
 5. IAM console → *Users → Create user* `hcf-deployer`, console access, **no access key**, add to group `hcf-deployers`; sign in as that user, assign MFA; sign out of root.
