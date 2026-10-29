@@ -1,0 +1,9 @@
+{
+  "description": "HYPOTHETICAL multi-cloud example for 03/05 (not measured data): one hospital edge node and three cloud destinations with their forecast RTT and cost index.",
+  "criticality": 2.0,
+  "clouds": [
+    {"name": "aws-ap-south-1 (Mumbai)", "predicted_latency_ms": 28.0, "cost_index": 0.45},
+    {"name": "aws-eu-north-1 (Stockholm)", "predicted_latency_ms": 145.0, "cost_index": 0.30},
+    {"name": "other-provider-us-east", "predicted_latency_ms": 310.0, "cost_index": 0.10}
+  ]
+}

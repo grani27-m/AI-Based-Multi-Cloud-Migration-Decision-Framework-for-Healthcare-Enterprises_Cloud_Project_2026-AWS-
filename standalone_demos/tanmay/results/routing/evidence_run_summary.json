@@ -1,0 +1,231 @@
+{
+  "all": {
+    "generated_at": "2026-10-29T06:07:21.256216+00:00",
+    "source_filter": "all",
+    "events": {
+      "total": 467,
+      "by_status": {
+        "completed": 467
+      },
+      "by_source": {
+        "replay": 400,
+        "simulated": 67
+      }
+    },
+    "decisions": {
+      "total": 467,
+      "edge": {
+        "count": 45,
+        "pct": 9.6
+      },
+      "cloud": {
+        "count": 422,
+        "pct": 90.4
+      },
+      "by_reason": {
+        "override_critical_patient": 12,
+        "network_degradation_veto": 20,
+        "prediction_unavailable_safe_default": 0,
+        "ahp_decision": 435
+      }
+    },
+    "predictions": {
+      "by_method": {
+        "lstm": 467
+      },
+      "by_risk": {
+        "HIGH": 20,
+        "LOW": 432,
+        "MEDIUM": 15
+      }
+    },
+    "executions": {
+      "by_status": {
+        "fallback_success": 10,
+        "success": 457
+      }
+    },
+    "alerts": {
+      "triggered": 32,
+      "by_status": {
+        "delivered": 12,
+        "not_notified": 20
+      },
+      "by_kind": {
+        "emergency_override": 12,
+        "network_veto": 20
+      },
+      "delivered": 12,
+      "failed": 0,
+      "not_configured": 0,
+      "pending": 0
+    },
+    "reconciliation": {
+      "events_equal_sum_of_statuses": true,
+      "reasons_sum_equals_decisions": true,
+      "events_equal_decisions_plus_failed_before_decision_plus_in_flight": true,
+      "failed_before_decision": 0,
+      "in_flight": 0,
+      "note": "Events without a decision are those rejected/failed before routing or still being processed. Alerts 'delivered' counts only alerts with at least one successful channel delivery."
+    }
+  },
+  "replay": {
+    "generated_at": "2026-10-29T06:07:21.273606+00:00",
+    "source_filter": "replay",
+    "events": {
+      "total": 400,
+      "by_status": {
+        "completed": 400
+      },
+      "by_source": {
+        "replay": 400
+      }
+    },
+    "decisions": {
+      "total": 400,
+      "edge": {
+        "count": 13,
+        "pct": 3.2
+      },
+      "cloud": {
+        "count": 387,
+        "pct": 96.8
+      },
+      "by_reason": {
+        "override_critical_patient": 0,
+        "network_degradation_veto": 0,
+        "prediction_unavailable_safe_default": 0,
+        "ahp_decision": 400
+      }
+    },
+    "predictions": {
+      "by_method": {
+        "lstm": 400
+      },
+      "by_risk": {
+        "LOW": 385,
+        "MEDIUM": 15
+      }
+    },
+    "executions": {
+      "by_status": {
+        "success": 400
+      }
+    },
+    "alerts": {
+      "triggered": 0,
+      "by_status": {},
+      "by_kind": {},
+      "delivered": 0,
+      "failed": 0,
+      "not_configured": 0,
+      "pending": 0
+    },
+    "reconciliation": {
+      "events_equal_sum_of_statuses": true,
+      "reasons_sum_equals_decisions": true,
+      "events_equal_decisions_plus_failed_before_decision_plus_in_flight": true,
+      "failed_before_decision": 0,
+      "in_flight": 0,
+      "note": "Events without a decision are those rejected/failed before routing or still being processed. Alerts 'delivered' counts only alerts with at least one successful channel delivery."
+    }
+  },
+  "simulated": {
+    "generated_at": "2026-10-29T06:07:21.285163+00:00",
+    "source_filter": "simulated",
+    "events": {
+      "total": 67,
+      "by_status": {
+        "completed": 67
+      },
+      "by_source": {
+        "simulated": 67
+      }
+    },
+    "decisions": {
+      "total": 67,
+      "edge": {
+        "count": 32,
+        "pct": 47.8
+      },
+      "cloud": {
+        "count": 35,
+        "pct": 52.2
+      },
+      "by_reason": {
+        "override_critical_patient": 12,
+        "network_degradation_veto": 20,
+        "prediction_unavailable_safe_default": 0,
+        "ahp_decision": 35
+      }
+    },
+    "predictions": {
+      "by_method": {
+        "lstm": 67
+      },
+      "by_risk": {
+        "HIGH": 20,
+        "LOW": 47
+      }
+    },
+    "executions": {
+      "by_status": {
+        "fallback_success": 10,
+        "success": 57
+      }
+    },
+    "alerts": {
+      "triggered": 32,
+      "by_status": {
+        "delivered": 12,
+        "not_notified": 20
+      },
+      "by_kind": {
+        "emergency_override": 12,
+        "network_veto": 20
+      },
+      "delivered": 12,
+      "failed": 0,
+      "not_configured": 0,
+      "pending": 0
+    },
+    "reconciliation": {
+      "events_equal_sum_of_statuses": true,
+      "reasons_sum_equals_decisions": true,
+      "events_equal_decisions_plus_failed_before_decision_plus_in_flight": true,
+      "failed_before_decision": 0,
+      "in_flight": 0,
+      "note": "Events without a decision are those rejected/failed before routing or still being processed. Alerts 'delivered' counts only alerts with at least one successful channel delivery."
+    }
+  },
+  "replay_detail": {
+    "n": 400,
+    "criticality_distribution": {
+      "0.0": 152,
+      "1.43": 103,
+      "2.86": 70,
+      "4.29": 43,
+      "5.71": 10,
+      "7.14": 16,
+      "8.57": 6
+    },
+    "predicted_rtt_ms": {
+      "median": 14.8385,
+      "max": 130.894
+    },
+    "risk": {
+      "LOW": 385,
+      "MEDIUM": 15,
+      "HIGH": 0
+    }
+  },
+  "audit_verify": {
+    "valid": true,
+    "checked": 1008,
+    "first_broken_id": null,
+    "problem": null,
+    "head_hash": "df5da43877913ed3fc8f0e3022ecf73957a4e76b14462a3032721df0168d7474",
+    "verified_at": "2026-10-29T06:07:21.493884+00:00",
+    "verified_by": "admin"
+  }
+}

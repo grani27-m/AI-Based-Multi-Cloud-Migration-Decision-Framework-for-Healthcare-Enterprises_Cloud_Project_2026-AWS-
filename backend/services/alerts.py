@@ -15,6 +15,7 @@ Channels (all optional, credentials only from environment):
     email     SMTP + STARTTLS              SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, ALERT_EMAIL_TO
     webhook   JSON POST (Slack/Discord/…)  ALERT_WEBHOOK_URL
     aws-sns   SNS Publish                  SNS_TOPIC_ARN (+ AWS credentials)
+    mock-file local JSON-lines file        ALERT_MOCK_FILE  -> status "mock_delivered", never "delivered"
 
 Each channel gets up to 3 attempts with a 10 s timeout; every attempt is an
 alert_deliveries row. Messages contain the device ID, criticality and latency only
@@ -43,6 +44,7 @@ MAX_ATTEMPTS = 3
 
 class Channel:
     name = "base"
+    is_mock = False  # True only for MockFileChannel: its deliveries never count as real notifications
 
     def configured(self) -> bool:
         raise NotImplementedError
@@ -151,8 +153,50 @@ class SNSChannel(Channel):
         return f"sns MessageId={r.get('MessageId')}"
 
 
+class MockFileChannel(Channel):
+    """Writes the alert to a local JSON-lines file instead of notifying anyone (demos / tests).
+
+    Enabled with ALERT_MOCK_FILE=<path>. Its deliveries are stored with a "MOCK" detail and an alert
+    delivered only through it gets status "mock_delivered" - never "delivered".
+    """
+
+    name = "mock-file"
+    is_mock = True
+
+    def __init__(self, s: Settings):
+        import os
+
+        self.path = os.environ.get("ALERT_MOCK_FILE", "")
+
+    def configured(self):
+        return bool(self.path)
+
+    def send(self, alert):
+        import json
+        from pathlib import Path
+
+        p = Path(self.path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        with p.open("a", encoding="utf-8") as f:
+            f.write(
+                json.dumps(
+                    {
+                        "MOCK": True,
+                        "note": "mock channel - this alert was NOT sent to anyone",
+                        "alert_id": alert.id,
+                        "severity": alert.severity,
+                        "kind": alert.kind,
+                        "device_id": alert.device_id,
+                        "message": alert.message,
+                    }
+                )
+                + "\n"
+            )
+        return f"MOCK: written to {p.name}; no message left this machine"
+
+
 def default_channels(s: Settings) -> list[Channel]:
-    return [TelegramChannel(s), EmailChannel(s), WebhookChannel(s), SNSChannel(s)]
+    return [TelegramChannel(s), EmailChannel(s), WebhookChannel(s), SNSChannel(s), MockFileChannel(s)]
 
 
 def dispatch_alert(
@@ -194,6 +238,7 @@ def dispatch_alert(
 
     attempts: list[dict] = []  # phase 2 - network calls only
     outcomes: list[bool] = []
+    real_success = False
     for ch in channels:
         if not ch.configured():
             attempts.append(
@@ -206,6 +251,7 @@ def dispatch_alert(
             try:
                 detail = ch.send(snapshot)
                 ok = True
+                real_success = real_success or not getattr(ch, "is_mock", False)
                 attempts.append(
                     dict(
                         channel=ch.name,
@@ -232,6 +278,8 @@ def dispatch_alert(
 
     if not outcomes:
         status = "not_configured"
+    elif any(outcomes) and not real_success:
+        status = "mock_delivered"  # only the local mock channel "succeeded": nobody was notified
     elif all(outcomes):
         status = "delivered"
     elif any(outcomes):

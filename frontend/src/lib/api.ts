@@ -12,7 +12,7 @@ export interface Summary {
                by_reason: Record<string, number> };
   predictions: { by_method: Record<string, number>; by_risk: Record<string, number> };
   executions: { by_status: Record<string, number> };
-  alerts: { triggered: number; delivered: number; failed: number; not_configured: number; pending: number;
+  alerts: { triggered: number; delivered: number; failed: number; not_configured: number; pending: number; mock_delivered?: number;
             by_status: Record<string, number>; by_kind: Record<string, number> };
   reconciliation: Record<string, boolean | number | string>;
 }
@@ -49,6 +49,11 @@ export interface AlertRow {
   created_at: string; delivered_at: string | null; acknowledged_at: string | null;
   deliveries: { channel: string; attempt: number; status: string; detail: string; latency_ms: number; attempted_at: string }[];
 }
+export interface CandidateScore { name: string; kind: 'edge' | 'cloud'; admissible: boolean; excluded_reason: string | null;
+  score: number | null; contributions: Record<string, number>; normalised: Record<string, number> }
+export interface Ranking { device_id: string; destination: string; destination_kind: 'edge' | 'cloud'; reason: string;
+  criticality: number; weights: Record<string, number>; weight_set: string; ranking: CandidateScore[]; explanation: string;
+  engine_version: string }
 export interface AuditRow { id: number; ts: string; actor: string; action: string; resource: string;
   detail: Record<string, unknown>; prev_hash: string; hash: string }
 export interface Verify { valid: boolean; checked: number; first_broken_id: number | null; problem: string | null;
@@ -119,6 +124,9 @@ export const api = {
   system: () => call<SystemInfo>('/api/v1/system/info'),
   preview: (b: { criticality: number; predicted_latency_ms: number | null; cloud_cost_index: number; weight_set: string }) =>
     call<Decision>('/api/v1/decision/preview', { method: 'POST', body: JSON.stringify(b) }),
+  rank: (b: { criticality: number; weight_set: string; clouds: { name: string; predicted_latency_ms: number | null; cost_index: number }[] }) =>
+    call<Ranking>('/api/v1/decision/rank', { method: 'POST', body: JSON.stringify(b) }),
+  health: () => call<{ status: string; version: string }>('/health'),
   demo: (b: { mode: 'replay' | 'simulate'; count: number; scenario?: string; seed: number }) =>
     call<{ processed: number; duplicates: number; failed: number; by_destination: Record<string, number>; by_reason: Record<string, number> }>(
       '/api/v1/demo/run', { method: 'POST', body: JSON.stringify(b) }),

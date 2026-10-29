@@ -59,7 +59,7 @@ export function SourceBadge({ s }: { s: string }) {
 
 const STATUS_COLORS: Record<string, string> = {
   delivered: 'var(--ok)', success: 'var(--ok)', completed: 'var(--ok)', sent: 'var(--ok)',
-  partially_delivered: 'var(--veto)', fallback_success: 'var(--veto)', not_configured: 'var(--muted)',
+  partially_delivered: 'var(--veto)', mock_delivered: 'var(--veto)', fallback_success: 'var(--veto)', not_configured: 'var(--muted)',
   not_notified: 'var(--muted)', skipped: 'var(--muted)', triggered: 'var(--cloud)',
   failed: 'var(--emergency)', received: 'var(--cloud)',
 };

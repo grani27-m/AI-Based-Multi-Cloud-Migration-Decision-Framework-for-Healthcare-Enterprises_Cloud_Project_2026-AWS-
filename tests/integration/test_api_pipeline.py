@@ -158,3 +158,19 @@ def test_demo_run_simulated_and_replay(client, headers):
     assert again.json()["duplicates"] == 10  # deterministic ids -> idempotent replays
     s = client.get("/api/v1/dashboard/summary?source=replay", headers=headers["admin"]).json()
     assert s["events"]["total"] == 10
+
+
+def test_multi_cloud_rank_endpoint(client, headers):
+    body = {
+        "criticality": 1.0,
+        "clouds": [
+            {"name": "aws-eu-north-1", "predicted_latency_ms": 140, "cost_index": 0.5},
+            {"name": "aws-ap-south-1", "predicted_latency_ms": 30, "cost_index": 0.4},
+            {"name": "far", "predicted_latency_ms": 350, "cost_index": 0.1},
+        ],
+    }
+    r = client.post("/api/v1/decision/rank", json=body, headers=headers["doctor"]).json()
+    assert r["destination"] == "aws-ap-south-1" and r["ranking"][0]["name"] == "aws-ap-south-1"
+    assert any(s["name"] == "far" and not s["admissible"] for s in r["ranking"])
+    bad = client.post("/api/v1/decision/rank", json={"criticality": 1, "clouds": []}, headers=headers["doctor"])
+    assert bad.status_code == 422

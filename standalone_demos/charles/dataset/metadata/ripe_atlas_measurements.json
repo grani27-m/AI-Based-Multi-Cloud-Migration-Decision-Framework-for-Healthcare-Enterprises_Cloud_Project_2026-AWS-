@@ -1,0 +1,55 @@
+{
+  "retrieved_at": "2026-10-29T04:53:55+00:00",
+  "measurements": [
+    {
+      "id": 1001,
+      "type": "ping",
+      "af": 4,
+      "target": "k.root-servers.net",
+      "target_ip": "193.0.14.129",
+      "interval": 240,
+      "start_time": 1288310400,
+      "stop_time": 2147126400,
+      "status": {
+        "id": 2,
+        "name": "Ongoing",
+        "when": null
+      },
+      "is_public": true,
+      "description": null
+    },
+    {
+      "id": 1004,
+      "type": "ping",
+      "af": 4,
+      "target": "f.root-servers.net",
+      "target_ip": "192.5.5.241",
+      "interval": 240,
+      "start_time": 1288310400,
+      "stop_time": 2147126400,
+      "status": {
+        "id": 2,
+        "name": "Ongoing",
+        "when": null
+      },
+      "is_public": true,
+      "description": null
+    },
+    {
+      "rejected": true,
+      "reason": "Checked 2026-10-29: user-defined one-off campaign with 1 probe, start 2026-10-28 and stop 2026-10-30 (about 2 days, ~700 readings). Too short for a 20-step forecaster; not used.",
+      "id": 228839605,
+      "type": "ping",
+      "target": "200.14.75.253",
+      "interval": 240,
+      "start_time": 1793221260,
+      "stop_time": 1793394000,
+      "participant_count": 1,
+      "status": {
+        "id": 2,
+        "name": "Ongoing",
+        "when": null
+      }
+    }
+  ]
+}

@@ -6,17 +6,20 @@ import { api } from '../lib/api';
 import {
   Activity, LayoutDashboard, Monitor, Cpu, Bell,
   FlaskConical, BrainCircuit, ShieldCheck, Settings, LogOut,
-  ChevronLeft, Sun, Moon, Globe, Wifi, WifiOff, RefreshCw
+  ChevronLeft, Sun, Moon, Globe, Wifi, WifiOff, RefreshCw, Compass, GitBranch, Cloud
 } from 'lucide-react';
 
 type LiveState = 'live' | 'offline';
 
 const NAV = [
+  { to: '/project',      label: 'Project tour', icon: Compass,         roles: ['admin','doctor','auditor'] },
   { to: '/',             label: 'Overview',     icon: LayoutDashboard, roles: ['admin','doctor','auditor'] },
   { to: '/events',       label: 'Live events',  icon: Monitor,         roles: ['admin','doctor','auditor'] },
+  { to: '/trace',        label: 'Request trace', icon: GitBranch,      roles: ['admin','doctor','auditor'] },
   { to: '/devices',      label: 'Devices',      icon: Cpu,             roles: ['admin','doctor','auditor'] },
   { to: '/alerts',       label: 'Alerts',       icon: Bell,            roles: ['admin','doctor','auditor'] },
   { to: '/decision-lab', label: 'Decision lab', icon: FlaskConical,    roles: ['admin','doctor','auditor'] },
+  { to: '/multi-cloud',  label: 'Multi-cloud',  icon: Cloud,           roles: ['admin','doctor','auditor'] },
   { to: '/model',        label: 'Model & data', icon: BrainCircuit,    roles: ['admin','doctor','auditor'] },
   { to: '/audit',        label: 'Audit',        icon: ShieldCheck,     roles: ['admin','auditor']         },
   { to: '/system',       label: 'System',       icon: Settings,        roles: ['admin','doctor','auditor'] },

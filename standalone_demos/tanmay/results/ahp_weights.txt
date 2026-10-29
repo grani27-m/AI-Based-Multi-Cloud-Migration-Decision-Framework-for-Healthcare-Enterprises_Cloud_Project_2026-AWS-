@@ -1,0 +1,4 @@
+criticality 0.333333
+latency 0.333333
+cost 0.333333
+CR 6.130268

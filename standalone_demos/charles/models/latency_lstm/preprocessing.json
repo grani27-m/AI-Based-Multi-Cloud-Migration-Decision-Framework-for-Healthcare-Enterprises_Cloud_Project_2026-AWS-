@@ -1,0 +1,69 @@
+{
+  "model_version": "lstm-20261029-0529",
+  "architecture": {
+    "type": "stacked LSTM",
+    "units": [
+      64,
+      32
+    ],
+    "dense": 16,
+    "dropout": 0.2,
+    "params": 31393
+  },
+  "window": 20,
+  "features": [
+    "rtt_avg_ms",
+    "rtt_min_ms",
+    "rtt_max_ms",
+    "jitter_ms",
+    "loss_pct",
+    "hour_sin",
+    "hour_cos"
+  ],
+  "target_mode": "residual",
+  "target": "next rtt_avg_ms: log1p, minus log1p(last RTT), standardised",
+  "horizon": "one measurement interval (240 s for RIPE Atlas built-in pings)",
+  "scaler": {
+    "mean": [
+      2.640376567840576,
+      2.57704758644104,
+      2.681682586669922,
+      0.408841609954834,
+      0.0016042649513110518,
+      -0.0028328823391348124,
+      0.00739256152883172
+    ],
+    "std": [
+      1.071234107017517,
+      1.0856659412384033,
+      1.0633716583251953,
+      0.5667457580566406,
+      0.03591007739305496,
+      0.7069088816642761,
+      0.707096517086029
+    ],
+    "y_mean": 1.579915260663256e-05,
+    "y_std": 0.2083929479122162
+  },
+  "scaler_fitted_on": "training windows only",
+  "training": {
+    "epochs_run": 11,
+    "best_epoch": 8,
+    "batch": 512,
+    "seed": 42,
+    "optimizer": "Adam(0.001)",
+    "loss": "huber",
+    "val_mae_ms": 1.4840343382786414,
+    "val_persistence_mae_ms": 1.8170715576372543,
+    "seconds": 680.1,
+    "train_windows": 475196,
+    "val_windows": 111314,
+    "tensorflow": "2.21.0"
+  },
+  "data": {
+    "windows_file": "dataset/processed/windows_w20.npz",
+    "windows_sha256": "14f1b4cb814a0e9e685c5dd8f2ebd4edcce9cd19d91c8ebff67a778554c0ac86",
+    "source": "RIPE Atlas built-in pings msm 1001/1004, see dataset/metadata"
+  },
+  "trained_at": "2026-10-29T05:29:40+00:00"
+}

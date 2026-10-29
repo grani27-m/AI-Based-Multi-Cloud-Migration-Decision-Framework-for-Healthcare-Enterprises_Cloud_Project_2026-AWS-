@@ -15,6 +15,9 @@ import ModelData from './pages/ModelData';
 import Audit from './pages/Audit';
 import SystemInfo from './pages/SystemInfo';
 import Admin from './pages/Admin';
+import Project from './pages/Project';
+import Trace from './pages/Trace';
+import MultiCloud from './pages/MultiCloud';
 
 const qc = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 3_000 } } });
 
@@ -41,7 +44,11 @@ function AppRoutes() {
         <Route path="/login" element={user ? <Navigate to="/" replace /> : <SignIn />} />
         <Route element={<RequireAuth><Layout /></RequireAuth>}>
           <Route index element={<Overview />} />
+          <Route path="project" element={<Project />} />
           <Route path="events" element={<LiveMonitor />} />
+          <Route path="trace" element={<Trace />} />
+          <Route path="trace/:id" element={<Trace />} />
+          <Route path="multi-cloud" element={<MultiCloud />} />
           <Route path="devices" element={<Devices />} />
           <Route path="alerts" element={<Alerts />} />
           <Route path="decision-lab" element={<DecisionLab />} />

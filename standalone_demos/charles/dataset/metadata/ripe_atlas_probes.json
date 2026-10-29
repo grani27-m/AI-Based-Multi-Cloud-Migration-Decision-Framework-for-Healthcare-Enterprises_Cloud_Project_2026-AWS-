@@ -1,0 +1,341 @@
+{
+  "retrieved_at": "2026-10-29T04:53:55+00:00",
+  "probes": [
+    {
+      "group": "access_network",
+      "id": 24916,
+      "country_code": "IN",
+      "asn_v4": 133661,
+      "description": "RIPE Probe - Amritsar (Punjab)",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-27T22:29:12Z"
+      },
+      "first_connected": 1453138153,
+      "total_uptime": 321056787
+    },
+    {
+      "group": "access_network",
+      "id": 25375,
+      "country_code": "IN",
+      "asn_v4": 24560,
+      "description": "Netgen STPI",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-11T04:53:46Z"
+      },
+      "first_connected": 1459763703,
+      "total_uptime": 319349313
+    },
+    {
+      "group": "access_network",
+      "id": 17590,
+      "country_code": "IN",
+      "asn_v4": 24560,
+      "description": "DD",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-29T01:45:02Z"
+      },
+      "first_connected": 1406640416,
+      "total_uptime": 298603137
+    },
+    {
+      "group": "access_network",
+      "id": 29959,
+      "country_code": "IN",
+      "asn_v4": 9829,
+      "description": "AS9829 HP",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-28T10:51:22Z"
+      },
+      "first_connected": 1478604069,
+      "total_uptime": 297250489
+    },
+    {
+      "group": "access_network",
+      "id": 25398,
+      "country_code": "IN",
+      "asn_v4": 24560,
+      "description": "RamShanker_01",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-27T13:24:19Z"
+      },
+      "first_connected": 1460162818,
+      "total_uptime": 241065408
+    },
+    {
+      "group": "access_network",
+      "id": 25250,
+      "country_code": "IN",
+      "asn_v4": 134858,
+      "description": "Excitel-Delhi",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-25T08:00:58Z"
+      },
+      "first_connected": 1460188491,
+      "total_uptime": 234770656
+    },
+    {
+      "group": "access_network",
+      "id": 11978,
+      "country_code": "IN",
+      "asn_v4": 24560,
+      "description": "RB01-HOME-Airtel",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-27T08:19:49Z"
+      },
+      "first_connected": 1376655336,
+      "total_uptime": 233216490
+    },
+    {
+      "group": "access_network",
+      "id": 1000458,
+      "country_code": "IN",
+      "asn_v4": 18209,
+      "description": "ACTHYD-DC",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-28T06:13:40Z"
+      },
+      "first_connected": 1587633308,
+      "total_uptime": 204781346
+    },
+    {
+      "group": "access_network",
+      "id": 53613,
+      "country_code": "IN",
+      "asn_v4": 24560,
+      "description": "Probe - Kullu (H.P.)",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-27T20:09:34Z"
+      },
+      "first_connected": 1594915077,
+      "total_uptime": 189085210
+    },
+    {
+      "group": "access_network",
+      "id": 54620,
+      "country_code": "IN",
+      "asn_v4": 9829,
+      "description": "AS9829 - Pathanamthitta",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-28T21:05:59Z"
+      },
+      "first_connected": 1601360602,
+      "total_uptime": 179990371
+    },
+    {
+      "group": "access_network",
+      "id": 1000726,
+      "country_code": "IN",
+      "asn_v4": 17488,
+      "description": "Hathway / Fiber / Delhi / IN on Docker@Pi",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-29T00:06:43Z"
+      },
+      "first_connected": 1594970577,
+      "total_uptime": 178063093
+    },
+    {
+      "group": "access_network",
+      "id": 25261,
+      "country_code": "IN",
+      "asn_v4": 136902,
+      "description": "Varun Sinai Priolkar India HOME NET",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-22T10:32:34Z"
+      },
+      "first_connected": 1459840865,
+      "total_uptime": 138936400
+    },
+    {
+      "group": "access_network",
+      "id": 55694,
+      "country_code": "IN",
+      "asn_v4": 24560,
+      "description": "AS9829 Shimla H.P",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-11T10:10:54Z"
+      },
+      "first_connected": 1597908008,
+      "total_uptime": 151137406
+    },
+    {
+      "group": "access_network",
+      "id": 52835,
+      "country_code": "IN",
+      "asn_v4": 136902,
+      "description": "ftver_ripe_probe_1",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-28T22:05:02Z"
+      },
+      "first_connected": 1602230262,
+      "total_uptime": 165963855
+    },
+    {
+      "group": "access_network",
+      "id": 54081,
+      "country_code": "IN",
+      "asn_v4": 149794,
+      "description": "Probe hosted in a home network",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-26T18:51:25Z"
+      },
+      "first_connected": 1594993112,
+      "total_uptime": 183070909
+    },
+    {
+      "group": "datacentre",
+      "id": 1003379,
+      "country_code": "IN",
+      "asn_v4": 16509,
+      "description": "AWS - Asia Pacific (Mumbai)",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-26T18:47:36Z"
+      },
+      "first_connected": 1639536738,
+      "total_uptime": 145013563
+    },
+    {
+      "group": "datacentre",
+      "id": 1000979,
+      "country_code": "IN",
+      "asn_v4": 31898,
+      "description": "Hosted on Oracle Cloud in Mumbai",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-23T19:39:24Z"
+      },
+      "first_connected": 1599072012,
+      "total_uptime": 176418247
+    },
+    {
+      "group": "datacentre",
+      "id": 1002359,
+      "country_code": "IN",
+      "asn_v4": 31898,
+      "description": "FiLabs OCI Hyderabad",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-06T12:55:50Z"
+      },
+      "first_connected": 1619980627,
+      "total_uptime": 171936690
+    },
+    {
+      "group": "datacentre",
+      "id": 1001134,
+      "country_code": "IN",
+      "asn_v4": 14061,
+      "description": "Digital-Ocean-Bengaluru",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-06T12:59:44Z"
+      },
+      "first_connected": 1602393633,
+      "total_uptime": 190708401
+    },
+    {
+      "group": "datacentre",
+      "id": 1003760,
+      "country_code": "IN",
+      "asn_v4": 132420,
+      "description": "E2E Networks, Atlas Probe Noida",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-06T12:51:07Z"
+      },
+      "first_connected": 1646120103,
+      "total_uptime": 147015663
+    },
+    {
+      "group": "datacentre",
+      "id": 1000689,
+      "country_code": "IN",
+      "asn_v4": 16276,
+      "description": "AS16276 probe India",
+      "is_anchor": false,
+      "is_public": true,
+      "status": {
+        "id": 1,
+        "name": "Connected",
+        "since": "2026-10-28T00:37:29Z"
+      },
+      "first_connected": 1593865892,
+      "total_uptime": 192635721
+    }
+  ]
+}

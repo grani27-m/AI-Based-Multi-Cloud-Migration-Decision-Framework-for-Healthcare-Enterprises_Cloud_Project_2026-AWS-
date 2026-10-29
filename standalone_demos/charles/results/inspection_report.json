@@ -1,0 +1,13 @@
+{
+  "rows_raw": 756495,
+  "rows_clean": 753410,
+  "checks": {
+    "row_count_matches_metadata": true,
+    "no_duplicate_keys": true,
+    "rtt_order_min_avg_max": true,
+    "loss_in_0_100": true,
+    "timestamps_in_period": true
+  },
+  "bidmc_files": 53,
+  "bidmc_checksums_ok": true
+}

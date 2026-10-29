@@ -1,0 +1,7 @@
+# Tanmay standalone package. The decision engine itself is PURE PYTHON (no third-party packages).
+# These are only for the dashboard and tests. Python 3.10-3.13 (tested 3.13).
+streamlit>=1.50,<2
+plotly>=5.22,<7
+pandas>=2.0,<4
+numpy>=1.26,<3
+pytest>=8,<10

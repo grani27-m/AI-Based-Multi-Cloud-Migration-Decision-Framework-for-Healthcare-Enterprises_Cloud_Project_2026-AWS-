@@ -1,0 +1,12 @@
+{
+  "rows_raw": 25493,
+  "rows_clean": 25485,
+  "records": 53,
+  "out_of_range_set_to_nan": {
+    "hr": 4,
+    "pulse": 128,
+    "resp": 375,
+    "spo2": 128
+  },
+  "rows_dropped_unrecoverable": 8
+}

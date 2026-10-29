@@ -1,0 +1,73 @@
+{
+ "note": "Byte-identical copies of the integrated project's authoritative files. Do not edit here; edit the source and run `python standalone_demos/export.py`.",
+ "files": {
+  "infra/__init__.py": {
+   "source": "infra/__init__.py",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "infra/aws/__init__.py": {
+   "source": "infra/aws/__init__.py",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "infra/aws/lambda_decision/__init__.py": {
+   "source": "infra/aws/lambda_decision/__init__.py",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "infra/aws/lambda_decision/handler.py": {
+   "source": "infra/aws/lambda_decision/handler.py",
+   "sha256": "0095cc51a45b21a626e96166d61ea5230dab9ef5ca7f885de69cdd9824116746"
+  },
+  "reports/ROUTING_EVALUATION_REPORT.md": {
+   "source": "reports/ROUTING_EVALUATION_REPORT.md",
+   "sha256": "c09c348621bda0aae4c539620cfb42f8d70369173ede575d1ce718e5f6dde5d0"
+  },
+  "results/routing/evidence_run_summary.json": {
+   "source": "results/routing/evidence_run_summary.json",
+   "sha256": "83bd423cd2c85ebf25c67dbfbd3308dce7719648fd6808069ce07e13ee4ba5c3"
+  },
+  "results/routing/weight_set_sensitivity.json": {
+   "source": "results/routing/weight_set_sensitivity.json",
+   "sha256": "c58ef3390fbe0e086209e9e7c43041d4333cd8a0d06ded49cd8c7e9b965b67ba"
+  },
+  "src/__init__.py": {
+   "source": "src/__init__.py",
+   "sha256": "b95dc82ca1648e9c54677c391d2f62e5dc672fe80620c141cd3f7a9523844d73"
+  },
+  "src/decision/__init__.py": {
+   "source": "src/decision/__init__.py",
+   "sha256": "ff5098479816bfdfa4ad43eda18bc48dbab73c285ec6e3b21178a0440b9bcd02"
+  },
+  "src/decision/ahp.py": {
+   "source": "src/decision/ahp.py",
+   "sha256": "cd8224c6de474969c449d488cdede672f70aadd97c16463797167dadf0d01a1d"
+  },
+  "src/decision/candidates.py": {
+   "source": "src/decision/candidates.py",
+   "sha256": "07e30cee9bb75d855d430a70dffb7af7fc407e29d9d5b8138d7261ab34de7d24"
+  },
+  "src/decision/criticality.py": {
+   "source": "src/decision/criticality.py",
+   "sha256": "6742c41228fdbf6a7553e12c782256ec75eb683da99a27e85091aa31bd9ae3da"
+  },
+  "src/decision/override_rules.py": {
+   "source": "src/decision/override_rules.py",
+   "sha256": "1cfd0fd3805caa8ceaaf37138f5182ede2ac37f35b717374ae9e328f43207051"
+  },
+  "src/decision/router.py": {
+   "source": "src/decision/router.py",
+   "sha256": "d5c96fcf0bd25daa86b576014c662dd34aea27d144b259f78b984af830207e6c"
+  },
+  "tests/unit/test_candidates.py": {
+   "source": "tests/unit/test_candidates.py",
+   "sha256": "3190d0d0a6f05ac590c83604bc9bc0122dd96037ddbc1a5234790de384a20080"
+  },
+  "tests/unit/test_decision.py": {
+   "source": "tests/unit/test_decision.py",
+   "sha256": "12efa0086bc83b32c71bc9dfdc54cdc34c2f7382e68961051dfa741159bd1ba2"
+  },
+  "tests/unit/test_lambda_handler.py": {
+   "source": "tests/unit/test_lambda_handler.py",
+   "sha256": "e1c98ebbc28dbed75dc244bc7c795ef50bed09bf09f59d42bcbd6600228922b3"
+  }
+ }
+}

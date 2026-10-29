@@ -1,0 +1,10 @@
+# Charles standalone package - inference, analysis, dashboard. Python 3.11-3.13 (tested 3.13).
+# TensorFlow is NOT needed here: the trained model runs through the numpy re-implementation.
+numpy>=2.0,<3
+pandas>=2.2,<4
+scikit-learn>=1.5,<2
+matplotlib>=3.8,<4
+requests>=2.31,<3
+streamlit>=1.50,<2
+plotly>=5.22,<7
+pytest>=8,<10

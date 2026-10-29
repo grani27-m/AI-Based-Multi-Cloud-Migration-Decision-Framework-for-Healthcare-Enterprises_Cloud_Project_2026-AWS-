@@ -13,6 +13,8 @@
   --ok:         #15803D;
   --border:     #E2E8F0;
   --chip:       #E2E8F0;
+  --model:      #7C3AED;
+  --data:       #0369A1;
   --radius:     8px;
 }
 
@@ -28,6 +30,8 @@
   --ok:         #4ADE80;
   --border:     #1E293B;
   --chip:       #334155;
+  --model:      #A78BFA;
+  --data:       #38BDF8;
 }
 
 body {

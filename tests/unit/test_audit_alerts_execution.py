@@ -230,3 +230,20 @@ def test_unknown_destination_rejected(tmp_path):
 
     with pytest.raises(ValueError):
         Executor(LocalEdgeAdapter(tmp_path), LocalCloudObjectStoreAdapter(tmp_path)).execute("MARS", _payload())
+
+
+def test_mock_channel_never_counts_as_real_delivery(tmp_path, monkeypatch):
+    from backend.services.alerts import MockFileChannel
+
+    monkeypatch.setenv("ALERT_MOCK_FILE", str(tmp_path / "mock_alerts.jsonl"))
+    s = make_settings(tmp_path)
+    app, alerts = _alert_app(tmp_path, [MockFileChannel(s)])
+    assert alerts[0].status == "mock_delivered"
+    with app.state.db.session() as db:
+        d = db.get(Alert, alerts[0].id).deliveries[0]
+        assert d.status == "sent" and d.detail.startswith("MOCK")
+    assert (tmp_path / "mock_alerts.jsonl").read_text().count("\n") == 1
+    # a real channel succeeding as well -> real delivery
+    (tmp_path / "b").mkdir()
+    app2, alerts2 = _alert_app(tmp_path / "b", [MockFileChannel(s), FakeChannel("real")])
+    assert alerts2[0].status == "delivered"

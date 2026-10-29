@@ -59,6 +59,34 @@ def decision_preview(body: DecisionPreview, _: Principal = Depends(require("reco
         raise HTTPException(422, str(exc)) from exc
 
 
+class CloudOption(BaseModel):
+    name: str = Field(..., min_length=1, max_length=48)
+    predicted_latency_ms: float | None = Field(None, ge=0, le=5000)
+    cost_index: float = Field(..., ge=0, le=1)
+
+
+class RankRequest(BaseModel):
+    criticality: float = Field(..., ge=0, le=10)
+    clouds: list[CloudOption] = Field(..., min_length=1, max_length=10)
+    weight_set: str = Field("eigenvector", pattern="^(eigenvector|column_normalisation|report)$")
+
+
+@router.post("/decision/rank")
+def decision_rank(body: RankRequest, _: Principal = Depends(require("records:read"))):
+    """Multi-cloud ranking: EDGE vs several cloud destinations (Tanmay's candidates.py). Not stored."""
+    from src.decision.candidates import CloudCandidate, rank_candidates
+
+    try:
+        return rank_candidates(
+            "preview",
+            body.criticality,
+            [CloudCandidate(c.name, c.predicted_latency_ms, c.cost_index) for c in body.clouds],
+            weight_set_name=body.weight_set,
+        ).to_dict()
+    except DecisionInputError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
 @router.get("/dashboard/summary")
 def summary(
     source: Optional[str] = Query(None, description="filter: simulated|replay|live|test"),
@@ -104,6 +132,7 @@ def summary(
             "delivered": alerts_by_status.get("delivered", 0) + alerts_by_status.get("partially_delivered", 0),
             "failed": alerts_by_status.get("failed", 0),
             "not_configured": alerts_by_status.get("not_configured", 0),
+            "mock_delivered": alerts_by_status.get("mock_delivered", 0),
             "pending": alerts_by_status.get("triggered", 0),
         },
         "reconciliation": {

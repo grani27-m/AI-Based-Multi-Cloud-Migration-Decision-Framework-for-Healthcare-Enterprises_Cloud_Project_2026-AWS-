@@ -1,0 +1,12 @@
+{
+  "description": "Decision criteria as documented in the project report and implemented in src/decision/. 01_load_criteria.py checks this file against the code.",
+  "criteria": [
+    {"id": "criticality", "name": "Patient criticality", "unit": "0-10 score", "source": "partial NEWS2 from vitals (src/decision/criticality.py) or supplied by the client", "normalisation": "n_c = criticality / 10", "favours": "EDGE when high (squared term)"},
+    {"id": "latency", "name": "Predicted network latency", "unit": "ms (next-round RTT)", "source": "Charles's LSTM forecast", "normalisation": "n_l = min(latency / 500, 1)", "favours": "EDGE when high"},
+    {"id": "cost", "name": "Cloud cost index", "unit": "0-1 index", "source": "tariff/price index (synthetic proxy in the demos)", "normalisation": "n_k = cost", "favours": "EDGE when high"}
+  ],
+  "pairwise_matrix": [[1, 3, 5], [0.3333333333333333, 1, 3], [0.2, 0.3333333333333333, 1]],
+  "pairwise_judgements": {"criticality_vs_latency": 3, "criticality_vs_cost": 5, "latency_vs_cost": 3},
+  "reported_weights": {"criticality": 0.6396, "latency": 0.2583, "cost": 0.1021, "cr": 0.037},
+  "thresholds": {"emergency_criticality": 9.0, "latency_veto_ms": 300.0, "cr_limit": 0.1}
+}

@@ -1,0 +1,21 @@
+{
+  "_comment": "Selection of public RIPE Atlas data used to train the latency forecaster. Owner: Charles. Every ID below was checked against the RIPE Atlas API on 2026-10-29 (see dataset/metadata/ripe_atlas_measurements.json and ripe_atlas_probes.json).",
+  "api_base": "https://atlas.ripe.net/api/v2",
+  "measurements": [
+    {"msm_id": 1001, "target": "k.root-servers.net (193.0.14.129)", "type": "ping", "interval_s": 240,
+     "why": "Built-in, ongoing, public IPv4 ping run by every probe every 240 s; anycast target with nearby instances, so RTT reflects the access network quality rather than intercontinental distance."},
+    {"msm_id": 1004, "target": "f.root-servers.net (192.5.5.241)", "type": "ping", "interval_s": 240,
+     "why": "Second built-in anycast target from the same probes; gives a second independent path per probe."}
+  ],
+  "rejected_candidates": [
+    {"msm_id": 228839605, "reason": "Checked 2026-10-29: user-defined one-off campaign with 1 probe, start 2026-10-28 and stop 2026-10-30 (about 2 days, ~700 readings). Too short for a 20-step forecaster; not used."},
+    {"msm_id": "1002/1003 (old README labels 'cloudflare'/'AWS eu-west')", "reason": "The previous downloader labelled built-in IDs as Cloudflare/AWS/Azure pings; those labels were not verified and are not used here."}
+  ],
+  "probes": {
+    "access_network": [24916, 25375, 17590, 29959, 25398, 25250, 11978, 1000458, 53613, 54620, 1000726, 25261, 55694, 52835, 54081],
+    "datacentre": [1003379, 1000979, 1002359, 1001134, 1003760, 1000689]
+  },
+  "probe_selection_rule": "Public probes in India (country_code=IN) with status 'Connected' on 2026-10-29, an IPv4 ASN, and the highest total_uptime; access-network = residential/ISP ASNs, datacentre = probes hosted in cloud/hosting networks (AWS AS16509, Oracle AS31898, DigitalOcean AS14061, E2E AS132420, OVH AS16276). India was chosen because the project team and target hospitals are in India.",
+  "time_range_utc": {"start": "2026-09-02T00:00:00Z", "stop": "2026-10-28T00:00:00Z"},
+  "chunk_days": 7
+}

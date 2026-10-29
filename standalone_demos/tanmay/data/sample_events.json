@@ -1,0 +1,3240 @@
+{
+ "description": "CACHED inputs/outputs exported from the integrated pipeline's evidence run on 2026-10-29 (database of the run that produced results/screenshots). predicted_latency_ms = Charles's trained LSTM on REAL RIPE Atlas test-period windows (source=replay) or on SIMULATED windows (source=simulated); criticality = partial NEWS2 from REAL BIDMC vitals (replay) or SIMULATED vitals (simulated); cloud_cost_index = synthetic tariff proxy. recorded_* = the decision the integrated system stored; 03_compare_candidates.py recomputes it with this package's engine.",
+ "events": [
+  {
+   "event_id": "replay-1001-24916-1792738533-b35-120",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-35",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 100.0,
+    "resp": 16.0,
+    "spo2": 96.0
+   },
+   "predicted_latency_ms": 14.063,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.672,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 24916, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 35, t=120 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1792707354-b16-101",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-16",
+   "criticality": 2.86,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 111.0,
+    "resp": 19.0,
+    "spo2": 97.0
+   },
+   "predicted_latency_ms": 14.288,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 16, t=101 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-54620-1793129927-b38-448",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-38",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 88.0,
+    "resp": 17.0,
+    "spo2": 96.0
+   },
+   "predicted_latency_ms": 21.862,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 54620, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 38, t=448 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-17590-1792705767-b38-161",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-38",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 80.0,
+    "resp": 16.0,
+    "spo2": 95.0
+   },
+   "predicted_latency_ms": 13.219,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 17590, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 38, t=161 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-29959-1793000903-b31-31",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-31",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 86.0,
+    "resp": 16.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 15.06,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.694,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 29959, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 31, t=31 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-52835-1792934591-b42-413",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-42",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 83.0,
+    "resp": 17.0,
+    "spo2": 95.0
+   },
+   "predicted_latency_ms": 31.114,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.456,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 42, t=413 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-1003379-1793058542-b20-280",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-20",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 87.0,
+    "resp": 15.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 126.38,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 1003379, test period (held out)",
+    "network_group": "datacentre",
+    "vitals": "PhysioNet BIDMC record 20, t=280 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-11978-1792866412-b01-376",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-01",
+   "criticality": 4.29,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 91.0,
+    "resp": 21.0,
+    "spo2": 97.0
+   },
+   "predicted_latency_ms": 26.733,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 11978, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 01, t=376 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-29959-1793092102-b22-202",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-22",
+   "criticality": 2.86,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 80.0,
+    "resp": 19.0,
+    "spo2": 93.0
+   },
+   "predicted_latency_ms": 16.356,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.695,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 29959, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 22, t=202 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-52835-1792774752-b18-64",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-18",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 91.0,
+    "resp": 18.0,
+    "spo2": 98.0
+   },
+   "predicted_latency_ms": 35.864,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 18, t=64 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-1000726-1792512227-b26-315",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-26",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 90.0,
+    "resp": 13.0,
+    "spo2": 94.0
+   },
+   "predicted_latency_ms": 4.526,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 1000726, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 26, t=315 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1792706392-b50-133",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-50",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 75.0,
+    "resp": 15.0,
+    "spo2": 99.0
+   },
+   "predicted_latency_ms": 14.332,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 50, t=133 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1793145592-b20-440",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-20",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 90.0,
+    "resp": 14.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 13.506,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 20, t=440 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-54620-1792880759-b10-287",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-10",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 80.0,
+    "resp": 18.0,
+    "spo2": 98.0
+   },
+   "predicted_latency_ms": 33.663,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 54620, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 10, t=287 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-53613-1793127841-b02-329",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-02",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 92.0,
+    "resp": 18.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 13.527,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 53613, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 02, t=329 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-1000979-1792603137-b32-205",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-32",
+   "criticality": 8.57,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 81.0,
+    "resp": 25.0,
+    "spo2": 84.0
+   },
+   "predicted_latency_ms": 1.624,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 1000979, test period (held out)",
+    "network_group": "datacentre",
+    "vitals": "PhysioNet BIDMC record 32, t=205 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-17590-1792776804-b28-88",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-28",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 77.0,
+    "resp": 17.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 14.179,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 17590, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 28, t=88 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-54081-1792969503-b34-468",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-34",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 82.0,
+    "resp": 17.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 55.611,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 54081, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 34, t=468 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-17590-1792941406-b35-246",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-35",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 98.0,
+    "resp": 18.0,
+    "spo2": 96.0
+   },
+   "predicted_latency_ms": 11.896,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.274,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 17590, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 35, t=246 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-54620-1793065850-b28-67",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-28",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 89.0,
+    "resp": 18.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 19.393,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.284,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 54620, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 28, t=67 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1792859033-b29-301",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-29",
+   "criticality": 2.86,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 90.0,
+    "resp": 19.0,
+    "spo2": 92.0
+   },
+   "predicted_latency_ms": 14.967,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 29, t=301 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-53613-1792895281-b35-462",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-35",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 101.0,
+    "resp": 19.0,
+    "spo2": 97.0
+   },
+   "predicted_latency_ms": 15.963,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.347,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 53613, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 35, t=462 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1792824713-b02-350",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-02",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 91.0,
+    "resp": 17.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 15.247,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.67,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 02, t=350 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-53613-1793122563-b53-90",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-53",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 88.0,
+    "resp": 19.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 13.27,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 53613, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 53, t=90 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-25250-1792472457-b49-10",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-49",
+   "criticality": 4.29,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 85.0,
+    "resp": 18.0,
+    "spo2": 86.0
+   },
+   "predicted_latency_ms": 37.082,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.568,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 25250, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 49, t=10 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1792834793-b46-333",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-46",
+   "criticality": 4.29,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 109.0,
+    "resp": 16.0,
+    "spo2": 93.0
+   },
+   "predicted_latency_ms": 14.671,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.685,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 46, t=333 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-17590-1792635405-b33-18",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-33",
+   "criticality": 4.29,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 83.0,
+    "resp": 23.0,
+    "spo2": 94.0
+   },
+   "predicted_latency_ms": 12.269,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.327,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 17590, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 33, t=18 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-25375-1792898382-b16-286",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-16",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 109.0,
+    "resp": 19.0,
+    "spo2": 99.0
+   },
+   "predicted_latency_ms": 52.977,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.428,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 25375, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 16, t=286 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-24916-1793040455-b48-361",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-48",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 98.0,
+    "resp": 19.0,
+    "spo2": 98.0
+   },
+   "predicted_latency_ms": 14.071,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 24916, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 48, t=361 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-25375-1793087066-b32-478",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-32",
+   "criticality": 7.14,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 80.0,
+    "resp": 24.0,
+    "spo2": 85.0
+   },
+   "predicted_latency_ms": 13.864,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.693,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 25375, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 32, t=478 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1792918315-b39-73",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-39",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 73.0,
+    "resp": 14.0,
+    "spo2": 97.0
+   },
+   "predicted_latency_ms": 15.541,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.699,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 39, t=73 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-1003760-1793082718-b21-467",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-21",
+   "criticality": 5.71,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 129.0,
+    "resp": 21.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 2.071,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.656,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 1003760, test period (held out)",
+    "network_group": "datacentre",
+    "vitals": "PhysioNet BIDMC record 21, t=467 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1793093033-b35-100",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-35",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 98.0,
+    "resp": 16.0,
+    "spo2": 96.0
+   },
+   "predicted_latency_ms": 14.82,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.691,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 35, t=100 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-25398-1793136683-b30-249",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-30",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 88.0,
+    "resp": 18.0,
+    "spo2": 96.0
+   },
+   "predicted_latency_ms": 4.207,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 25398, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 30, t=249 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-52835-1792713074-b19-164",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-19",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 74.0,
+    "resp": 13.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 30.034,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 19, t=164 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-25398-1792585594-b41-339",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-41",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 70.0,
+    "resp": 14.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 6.604,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.536,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 25398, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 41, t=339 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-25375-1792938269-b34-175",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-34",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 80.0,
+    "resp": 18.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 14.58,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.36,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 25375, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 34, t=175 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-1000726-1792835271-b18-346",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-18",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 91.0,
+    "resp": 18.0,
+    "spo2": 98.0
+   },
+   "predicted_latency_ms": 4.274,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.681,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 1000726, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 18, t=346 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-29959-1792883062-b35-407",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-35",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 101.0,
+    "resp": 17.0,
+    "spo2": 99.0
+   },
+   "predicted_latency_ms": 11.547,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 29959, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 35, t=407 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1792478152-b30-287",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-30",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 88.0,
+    "resp": 19.0,
+    "spo2": 96.0
+   },
+   "predicted_latency_ms": 14.891,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.659,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 30, t=287 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1793114633-b20-372",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-20",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 88.0,
+    "resp": 15.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 14.095,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.262,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 20, t=372 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-1000458-1793017594-b07-337",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-07",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 90.0,
+    "resp": 18.0,
+    "spo2": 95.0
+   },
+   "predicted_latency_ms": 0.587,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.536,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 1000458, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 07, t=337 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-25250-1793102018-b49-398",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-49",
+   "criticality": 4.29,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 84.0,
+    "resp": 17.0,
+    "spo2": 87.0
+   },
+   "predicted_latency_ms": 1.867,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.576,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 25250, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 49, t=398 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1792712153-b31-419",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-31",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 83.0,
+    "resp": 18.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 14.314,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 31, t=419 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-52835-1792488193-b30-10",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-30",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 87.0,
+    "resp": 18.0,
+    "spo2": 94.0
+   },
+   "predicted_latency_ms": 38.288,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.691,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 30, t=10 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-25398-1793116044-b45-95",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-45",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 62.0,
+    "resp": 16.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 4.168,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 25398, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 45, t=95 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-54081-1792914264-b26-111",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-26",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 89.0,
+    "resp": 17.0,
+    "spo2": 96.0
+   },
+   "predicted_latency_ms": 83.442,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.693,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 54081, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 26, t=111 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-11978-1792615852-b51-453",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-51",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 90.0,
+    "resp": 18.0,
+    "spo2": 98.0
+   },
+   "predicted_latency_ms": 30.365,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 11978, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 51, t=453 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-11978-1792568379-b31-303",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-31",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 83.0,
+    "resp": 19.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 4.474,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.692,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 11978, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 31, t=303 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-1000458-1792868038-b40-275",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-40",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 110.0,
+    "resp": 16.0,
+    "spo2": 97.0
+   },
+   "predicted_latency_ms": 23.703,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 1000458, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 40, t=275 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1792913032-b42-279",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-42",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 84.0,
+    "resp": 17.0,
+    "spo2": 95.0
+   },
+   "predicted_latency_ms": 19.282,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.686,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 42, t=279 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-52835-1792711634-b09-110",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-09",
+   "criticality": 2.86,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 77.0,
+    "resp": 20.0,
+    "spo2": 93.0
+   },
+   "predicted_latency_ms": 29.654,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 09, t=110 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-1000726-1793105708-b19-148",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-19",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 71.0,
+    "resp": 16.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 33.796,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.496,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 1000726, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 19, t=148 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-1000726-1792587588-b01-168",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-01",
+   "criticality": 4.29,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 91.0,
+    "resp": 21.0,
+    "spo2": 97.0
+   },
+   "predicted_latency_ms": 4.06,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.491,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 1000726, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 01, t=168 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-1000458-1793140957-b40-67",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-40",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 110.0,
+    "resp": 15.0,
+    "spo2": 96.0
+   },
+   "predicted_latency_ms": 0.558,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 1000458, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 40, t=67 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-29959-1793102425-b50-47",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-50",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 78.0,
+    "resp": 15.0,
+    "spo2": 99.0
+   },
+   "predicted_latency_ms": 16.199,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.568,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 29959, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 50, t=47 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1001-25261-1792960836-b16-89",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-16",
+   "criticality": 1.43,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 110.0,
+    "resp": 19.0,
+    "spo2": 97.0
+   },
+   "predicted_latency_ms": 32.134,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.25,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1001, probe 25261, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 16, t=89 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-25398-1792727244-b41-367",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-41",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 88.0,
+    "resp": 14.0,
+    "spo2": 100.0
+   },
+   "predicted_latency_ms": 4.221,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.471,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 25398, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 41, t=367 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-52835-1792565754-b06-361",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-06",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 82.0,
+    "resp": 18.0,
+    "spo2": 99.0
+   },
+   "predicted_latency_ms": 14.574,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.672,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 52835, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 06, t=361 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "replay-1004-17590-1792502967-b10-106",
+   "source": "replay",
+   "device_id": "ICU-BIDMC-10",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 82.0,
+    "resp": 19.0,
+    "spo2": 97.0
+   },
+   "predicted_latency_ms": 12.537,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.447,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "network": "RIPE Atlas msm 1004, probe 17590, test period (held out)",
+    "network_group": "access_network",
+    "vitals": "PhysioNet BIDMC record 10, t=106 s",
+    "pairing": "artificial (network path and patient recorded independently)",
+    "cost_index": "synthetic time-of-day tariff proxy"
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00000",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 70.6,
+    "resp": 18.8,
+    "spo2": 98.3
+   },
+   "predicted_latency_ms": 24.35,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.194,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00001",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 77.5,
+    "resp": 14.8,
+    "spo2": 96.5
+   },
+   "predicted_latency_ms": 17.698,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.676,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00002",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 77.1,
+    "resp": 15.6,
+    "spo2": 98.5
+   },
+   "predicted_latency_ms": 10.453,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.167,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00003",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 65.7,
+    "resp": 13.3,
+    "spo2": 97.9
+   },
+   "predicted_latency_ms": 35.041,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.457,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00004",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 82.5,
+    "resp": 13.8,
+    "spo2": 96.4
+   },
+   "predicted_latency_ms": 29.903,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.513,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00005",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 64.7,
+    "resp": 17.4,
+    "spo2": 96.4
+   },
+   "predicted_latency_ms": 31.268,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.508,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00006",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 86.7,
+    "resp": 15.8,
+    "spo2": 98.3
+   },
+   "predicted_latency_ms": 18.279,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.361,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00007",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 68.7,
+    "resp": 15.4,
+    "spo2": 96.2
+   },
+   "predicted_latency_ms": 24.173,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.256,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00008",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 63.4,
+    "resp": 16.2,
+    "spo2": 96.4
+   },
+   "predicted_latency_ms": 19.963,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.454,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00009",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 73.1,
+    "resp": 15.2,
+    "spo2": 96.3
+   },
+   "predicted_latency_ms": 26.596,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.8,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00010",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 85.4,
+    "resp": 13.5,
+    "spo2": 97.9
+   },
+   "predicted_latency_ms": 13.287,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.215,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00011",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 70.1,
+    "resp": 16.3,
+    "spo2": 98.5
+   },
+   "predicted_latency_ms": 32.259,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.484,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00012",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 70.1,
+    "resp": 13.5,
+    "spo2": 96.9
+   },
+   "predicted_latency_ms": 19.179,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.474,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00013",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 72.4,
+    "resp": 17.2,
+    "spo2": 98.9
+   },
+   "predicted_latency_ms": 30.329,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.732,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00014",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 86.4,
+    "resp": 17.0,
+    "spo2": 96.9
+   },
+   "predicted_latency_ms": 31.344,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.637,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00015",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 85.7,
+    "resp": 18.8,
+    "spo2": 98.0
+   },
+   "predicted_latency_ms": 31.15,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.793,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00016",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 68.1,
+    "resp": 17.0,
+    "spo2": 98.4
+   },
+   "predicted_latency_ms": 22.691,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.398,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00017",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 77.5,
+    "resp": 17.3,
+    "spo2": 97.7
+   },
+   "predicted_latency_ms": 27.986,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.798,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00018",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 70.8,
+    "resp": 18.9,
+    "spo2": 97.8
+   },
+   "predicted_latency_ms": 10.759,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.132,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00019",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 70.1,
+    "resp": 15.5,
+    "spo2": 97.6
+   },
+   "predicted_latency_ms": 23.115,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.209,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00020",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 74.2,
+    "resp": 15.0,
+    "spo2": 96.8
+   },
+   "predicted_latency_ms": 32.35,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.119,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00021",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 68.2,
+    "resp": 14.5,
+    "spo2": 97.0
+   },
+   "predicted_latency_ms": 19.18,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.242,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00022",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 70.0,
+    "resp": 17.8,
+    "spo2": 98.5
+   },
+   "predicted_latency_ms": 22.934,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.327,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00023",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 86.9,
+    "resp": 13.1,
+    "spo2": 97.6
+   },
+   "predicted_latency_ms": 20.548,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.748,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-normal-00024",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 71.3,
+    "resp": 18.9,
+    "spo2": 96.4
+   },
+   "predicted_latency_ms": 35.279,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.608,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "normal",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00000",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 82.9,
+    "resp": 14.8,
+    "spo2": 98.7
+   },
+   "predicted_latency_ms": 463.429,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.269,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00001",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 81.2,
+    "resp": 18.4,
+    "spo2": 98.2
+   },
+   "predicted_latency_ms": 448.576,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.663,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00002",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 65.5,
+    "resp": 15.7,
+    "spo2": 96.1
+   },
+   "predicted_latency_ms": 486.174,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.764,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00003",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 78.6,
+    "resp": 16.1,
+    "spo2": 98.5
+   },
+   "predicted_latency_ms": 424.336,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.548,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00004",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 73.0,
+    "resp": 17.7,
+    "spo2": 96.4
+   },
+   "predicted_latency_ms": 519.024,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.422,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00005",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 75.9,
+    "resp": 15.3,
+    "spo2": 99.0
+   },
+   "predicted_latency_ms": 503.568,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.614,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00006",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 75.8,
+    "resp": 19.0,
+    "spo2": 98.9
+   },
+   "predicted_latency_ms": 429.235,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.687,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00007",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 82.9,
+    "resp": 14.8,
+    "spo2": 97.0
+   },
+   "predicted_latency_ms": 573.909,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.42,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00008",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 73.9,
+    "resp": 16.5,
+    "spo2": 98.7
+   },
+   "predicted_latency_ms": 512.289,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.129,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00009",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 71.4,
+    "resp": 17.1,
+    "spo2": 96.3
+   },
+   "predicted_latency_ms": 396.334,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.415,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00010",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 75.4,
+    "resp": 17.3,
+    "spo2": 98.5
+   },
+   "predicted_latency_ms": 484.304,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.258,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00011",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 80.9,
+    "resp": 18.4,
+    "spo2": 98.2
+   },
+   "predicted_latency_ms": 476.801,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.578,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00012",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 68.1,
+    "resp": 17.0,
+    "spo2": 98.4
+   },
+   "predicted_latency_ms": 447.046,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.398,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00013",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 63.1,
+    "resp": 14.9,
+    "spo2": 97.9
+   },
+   "predicted_latency_ms": 531.444,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.52,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00014",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 86.0,
+    "resp": 17.3,
+    "spo2": 96.8
+   },
+   "predicted_latency_ms": 392.448,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.389,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00015",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 63.6,
+    "resp": 15.4,
+    "spo2": 96.2
+   },
+   "predicted_latency_ms": 521.753,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.496,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00016",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 84.5,
+    "resp": 18.2,
+    "spo2": 96.2
+   },
+   "predicted_latency_ms": 474.367,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.303,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00017",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 74.6,
+    "resp": 19.0,
+    "spo2": 96.6
+   },
+   "predicted_latency_ms": 548.674,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.794,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00018",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 87.0,
+    "resp": 14.3,
+    "spo2": 97.2
+   },
+   "predicted_latency_ms": 539.383,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.665,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-degraded-00019",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 63.0,
+    "resp": 15.1,
+    "spo2": 98.6
+   },
+   "predicted_latency_ms": 541.496,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.767,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "network_degradation_veto",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "degraded",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00000",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 141.3,
+    "resp": 33.7,
+    "spo2": 88.5
+   },
+   "predicted_latency_ms": 24.35,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.194,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00001",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 148.7,
+    "resp": 28.3,
+    "spo2": 85.1
+   },
+   "predicted_latency_ms": 17.698,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.676,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00002",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 148.3,
+    "resp": 29.5,
+    "spo2": 89.0
+   },
+   "predicted_latency_ms": 10.453,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.167,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00003",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 135.9,
+    "resp": 26.4,
+    "spo2": 87.8
+   },
+   "predicted_latency_ms": 35.041,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.457,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00004",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 154.1,
+    "resp": 27.1,
+    "spo2": 84.9
+   },
+   "predicted_latency_ms": 29.903,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.513,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00005",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 134.9,
+    "resp": 31.8,
+    "spo2": 84.7
+   },
+   "predicted_latency_ms": 31.268,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.508,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00006",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 158.6,
+    "resp": 29.7,
+    "spo2": 88.6
+   },
+   "predicted_latency_ms": 18.279,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.361,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00007",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 139.2,
+    "resp": 29.2,
+    "spo2": 84.3
+   },
+   "predicted_latency_ms": 24.173,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.256,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00008",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 133.5,
+    "resp": 30.2,
+    "spo2": 84.7
+   },
+   "predicted_latency_ms": 19.963,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.454,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00009",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 144.0,
+    "resp": 29.0,
+    "spo2": 84.6
+   },
+   "predicted_latency_ms": 26.596,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.8,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00010",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 157.2,
+    "resp": 26.7,
+    "spo2": 87.8
+   },
+   "predicted_latency_ms": 13.287,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.215,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-emergency-00011",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 10.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 140.7,
+    "resp": 30.4,
+    "spo2": 88.9
+   },
+   "predicted_latency_ms": 32.259,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.484,
+   "recorded_destination": "EDGE",
+   "recorded_reason": "override_critical_patient",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "emergency",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-failure-00000",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 70.6,
+    "resp": 18.8,
+    "spo2": 98.3
+   },
+   "predicted_latency_ms": 24.35,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.194,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "failure",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-failure-00001",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 77.5,
+    "resp": 14.8,
+    "spo2": 96.5
+   },
+   "predicted_latency_ms": 17.698,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.676,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "failure",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-failure-00002",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 77.1,
+    "resp": 15.6,
+    "spo2": 98.5
+   },
+   "predicted_latency_ms": 10.453,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.167,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "failure",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-failure-00003",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 65.7,
+    "resp": 13.3,
+    "spo2": 97.9
+   },
+   "predicted_latency_ms": 35.041,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.457,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "failure",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-failure-00004",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 82.5,
+    "resp": 13.8,
+    "spo2": 96.4
+   },
+   "predicted_latency_ms": 29.903,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.513,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "failure",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-failure-00005",
+   "source": "simulated",
+   "device_id": "SIM-ECG-101",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 64.7,
+    "resp": 17.4,
+    "spo2": 96.4
+   },
+   "predicted_latency_ms": 31.268,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.508,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "failure",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-failure-00006",
+   "source": "simulated",
+   "device_id": "SIM-SPO2-201",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 86.7,
+    "resp": 15.8,
+    "spo2": 98.3
+   },
+   "predicted_latency_ms": 18.279,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.361,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "failure",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-failure-00007",
+   "source": "simulated",
+   "device_id": "SIM-WEAR-301",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 68.7,
+    "resp": 15.4,
+    "spo2": 96.2
+   },
+   "predicted_latency_ms": 24.173,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.256,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "failure",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-failure-00008",
+   "source": "simulated",
+   "device_id": "SIM-BP-401",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 63.4,
+    "resp": 16.2,
+    "spo2": 96.4
+   },
+   "predicted_latency_ms": 19.963,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.454,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "failure",
+    "seed": 11,
+    "synthetic": true
+   }
+  },
+  {
+   "event_id": "sim-11-failure-00009",
+   "source": "simulated",
+   "device_id": "SIM-RESP-501",
+   "criticality": 0.0,
+   "criticality_method": "partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated",
+   "vitals": {
+    "hr": 73.1,
+    "resp": 15.2,
+    "spo2": 96.3
+   },
+   "predicted_latency_ms": 26.596,
+   "prediction_method": "lstm",
+   "model_version": "lstm-20261029-0529",
+   "cloud_cost_index": 0.8,
+   "recorded_destination": "CLOUD",
+   "recorded_reason": "ahp_decision",
+   "recorded_weight_set": "eigenvector",
+   "provenance": {
+    "generator": "data_ingestion/simulator.py",
+    "scenario": "failure",
+    "seed": 11,
+    "synthetic": true
+   }
+  }
+ ]
+}

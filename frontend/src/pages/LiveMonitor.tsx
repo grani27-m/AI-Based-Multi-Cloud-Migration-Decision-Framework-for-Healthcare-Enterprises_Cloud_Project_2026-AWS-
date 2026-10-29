@@ -1,6 +1,7 @@
 // src/pages/LiveMonitor.tsx — paginated event history with a full per-event trace (predict → decide → execute → alert).
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Pause, Play, X } from 'lucide-react';
 import { api, type EventDetail } from '../lib/api';
@@ -94,7 +95,8 @@ export function EventDrawer({ id, onClose }: { id: string; onClose: () => void }
         onClick={ev => ev.stopPropagation()}>
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-bold font-mono truncate">{id}</h2>
-          <button onClick={onClose} className="ml-auto p-1" aria-label="Close"><X size={18} /></button>
+          <Link to={`/trace/${encodeURIComponent(id)}`} className="ml-auto text-xs font-medium underline shrink-0" style={{ color: 'var(--cloud)' }}>Open request trace</Link>
+          <button onClick={onClose} className="p-1" aria-label="Close"><X size={18} /></button>
         </div>
         {q.isLoading && <Loading />}
         {q.error && <ErrorState error={q.error} />}

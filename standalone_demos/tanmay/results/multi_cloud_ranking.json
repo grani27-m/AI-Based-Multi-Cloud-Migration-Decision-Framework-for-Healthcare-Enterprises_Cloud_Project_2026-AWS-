@@ -1,0 +1,78 @@
+{
+  "device_id": "example",
+  "destination": "aws-ap-south-1 (Mumbai)",
+  "destination_kind": "cloud",
+  "reason": "ahp_decision",
+  "criticality": 2.0,
+  "weights": {
+    "criticality": 0.6369855717447745,
+    "latency": 0.2582849943744825,
+    "cost": 0.104729433880743
+  },
+  "weight_set": "eigenvector",
+  "ranking": [
+    {
+      "name": "aws-ap-south-1 (Mumbai)",
+      "kind": "cloud",
+      "admissible": true,
+      "excluded_reason": null,
+      "score": 0.709093,
+      "contributions": {
+        "criticality": 0.407671,
+        "latency": 0.243821,
+        "cost": 0.057601
+      },
+      "normalised": {
+        "criticality": 0.2,
+        "latency": 0.056,
+        "cost": 0.45
+      }
+    },
+    {
+      "name": "aws-eu-north-1 (Stockholm)",
+      "kind": "cloud",
+      "admissible": true,
+      "excluded_reason": null,
+      "score": 0.664364,
+      "contributions": {
+        "criticality": 0.407671,
+        "latency": 0.183382,
+        "cost": 0.073311
+      },
+      "normalised": {
+        "criticality": 0.2,
+        "latency": 0.29,
+        "cost": 0.3
+      }
+    },
+    {
+      "name": "EDGE",
+      "kind": "edge",
+      "admissible": true,
+      "excluded_reason": null,
+      "score": 0.087072,
+      "contributions": {
+        "criticality": 0.025479,
+        "latency": 0.014464,
+        "cost": 0.047128
+      },
+      "normalised": {
+        "criticality": 0.2,
+        "latency": 0.056,
+        "cost": 0.45,
+        "compared_with": "aws-ap-south-1 (Mumbai)"
+      }
+    },
+    {
+      "name": "other-provider-us-east",
+      "kind": "cloud",
+      "admissible": false,
+      "excluded_reason": "network veto (310 ms)",
+      "score": null,
+      "contributions": {},
+      "normalised": {}
+    }
+  ],
+  "explanation": "aws-ap-south-1 (Mumbai) has the highest AHP score 0.709 (vs aws-eu-north-1 (Stockholm) 0.664, EDGE 0.087); excluded: other-provider-us-east (network veto (310 ms)).",
+  "engine_version": "ahp-2stage-1.1+candidates"
+}

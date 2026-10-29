@@ -24,3 +24,10 @@ frontend/dist/
 .DS_Store
 .idea/
 .vscode/
+# the standalone Rani package ships a PREBUILT dashboard so no Node.js is needed on her laptop
+!standalone_demos/rani/frontend/dist/
+!standalone_demos/rani/frontend/dist/**
+standalone_demos/*/runtime/
+standalone_demos/*/.venv/
+standalone_demos/charles/dataset/processed/windows_w20.npz
+standalone_demos/charles/dataset/processed/bidmc_vitals_1hz.csv

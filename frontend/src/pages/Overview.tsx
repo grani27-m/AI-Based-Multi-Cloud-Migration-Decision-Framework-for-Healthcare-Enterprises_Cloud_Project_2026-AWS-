@@ -104,7 +104,7 @@ export default function Overview() {
 
           <Card title="Alert accounting" sub="Triggered ≠ delivered: every channel attempt is logged">
             <table className="w-full text-sm">
-              <tbody>{[['Triggered', s.alerts.triggered], ['Delivered (≥1 channel)', s.alerts.delivered], ['Failed', s.alerts.failed],
+              <tbody>{[['Triggered', s.alerts.triggered], ['Delivered (≥1 real channel)', s.alerts.delivered], ['Mock only (nobody notified)', s.alerts.mock_delivered ?? 0], ['Failed', s.alerts.failed],
                 ['No channel configured', s.alerts.not_configured], ['Recorded only (WARNING)', s.alerts.by_status.not_notified ?? 0],
                 ['Pending dispatch', s.alerts.pending]].map(([k, v]) => (
                 <tr key={k as string} className="border-b last:border-0" style={{ borderColor: 'var(--border)' }}>

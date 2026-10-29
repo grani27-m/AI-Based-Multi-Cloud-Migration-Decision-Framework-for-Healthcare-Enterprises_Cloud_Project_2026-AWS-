@@ -1,0 +1,51 @@
+{
+  "selection_rule": "lowest validation MAE (ms); test set not used for selection",
+  "selected": "residual_huber_1e-3",
+  "runs": [
+    {
+      "run": "v1_level_mse_lr1e-3",
+      "target_mode": "level",
+      "loss": "mse",
+      "lr": 0.001,
+      "best_epoch": 1,
+      "val_mae_ms": null,
+      "note": "val_loss rose after epoch 1; was ALSO evaluated on test (MAE 2.076 vs persistence 1.633) before tuning - see v1_level_target_metrics.json"
+    },
+    {
+      "run": "residual_mse_1e-3",
+      "target_mode": "residual",
+      "loss": "mse",
+      "lr": 0.001,
+      "best_epoch": 10,
+      "epochs_run": 13,
+      "val_mae_ms": 1.5785,
+      "val_persistence_mae_ms": 1.8171,
+      "model_version": "lstm-20261029-0518",
+      "seconds": 836.5
+    },
+    {
+      "run": "residual_huber_1e-3",
+      "target_mode": "residual",
+      "loss": "huber",
+      "lr": 0.001,
+      "best_epoch": 8,
+      "epochs_run": 11,
+      "val_mae_ms": 1.484,
+      "val_persistence_mae_ms": 1.8171,
+      "model_version": "lstm-20261029-0529",
+      "seconds": 680.1
+    },
+    {
+      "run": "residual_huber_3e-4",
+      "target_mode": "residual",
+      "loss": "huber",
+      "lr": 0.0003,
+      "best_epoch": 20,
+      "epochs_run": 20,
+      "val_mae_ms": 1.4849,
+      "val_persistence_mae_ms": 1.8171,
+      "model_version": "lstm-20261029-0549",
+      "seconds": 1172.0
+    }
+  ]
+}
