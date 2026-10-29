@@ -127,10 +127,15 @@ PACKAGES: dict[str, list[str]] = {
 }
 
 
-def _expand(pattern: str) -> list[Path]:
+BUILD_OUTPUTS = ("frontend/dist/",)  # git-ignored build output: absent in a fresh clone until `npm run build`
+
+
+def _expand(pattern: str, allow_missing_build: bool = False) -> list[Path]:
     if pattern.endswith("/**"):
         base = ROOT / pattern[:-3]
         files = [p for p in base.rglob("*") if p.is_file() and "__pycache__" not in p.parts]
+        if not files and allow_missing_build and pattern.startswith(BUILD_OUTPUTS):
+            return []
         if not files:
             raise FileNotFoundError(f"nothing matches {pattern} (did you build frontend/dist?)")
         return sorted(files)
@@ -144,9 +149,9 @@ def _sha(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def plan(member: str) -> list[tuple[Path, Path]]:
+def plan(member: str, allow_missing_build: bool = False) -> list[tuple[Path, Path]]:
     pkg = HERE / member
-    return [(src, pkg / src.relative_to(ROOT)) for pat in PACKAGES[member] for src in _expand(pat)]
+    return [(src, pkg / src.relative_to(ROOT)) for pat in PACKAGES[member] for src in _expand(pat, allow_missing_build)]
 
 
 def export(member: str) -> dict:
@@ -180,13 +185,17 @@ def check(member: str) -> list[str]:
     if not manifest_path.exists():
         return [f"{member}: EXPORTED_FILES.json missing"]
     files = json.loads(manifest_path.read_text())["files"]
-    expected = {str(d.relative_to(pkg)).replace("\\", "/"): s for s, d in plan(member)}
+    expected = {str(d.relative_to(pkg)).replace("\\", "/"): s for s, d in plan(member, allow_missing_build=True)}
     for rel in sorted(set(expected) - set(files)):
         problems.append(f"{member}: {rel} not exported yet")
     for rel, meta in files.items():
         src = ROOT / meta["source"]
         dst = pkg / rel
-        if not src.exists():
+        if not src.exists() and meta["source"].startswith(BUILD_OUTPUTS):
+            # dashboard not built in this checkout: check the shipped copy against the hash recorded at export time
+            if not dst.exists() or _sha(dst) != meta["sha256"]:
+                problems.append(f"{member}: {rel} missing or altered since export")
+        elif not src.exists():
             problems.append(f"{member}: source {meta['source']} no longer exists")
         elif not dst.exists():
             problems.append(f"{member}: {rel} missing")
