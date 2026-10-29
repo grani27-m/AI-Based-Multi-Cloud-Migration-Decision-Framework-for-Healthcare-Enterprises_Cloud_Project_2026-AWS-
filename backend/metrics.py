@@ -1,8 +1,10 @@
 """Prometheus metrics (optional dependency).  Owner: Rani Gupta"""
+
 from __future__ import annotations
 
 try:
     from prometheus_client import CollectorRegistry, Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+
     AVAILABLE = True
 except ImportError:  # pragma: no cover
     AVAILABLE = False
@@ -14,12 +16,18 @@ class Metrics:
         if not AVAILABLE:
             return
         self.registry = CollectorRegistry()
-        self.requests = Histogram("hcf_http_request_seconds", "HTTP request latency", ["method", "path", "status"],
-                                  registry=self.registry)
-        self.events = Counter("hcf_events_total", "Processed telemetry events",
-                              ["source", "destination", "reason", "status"], registry=self.registry)
-        self.prediction_method = Counter("hcf_predictions_total", "Predictions by method", ["method"],
-                                         registry=self.registry)
+        self.requests = Histogram(
+            "hcf_http_request_seconds", "HTTP request latency", ["method", "path", "status"], registry=self.registry
+        )
+        self.events = Counter(
+            "hcf_events_total",
+            "Processed telemetry events",
+            ["source", "destination", "reason", "status"],
+            registry=self.registry,
+        )
+        self.prediction_method = Counter(
+            "hcf_predictions_total", "Predictions by method", ["method"], registry=self.registry
+        )
 
     def observe_request(self, method: str, path: str, status: int, seconds: float) -> None:
         if self.enabled:

@@ -20,14 +20,15 @@ The engine therefore uses the principal eigenvector by default (WEIGHT_SET="eige
 the report's numbers stay available as WEIGHT_SET="report" so results can be compared
 (see reports/ROUTING_EVALUATION_REPORT.md, which shows how many decisions differ).
 """
+
 from __future__ import annotations
 
 from typing import Sequence
 
 DEFAULT_PAIRWISE_MATRIX: list[list[float]] = [
-    [1.0, 3.0, 5.0],        # criticality vs (criticality, latency, cost)
-    [1 / 3, 1.0, 3.0],      # latency
-    [1 / 5, 1 / 3, 1.0],    # cost
+    [1.0, 3.0, 5.0],  # criticality vs (criticality, latency, cost)
+    [1 / 3, 1.0, 3.0],  # latency
+    [1 / 5, 1 / 3, 1.0],  # cost
 ]
 CRITERIA = ("criticality", "latency", "cost")
 # Saaty's random consistency index
@@ -113,15 +114,21 @@ def ahp_report(m: Sequence[Sequence[float]] = DEFAULT_PAIRWISE_MATRIX) -> dict:
     c = consistency(m, eig)
     return {
         "matrix": [list(r) for r in m],
-        "eigenvector": {"weights": dict(zip(CRITERIA, eig)), "lambda_max": lam, "ci": c["ci"],
-                        "cr_ri_0_58": c["cr"], "cr_ri_0_52": c["ci"] / 0.52},
+        "eigenvector": {
+            "weights": dict(zip(CRITERIA, eig)),
+            "lambda_max": lam,
+            "ci": c["ci"],
+            "cr_ri_0_58": c["cr"],
+            "cr_ri_0_52": c["ci"] / 0.52,
+        },
         "column_normalisation": {"weights": dict(zip(CRITERIA, col)), "cr_ri_0_58": consistency(m, col)["cr"]},
         "reported": {"weights": dict(zip(CRITERIA, REPORTED_WEIGHTS)), "cr": REPORTED_CR},
         "note": "Reported C1/C3 weights are not reproducible from the documented matrix; CR 0.037 corresponds "
-                "to RI=0.52. Default engine uses the principal eigenvector.",
+        "to RI=0.52. Default engine uses the principal eigenvector.",
     }
 
 
 if __name__ == "__main__":
     import json
+
     print(json.dumps(ahp_report(), indent=2))

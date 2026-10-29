@@ -25,6 +25,7 @@ Data licence: RIPE Atlas data is provided under the RIPE NCC Terms and Condition
 (https://www.ripe.net/manage-ips-and-asns/legal/ripe-atlas-terms-and-conditions).
 Parsing/cleaning lives in src/prediction/ripe_parser.py.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -37,7 +38,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -57,15 +58,17 @@ class Chunk:
     msm_id: int
     probe_id: int
     start: int  # unix seconds, inclusive
-    stop: int   # unix seconds, exclusive
+    stop: int  # unix seconds, exclusive
 
     @property
     def path(self) -> Path:
         return RAW_DIR / f"msm{self.msm_id}" / f"probe{self.probe_id}" / f"{self.start}_{self.stop}.json.gz"
 
     def url(self, base: str) -> str:
-        return (f"{base}/measurements/{self.msm_id}/results/"
-                f"?start={self.start}&stop={self.stop - 1}&probe_ids={self.probe_id}&format=json")
+        return (
+            f"{base}/measurements/{self.msm_id}/results/"
+            f"?start={self.start}&stop={self.stop - 1}&probe_ids={self.probe_id}&format=json"
+        )
 
 
 def load_config(path: Path = CONFIG) -> dict:
@@ -170,12 +173,27 @@ def cmd_download(workers: int) -> int:
             done += 1
             try:
                 res = fut.result()
-                log.info("[%d/%d] msm%d probe%d %s rows=%s", done, len(todo), c.msm_id, c.probe_id,
-                         res["status"], res.get("rows"))
+                log.info(
+                    "[%d/%d] msm%d probe%d %s rows=%s",
+                    done,
+                    len(todo),
+                    c.msm_id,
+                    c.probe_id,
+                    res["status"],
+                    res.get("rows"),
+                )
             except Exception as exc:  # recorded, not swallowed: rerun download to retry
                 failures += 1
-                log.error("[%d/%d] FAILED msm%d probe%d %d-%d: %s", done, len(todo), c.msm_id, c.probe_id,
-                          c.start, c.stop, exc)
+                log.error(
+                    "[%d/%d] FAILED msm%d probe%d %d-%d: %s",
+                    done,
+                    len(todo),
+                    c.msm_id,
+                    c.probe_id,
+                    c.start,
+                    c.stop,
+                    exc,
+                )
     log.info("finished: %d failures (rerun the same command to retry only the missing chunks)", failures)
     return 1 if failures else 0
 
@@ -187,26 +205,76 @@ def cmd_discover() -> int:
     msms = []
     for m in cfg["measurements"]:
         meta = fetch_json(session, f"{cfg['api_base']}/measurements/{m['msm_id']}/")
-        msms.append({k: meta.get(k) for k in ("id", "type", "af", "target", "target_ip", "interval",
-                                              "start_time", "stop_time", "status", "is_public", "description")})
+        msms.append(
+            {
+                k: meta.get(k)
+                for k in (
+                    "id",
+                    "type",
+                    "af",
+                    "target",
+                    "target_ip",
+                    "interval",
+                    "start_time",
+                    "stop_time",
+                    "status",
+                    "is_public",
+                    "description",
+                )
+            }
+        )
     for c in cfg.get("rejected_candidates", []):
         if isinstance(c["msm_id"], int):
             meta = fetch_json(session, f"{cfg['api_base']}/measurements/{c['msm_id']}/")
-            msms.append({"rejected": True, "reason": c["reason"],
-                         **{k: meta.get(k) for k in ("id", "type", "target", "interval", "start_time",
-                                                     "stop_time", "participant_count", "status")}})
+            msms.append(
+                {
+                    "rejected": True,
+                    "reason": c["reason"],
+                    **{
+                        k: meta.get(k)
+                        for k in (
+                            "id",
+                            "type",
+                            "target",
+                            "interval",
+                            "start_time",
+                            "stop_time",
+                            "participant_count",
+                            "status",
+                        )
+                    },
+                }
+            )
     probes = []
     for group, ids in cfg["probes"].items():
         for pid in ids:
             p = fetch_json(session, f"{cfg['api_base']}/probes/{pid}/")
-            probes.append({"group": group, **{k: p.get(k) for k in (
-                "id", "country_code", "asn_v4", "description", "is_anchor", "is_public",
-                "status", "first_connected", "total_uptime")}})
+            probes.append(
+                {
+                    "group": group,
+                    **{
+                        k: p.get(k)
+                        for k in (
+                            "id",
+                            "country_code",
+                            "asn_v4",
+                            "description",
+                            "is_anchor",
+                            "is_public",
+                            "status",
+                            "first_connected",
+                            "total_uptime",
+                        )
+                    },
+                }
+            )
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     (META_DIR / "ripe_atlas_measurements.json").write_text(
-        json.dumps({"retrieved_at": now, "measurements": msms}, indent=2), encoding="utf-8")
+        json.dumps({"retrieved_at": now, "measurements": msms}, indent=2), encoding="utf-8"
+    )
     (META_DIR / "ripe_atlas_probes.json").write_text(
-        json.dumps({"retrieved_at": now, "probes": probes}, indent=2), encoding="utf-8")
+        json.dumps({"retrieved_at": now, "probes": probes}, indent=2), encoding="utf-8"
+    )
     log.info("saved metadata for %d measurements and %d probes", len(msms), len(probes))
     return 0
 

@@ -11,6 +11,7 @@ Thresholds are configurable through the environment (EMERGENCY_CRITICALITY_THRES
 LATENCY_VETO_MS) but default to the values in the project report. They are design
 parameters that would need clinical review before real use.
 """
+
 from __future__ import annotations
 
 import os
@@ -19,7 +20,9 @@ EMERGENCY_CRITICALITY_THRESHOLD: float = float(os.environ.get("EMERGENCY_CRITICA
 LATENCY_VETO_MS: float = float(os.environ.get("LATENCY_VETO_MS", 300.0))
 
 
-def check_emergency_override(patient_criticality_score: float, threshold: float = EMERGENCY_CRITICALITY_THRESHOLD) -> bool:
+def check_emergency_override(
+    patient_criticality_score: float, threshold: float = EMERGENCY_CRITICALITY_THRESHOLD
+) -> bool:
     return patient_criticality_score >= threshold
 
 

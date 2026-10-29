@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Healthcare edge/cloud routing - minimal AWS footprint (Team 11, BCSE355L).
+  S3 (model artifacts + processed CLOUD-path objects), Lambda (AHP decision engine) behind an
+  HTTP API, SNS (emergency alerts), CloudWatch (log retention + error alarm).
+  Works in AWS Academy Learner Lab by passing ExistingRoleArn=arn:aws:iam::<acct>:role/LabRole.
+
+Parameters:
+  ExistingRoleArn:
+    Type: String
+    Default: ""
+    Description: Use an existing role (Learner Lab LabRole). Leave empty to create a least-privilege role.
+  AlertEmail:
+    Type: String
+    Default: ""
+    Description: Optional e-mail subscribed to the SNS alert topic (must confirm the subscription e-mail).
+
+Conditions:
+  CreateRole: !Equals [!Ref ExistingRoleArn, ""]
+  HasEmail: !Not [!Equals [!Ref AlertEmail, ""]]
+
+Resources:
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration: {Status: Enabled}
+      LifecycleConfiguration:
+        Rules:
+          - Id: processed-to-ia
+            Prefix: processed/
+            Status: Enabled
+            Transitions: [{StorageClass: STANDARD_IA, TransitionInDays: 30}]
+
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: HCF emergency alerts
+      KmsMasterKeyId: alias/aws/sns
+
+  AlertEmailSub:
+    Type: AWS::SNS::Subscription
+    Condition: HasEmail
+    Properties: {TopicArn: !Ref AlertTopic, Protocol: email, Endpoint: !Ref AlertEmail}
+
+  DecisionRole:
+    Type: AWS::IAM::Role
+    Condition: CreateRole
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{Effect: Allow, Principal: {Service: lambda.amazonaws.com}, Action: sts:AssumeRole}]
+      ManagedPolicyArns: [arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole]
+
+  DecisionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: build/
+      Handler: infra/aws/lambda_decision/handler.lambda_handler
+      Runtime: python3.12
+      MemorySize: 256
+      Timeout: 10
+      Role: !If [CreateRole, !GetAtt DecisionRole.Arn, !Ref ExistingRoleArn]
+      Environment:
+        Variables: {AHP_WEIGHT_SET: eigenvector, EMERGENCY_CRITICALITY_THRESHOLD: "9.0", LATENCY_VETO_MS: "300"}
+      Events:
+        Decide:
+          Type: HttpApi
+          Properties: {Path: /decide, Method: post}
+
+  DecisionLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${DecisionFunction}
+      RetentionInDays: 30
+
+  DecisionErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Decision Lambda errors
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{Name: FunctionName, Value: !Ref DecisionFunction}]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertTopic]
+
+Outputs:
+  DecideUrl: {Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/decide"}
+  DataBucketName: {Value: !Ref DataBucket}
+  AlertTopicArn: {Value: !Ref AlertTopic}
+  DecisionFunctionName: {Value: !Ref DecisionFunction}

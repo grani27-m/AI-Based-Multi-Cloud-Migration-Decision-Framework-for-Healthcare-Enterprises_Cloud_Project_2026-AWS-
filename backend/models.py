@@ -11,13 +11,25 @@ ORM schema (ER diagram: integration/DATABASE_SCHEMA.md). One telemetry event flo
 All timestamps are timezone-aware UTC. No patient identifiers are stored: devices
 are identified by a device ID and vitals are stored only as three numbers.
 """
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import (JSON, Boolean, CheckConstraint, DateTime, Float, ForeignKey, Index, Integer, String,
-                        Text, UniqueConstraint)
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db import Base
@@ -85,8 +97,7 @@ class TelemetryEvent(Base):
 class Prediction(Base):
     __tablename__ = "predictions"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    telemetry_event_id: Mapped[int] = mapped_column(ForeignKey("telemetry_events.id", ondelete="CASCADE"),
-                                                    unique=True)
+    telemetry_event_id: Mapped[int] = mapped_column(ForeignKey("telemetry_events.id", ondelete="CASCADE"), unique=True)
     predicted_rtt_ms: Mapped[float] = mapped_column(Float)
     risk: Mapped[str] = mapped_column(String(8))
     method: Mapped[str] = mapped_column(String(32), index=True)  # lstm | persistence_fallback
@@ -101,8 +112,7 @@ class Prediction(Base):
 class RoutingDecision(Base):
     __tablename__ = "routing_decisions"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    telemetry_event_id: Mapped[int] = mapped_column(ForeignKey("telemetry_events.id", ondelete="CASCADE"),
-                                                    unique=True)
+    telemetry_event_id: Mapped[int] = mapped_column(ForeignKey("telemetry_events.id", ondelete="CASCADE"), unique=True)
     prediction_id: Mapped[Optional[int]] = mapped_column(ForeignKey("predictions.id"), nullable=True)
     destination: Mapped[str] = mapped_column(String(8), index=True)
     reason: Mapped[str] = mapped_column(String(48), index=True)
@@ -123,8 +133,7 @@ class RoutingDecision(Base):
 class ExecutionRecord(Base):
     __tablename__ = "execution_records"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    telemetry_event_id: Mapped[int] = mapped_column(ForeignKey("telemetry_events.id", ondelete="CASCADE"),
-                                                    index=True)
+    telemetry_event_id: Mapped[int] = mapped_column(ForeignKey("telemetry_events.id", ondelete="CASCADE"), index=True)
     decision_id: Mapped[int] = mapped_column(ForeignKey("routing_decisions.id", ondelete="CASCADE"), index=True)
     requested_destination: Mapped[str] = mapped_column(String(8))
     final_destination: Mapped[Optional[str]] = mapped_column(String(8), nullable=True)
@@ -142,8 +151,7 @@ class ExecutionRecord(Base):
 class Alert(Base):
     __tablename__ = "alerts"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    telemetry_event_id: Mapped[int] = mapped_column(ForeignKey("telemetry_events.id", ondelete="CASCADE"),
-                                                    index=True)
+    telemetry_event_id: Mapped[int] = mapped_column(ForeignKey("telemetry_events.id", ondelete="CASCADE"), index=True)
     device_id: Mapped[str] = mapped_column(String(64), index=True)
     severity: Mapped[str] = mapped_column(String(10), index=True)  # CRITICAL | WARNING
     kind: Mapped[str] = mapped_column(String(32))  # emergency_override | network_veto | execution_failure
@@ -165,7 +173,7 @@ class AlertDelivery(Base):
     alert_id: Mapped[int] = mapped_column(ForeignKey("alerts.id", ondelete="CASCADE"), index=True)
     channel: Mapped[str] = mapped_column(String(16))  # telegram | email | webhook
     attempt: Mapped[int] = mapped_column(Integer)
-    status: Mapped[str] = mapped_column(String(12))   # sent | failed | skipped
+    status: Mapped[str] = mapped_column(String(12))  # sent | failed | skipped
     detail: Mapped[str] = mapped_column(Text, default="")  # sanitised: never contains credentials
     latency_ms: Mapped[float] = mapped_column(Float, default=0.0)
     attempted_at: Mapped[datetime] = mapped_column(TS, default=utcnow)

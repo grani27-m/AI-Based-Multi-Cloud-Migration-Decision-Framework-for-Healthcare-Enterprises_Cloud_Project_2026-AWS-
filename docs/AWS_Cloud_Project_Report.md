@@ -337,10 +337,10 @@ Wraps the full pipeline with zero changes to core business logic:
 ```python
 def lambda_handler(event, context):
     body = json.loads(event["body"])
-    prediction = predict_latency(window)          # -> SageMaker on AWS
-    decision = route_decision(...)                 # zero changes on AWS
-    exec_result = edge_handle(exec_event)          # or cloud_handle()
-    log_event("PIPELINE_COMPLETE", {...})           # -> CloudWatch on AWS
+    prediction = predict_latency(window)  # -> SageMaker on AWS
+    decision = route_decision(...)  # zero changes on AWS
+    exec_result = edge_handle(exec_event)  # or cloud_handle()
+    log_event("PIPELINE_COMPLETE", {...})  # -> CloudWatch on AWS
     return {"statusCode": 200, "body": json.dumps(response_body)}
 ```
 

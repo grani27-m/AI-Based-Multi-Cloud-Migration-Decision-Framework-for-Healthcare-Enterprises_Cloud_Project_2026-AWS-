@@ -1,0 +1,13 @@
+.git
+**/__pycache__
+**/node_modules
+frontend/dist
+runtime
+.env
+dataset/raw
+dataset/processed
+results/model/experiments
+infra/aws/build
+*.zip
+*.pdf
+*.docx

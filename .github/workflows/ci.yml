@@ -1,130 +1,68 @@
-name: CI — Telemedicine Workload Offloader
-
+name: CI
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
+  push: {branches: [main, develop, "feature/**"]}
+  pull_request: {branches: [main, develop]}
 
 jobs:
-  # ── Lint & Type Check ─────────────────────────────────────────────────────
   lint:
-    name: Lint & Format Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: pip install ruff==0.16.9
+      - run: ruff check .
+      - run: ruff format --check .
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-
-      - name: Install linting tools
-        run: pip install ruff
-
-      - name: Ruff lint
-        run: ruff check src/ backend/ tests/
-
-      - name: Ruff format check
-        run: ruff format --check src/ backend/ tests/
-
-  # ── Tests ─────────────────────────────────────────────────────────────────
   test:
-    name: Test Suite
     runs-on: ubuntu-latest
     needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13", cache: pip}
+      - run: pip install -r requirements-dev.txt
+      - name: Unit + integration tests (SQLite, real committed model artifacts)
+        run: pytest -q --junitxml=results/tests/junit.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: junit, path: results/tests/junit.xml}
 
+  postgres:
+    runs-on: ubuntu-latest
+    needs: lint
     services:
       postgres:
-        image: timescale/timescaledb:latest-pg16
-        env:
-          POSTGRES_DB:       telemedicine_test
-          POSTGRES_USER:     telemedicine
-          POSTGRES_PASSWORD: telemedicine123
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U telemedicine -d telemedicine_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
+        image: postgres:16-alpine
+        env: {POSTGRES_DB: hcf, POSTGRES_USER: hcf, POSTGRES_PASSWORD: ci-only-password}
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U hcf" --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg2://hcf:ci-only-password@localhost:5432/hcf
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13", cache: pip}
+      - run: pip install -r requirements-dev.txt
+      - name: Migrations on PostgreSQL (upgrade, drift check, downgrade, upgrade)
+        run: alembic upgrade head && alembic check && alembic downgrade base && alembic upgrade head
+      - name: Pipeline smoke test on PostgreSQL
+        run: python -m scripts.smoke_test
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run tests
-        env:
-          DATABASE_URL: postgresql+asyncpg://telemedicine:telemedicine123@localhost:5432/telemedicine_test
-          REDIS_URL:    redis://localhost:6379
-          SECRET_KEY:   test-secret-key-not-for-production
-          ENVIRONMENT:  test
-          DEBUG:        "true"
-          TELEGRAM_ENABLED: "false"
-          EMAIL_ENABLED:    "false"
-        run: |
-          pytest tests/ -v \
-            --tb=short \
-            --cov=src \
-            --cov=backend \
-            --cov-report=xml \
-            --cov-report=term-missing \
-            -W error::DeprecationWarning
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: coverage.xml
-          fail_ci_if_error: false
-
-  # ── Docker Build Check ────────────────────────────────────────────────────
-  docker:
-    name: Docker Build Check
+  frontend:
     runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main'
-
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22", cache: npm, cache-dependency-path: frontend/package-lock.json}
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build API image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: Dockerfile.api
-          push: false
-          tags: telemedicine-api:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build MQTT consumer image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: Dockerfile.mqtt
-          push: false
-          tags: telemedicine-mqtt:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+  docker:
+    runs-on: ubuntu-latest
+    needs: [test, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t hcf-api:ci .

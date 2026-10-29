@@ -1,4 +1,5 @@
 """Rani: password hashing, JWT validation (valid/invalid/expired/tampered) and the full role matrix."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -37,16 +38,28 @@ def test_missing_malformed_and_tampered_tokens(client, headers):
 
 def test_expired_token_rejected(client, app):
     s = app.state.settings
-    tok = jwt.encode({"sub": "1", "username": "admin1", "role": "admin", "iss": s.jwt_issuer, "aud": s.jwt_audience,
-                      "iat": datetime.now(timezone.utc) - timedelta(hours=2),
-                      "exp": datetime.now(timezone.utc) - timedelta(hours=1)}, s.secret_key, algorithm="HS256")
+    tok = jwt.encode(
+        {
+            "sub": "1",
+            "username": "admin1",
+            "role": "admin",
+            "iss": s.jwt_issuer,
+            "aud": s.jwt_audience,
+            "iat": datetime.now(timezone.utc) - timedelta(hours=2),
+            "exp": datetime.now(timezone.utc) - timedelta(hours=1),
+        },
+        s.secret_key,
+        algorithm="HS256",
+    )
     r = client.get("/api/v1/events", headers={"Authorization": f"Bearer {tok}"})
     assert r.status_code == 401 and r.json()["detail"] == "token expired"
 
 
 def test_wrong_secret_or_audience_rejected(client, app):
     s = app.state.settings
-    bad_key, _ = create_access_token(1, "admin1", "admin", "another-secret-" + "y" * 40, s.jwt_issuer, s.jwt_audience, 5)
+    bad_key, _ = create_access_token(
+        1, "admin1", "admin", "another-secret-" + "y" * 40, s.jwt_issuer, s.jwt_audience, 5
+    )
     bad_aud, _ = create_access_token(1, "admin1", "admin", s.secret_key, s.jwt_issuer, "other-api", 5)
     for t in (bad_key, bad_aud):
         assert client.get("/api/v1/events", headers={"Authorization": f"Bearer {t}"}).status_code == 401
@@ -94,12 +107,19 @@ def test_admin_cannot_demote_self(client, headers):
 
 
 def test_create_user_validation(client, headers):
-    ok = client.post("/api/v1/users", json={"username": "nurse.a", "password": "long-enough-pw", "role": "doctor"},
-                     headers=headers["admin"])
+    ok = client.post(
+        "/api/v1/users",
+        json={"username": "nurse.a", "password": "long-enough-pw", "role": "doctor"},
+        headers=headers["admin"],
+    )
     assert ok.status_code == 201 and "password" not in ok.text
-    dup = client.post("/api/v1/users", json={"username": "nurse.a", "password": "long-enough-pw", "role": "doctor"},
-                      headers=headers["admin"])
+    dup = client.post(
+        "/api/v1/users",
+        json={"username": "nurse.a", "password": "long-enough-pw", "role": "doctor"},
+        headers=headers["admin"],
+    )
     assert dup.status_code == 409
-    weak = client.post("/api/v1/users", json={"username": "nurse.b", "password": "short", "role": "doctor"},
-                       headers=headers["admin"])
+    weak = client.post(
+        "/api/v1/users", json={"username": "nurse.b", "password": "short", "role": "doctor"}, headers=headers["admin"]
+    )
     assert weak.status_code == 422

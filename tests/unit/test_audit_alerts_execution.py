@@ -1,4 +1,5 @@
 """Rani: audit tamper detection, alert delivery accounting, execution adapters and retries."""
+
 from __future__ import annotations
 
 import json
@@ -79,25 +80,37 @@ def test_inserted_forged_row_detected(tmp_path):
     _chain(db, 3)
     with db.session() as s:
         last = s.get(AuditLog, 3)
-        s.add(AuditLog(ts=last.ts, actor="attacker", action="forged", resource="x", detail={}, prev_hash=last.hash,
-                       hash="f" * 64))
+        s.add(
+            AuditLog(
+                ts=last.ts,
+                actor="attacker",
+                action="forged",
+                resource="x",
+                detail={},
+                prev_hash=last.hash,
+                hash="f" * 64,
+            )
+        )
     with db.session() as s:
         assert verify_chain(s)["first_broken_id"] == 4
 
 
 def test_audit_detail_never_contains_vitals_or_tokens(client, headers):
-    client.post("/api/v1/events", json=event("phi-1", vitals={"hr": 77, "resp": 14, "spo2": 98}),
-                headers=headers["device"])
+    client.post(
+        "/api/v1/events", json=event("phi-1", vitals={"hr": 77, "resp": 14, "spo2": 98}), headers=headers["device"]
+    )
     dump = json.dumps(client.get("/api/v1/audit?limit=1000", headers=headers["admin"]).json())
     assert "spo2" not in dump and "Bearer" not in dump and "password" not in dump
 
 
 # ---------------- alerts ----------------
 
+
 def _alert_app(tmp_path, channels):
     from backend.app import create_app
     from tests.conftest import add_user, login
     from fastapi.testclient import TestClient
+
     app = create_app(make_settings(tmp_path), alert_channels=channels)
     add_user(app, "dev9", "device")
     c = TestClient(app)
@@ -150,10 +163,12 @@ def test_secrets_are_sanitised_in_delivery_log(tmp_path, monkeypatch):
             raise RuntimeError("POST https://api.telegram.org/botSECRET-TOKEN-123/sendMessage failed")
 
     from backend.app import create_app
+
     s = make_settings(tmp_path)
     s.telegram_bot_token = "SECRET-TOKEN-123"
     from tests.conftest import add_user, login
     from fastapi.testclient import TestClient
+
     app = create_app(s, alert_channels=[Leaky("leaky")])
     add_user(app, "dev9", "device")
     c = TestClient(app)
@@ -165,9 +180,17 @@ def test_secrets_are_sanitised_in_delivery_log(tmp_path, monkeypatch):
 
 # ---------------- execution ----------------
 
+
 def _payload(**kw):
-    return {"event_id": "e1", "device_id": "D1", "criticality": 3.0, "network_window": [{"rtt_avg_ms": 10.0}],
-            "predicted_rtt_ms": 11.0, "reason": "ahp_decision", **kw}
+    return {
+        "event_id": "e1",
+        "device_id": "D1",
+        "criticality": 3.0,
+        "network_window": [{"rtt_avg_ms": 10.0}],
+        "predicted_rtt_ms": 11.0,
+        "reason": "ahp_decision",
+        **kw,
+    }
 
 
 def test_edge_and_cloud_adapters_write_records(tmp_path):
@@ -204,5 +227,6 @@ def test_cloud_failure_falls_back_edge_failure_does_not_go_to_cloud(tmp_path):
 
 def test_unknown_destination_rejected(tmp_path):
     import pytest
+
     with pytest.raises(ValueError):
         Executor(LocalEdgeAdapter(tmp_path), LocalCloudObjectStoreAdapter(tmp_path)).execute("MARS", _payload())

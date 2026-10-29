@@ -15,6 +15,7 @@ recorded together) and is stated in every event's provenance.
 Uses dataset/processed/ripe_atlas_clean.csv.gz when present (full rebuild), otherwise
 the committed sample dataset/samples/ripe_atlas_test_sample.csv.gz.
 """
+
 from __future__ import annotations
 
 import json
@@ -74,7 +75,7 @@ def build_replay_events(n: int, seed: int = 7) -> list[dict]:
         tries += 1
         start, length = rng.choice(segs)
         i = start + rng.randrange(0, length - WINDOW + 1)
-        rows = df.iloc[i:i + WINDOW]
+        rows = df.iloc[i : i + WINDOW]
         if rows["rtt_avg_ms"].isna().all():
             continue
         window = []
@@ -89,16 +90,22 @@ def build_replay_events(n: int, seed: int = 7) -> list[dict]:
         v = vit.iloc[rng.randrange(len(vit))]
         last_ts = datetime.fromisoformat(window[-1]["timestamp"])
         msm, prb = int(rows.iloc[0]["msm_id"]), int(rows.iloc[0]["prb_id"])
-        events.append({
-            "event_id": f"replay-{msm}-{prb}-{int(rows.iloc[-1]['timestamp'])}-b{int(v.record_id):02d}-{int(v.t_s)}",
-            "device_id": f"ICU-BIDMC-{int(v.record_id):02d}", "device_kind": "bedside-monitor", "source": "replay",
-            "network_window": window,
-            "vitals": {"hr": float(v.hr), "resp": float(v.resp), "spo2": float(v.spo2)},
-            "cloud_cost_index": cost_index_for(last_ts),
-            "provenance": {"network": f"RIPE Atlas msm {msm}, probe {prb}, test period (held out)",
-                           "network_group": str(rows.iloc[0]["group"]),
-                           "vitals": f"PhysioNet BIDMC record {int(v.record_id):02d}, t={int(v.t_s)} s",
-                           "pairing": "artificial (network path and patient recorded independently)",
-                           "cost_index": "synthetic time-of-day tariff proxy"},
-        })
+        events.append(
+            {
+                "event_id": f"replay-{msm}-{prb}-{int(rows.iloc[-1]['timestamp'])}-b{int(v.record_id):02d}-{int(v.t_s)}",
+                "device_id": f"ICU-BIDMC-{int(v.record_id):02d}",
+                "device_kind": "bedside-monitor",
+                "source": "replay",
+                "network_window": window,
+                "vitals": {"hr": float(v.hr), "resp": float(v.resp), "spo2": float(v.spo2)},
+                "cloud_cost_index": cost_index_for(last_ts),
+                "provenance": {
+                    "network": f"RIPE Atlas msm {msm}, probe {prb}, test period (held out)",
+                    "network_group": str(rows.iloc[0]["group"]),
+                    "vitals": f"PhysioNet BIDMC record {int(v.record_id):02d}, t={int(v.t_s)} s",
+                    "pairing": "artificial (network path and patient recorded independently)",
+                    "cost_index": "synthetic time-of-day tariff proxy",
+                },
+            }
+        )
     return events

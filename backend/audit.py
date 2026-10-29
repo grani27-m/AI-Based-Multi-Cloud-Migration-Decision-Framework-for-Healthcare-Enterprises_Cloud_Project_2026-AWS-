@@ -15,6 +15,7 @@ protection requires exporting checkpoints (latest hash) to a separately controll
 store such as S3 Object Lock or CloudWatch Logs. /api/v1/audit/verify returns the
 head hash so it can be checkpointed.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -32,8 +33,12 @@ _lock = threading.Lock()  # serialises writers inside one process (SQLite); Post
 
 
 def digest(prev: str, ts: str, actor: str, action: str, resource: str, detail: dict) -> str:
-    body = json.dumps({"prev": prev, "ts": ts, "actor": actor, "action": action, "resource": resource,
-                       "detail": detail}, sort_keys=True, separators=(",", ":"), default=str)
+    body = json.dumps(
+        {"prev": prev, "ts": ts, "actor": actor, "action": action, "resource": resource, "detail": detail},
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    )
     return hashlib.sha256(body.encode()).hexdigest()
 
 
@@ -46,8 +51,15 @@ def write_audit(db: Session, actor: str, action: str, resource: str, detail: dic
         last = db.execute(select(AuditLog.hash).order_by(AuditLog.id.desc()).limit(1)).scalar_one_or_none()
         prev = last or GENESIS
         ts = datetime.now(timezone.utc).isoformat()
-        row = AuditLog(ts=ts, actor=actor, action=action, resource=resource, detail=detail, prev_hash=prev,
-                       hash=digest(prev, ts, actor, action, resource, detail))
+        row = AuditLog(
+            ts=ts,
+            actor=actor,
+            action=action,
+            resource=resource,
+            detail=detail,
+            prev_hash=prev,
+            hash=digest(prev, ts, actor, action, resource, detail),
+        )
         db.add(row)
         db.flush()
     return row
@@ -60,8 +72,14 @@ def verify_chain(db: Session) -> dict:
         n += 1
         expected = digest(prev, row.ts, row.actor, row.action, row.resource, row.detail)
         if row.prev_hash != prev or row.hash != expected:
-            return {"valid": False, "checked": n, "first_broken_id": row.id,
-                    "problem": "prev_hash mismatch (row deleted/reordered/inserted)" if row.prev_hash != prev
-                    else "content hash mismatch (row edited)", "head_hash": None}
+            return {
+                "valid": False,
+                "checked": n,
+                "first_broken_id": row.id,
+                "problem": "prev_hash mismatch (row deleted/reordered/inserted)"
+                if row.prev_hash != prev
+                else "content hash mismatch (row edited)",
+                "head_hash": None,
+            }
         prev = row.hash
     return {"valid": True, "checked": n, "first_broken_id": None, "problem": None, "head_hash": prev}

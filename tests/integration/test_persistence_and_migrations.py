@@ -1,4 +1,5 @@
 """Rani: migrations from an empty DB, schema/model parity, and persistence across an application restart."""
+
 from __future__ import annotations
 
 import os
@@ -13,8 +14,18 @@ from backend.app import create_app
 from tests.conftest import FakeChannel, add_user, event, login, make_settings
 
 ROOT = Path(__file__).resolve().parents[2]
-TABLES = {"users", "devices", "telemetry_events", "predictions", "routing_decisions", "execution_records", "alerts",
-          "alert_deliveries", "audit_log", "alembic_version"}
+TABLES = {
+    "users",
+    "devices",
+    "telemetry_events",
+    "predictions",
+    "routing_decisions",
+    "execution_records",
+    "alerts",
+    "alert_deliveries",
+    "audit_log",
+    "alembic_version",
+}
 
 
 def _alembic(url, *args):

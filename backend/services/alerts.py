@@ -14,11 +14,13 @@ Channels (all optional, credentials only from environment):
     telegram  Bot API sendMessage          TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
     email     SMTP + STARTTLS              SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, ALERT_EMAIL_TO
     webhook   JSON POST (Slack/Discord/…)  ALERT_WEBHOOK_URL
+    aws-sns   SNS Publish                  SNS_TOPIC_ARN (+ AWS credentials)
 
 Each channel gets up to 3 attempts with a 10 s timeout; every attempt is an
 alert_deliveries row. Messages contain the device ID, criticality and latency only
 (no patient identity). Error details are sanitised so tokens never reach the DB.
 """
+
 from __future__ import annotations
 
 import logging
@@ -66,8 +68,11 @@ class TelegramChannel(Channel):
         return bool(self.token and self.chat)
 
     def send(self, alert):
-        r = httpx.post(f"https://api.telegram.org/bot{self.token}/sendMessage",
-                       json={"chat_id": self.chat, "text": alert.message}, timeout=10)
+        r = httpx.post(
+            f"https://api.telegram.org/bot{self.token}/sendMessage",
+            json={"chat_id": self.chat, "text": alert.message},
+            timeout=10,
+        )
         if r.status_code != 200 or not r.json().get("ok"):
             raise RuntimeError(f"telegram HTTP {r.status_code}")
         return f"telegram message_id={r.json()['result'].get('message_id')}"
@@ -108,19 +113,54 @@ class WebhookChannel(Channel):
         return bool(self.url)
 
     def send(self, alert):
-        r = httpx.post(self.url, json={"text": alert.message, "content": alert.message,
-                                       "severity": alert.severity, "device_id": alert.device_id}, timeout=10)
+        r = httpx.post(
+            self.url,
+            json={
+                "text": alert.message,
+                "content": alert.message,
+                "severity": alert.severity,
+                "device_id": alert.device_id,
+            },
+            timeout=10,
+        )
         if r.status_code >= 300:
             raise RuntimeError(f"webhook HTTP {r.status_code}")
         return f"webhook HTTP {r.status_code}"
 
 
+class SNSChannel(Channel):
+    """Amazon SNS publish (only when SNS_TOPIC_ARN is set and AWS credentials exist)."""
+
+    name = "aws-sns"
+
+    def __init__(self, s: Settings):
+        import os
+
+        self.topic = os.environ.get("SNS_TOPIC_ARN", "")
+
+    def configured(self):
+        return bool(self.topic)
+
+    def send(self, alert):
+        import boto3
+
+        r = boto3.client("sns").publish(
+            TopicArn=self.topic, Subject=f"[{alert.severity}] {alert.kind}"[:100], Message=alert.message
+        )
+        return f"sns MessageId={r.get('MessageId')}"
+
+
 def default_channels(s: Settings) -> list[Channel]:
-    return [TelegramChannel(s), EmailChannel(s), WebhookChannel(s)]
+    return [TelegramChannel(s), EmailChannel(s), WebhookChannel(s), SNSChannel(s)]
 
 
-def dispatch_alert(session_factory: Callable, settings: Settings, alert_id: int,
-                   channels: list[Channel] | None = None, backoff_s: float = 1.0) -> str:
+def dispatch_alert(
+    session_factory: Callable,
+    settings: Settings,
+    alert_id: int,
+    channels: list[Channel] | None = None,
+    backoff_s: float = 1.0,
+) -> str:
     """Deliver one alert through every configured channel and persist every attempt."""
     channels = channels if channels is not None else default_channels(settings)
     secrets_ = [settings.telegram_bot_token, settings.smtp_password, settings.alert_webhook_url]
@@ -134,8 +174,15 @@ def dispatch_alert(session_factory: Callable, settings: Settings, alert_id: int,
             outcomes = []
             for ch in channels:
                 if not ch.configured():
-                    db.add(AlertDelivery(alert_id=alert.id, channel=ch.name, attempt=0, status="skipped",
-                                         detail="channel not configured"))
+                    db.add(
+                        AlertDelivery(
+                            alert_id=alert.id,
+                            channel=ch.name,
+                            attempt=0,
+                            status="skipped",
+                            detail="channel not configured",
+                        )
+                    )
                     continue
                 ok = False
                 for attempt in range(1, MAX_ATTEMPTS + 1):
@@ -143,13 +190,28 @@ def dispatch_alert(session_factory: Callable, settings: Settings, alert_id: int,
                     try:
                         detail = ch.send(alert)
                         ok = True
-                        db.add(AlertDelivery(alert_id=alert.id, channel=ch.name, attempt=attempt, status="sent",
-                                             detail=detail, latency_ms=(time.perf_counter() - t0) * 1000))
+                        db.add(
+                            AlertDelivery(
+                                alert_id=alert.id,
+                                channel=ch.name,
+                                attempt=attempt,
+                                status="sent",
+                                detail=detail,
+                                latency_ms=(time.perf_counter() - t0) * 1000,
+                            )
+                        )
                         break
                     except Exception as exc:
-                        db.add(AlertDelivery(alert_id=alert.id, channel=ch.name, attempt=attempt, status="failed",
-                                             detail=_sanitise(f"{type(exc).__name__}: {exc}", secrets_),
-                                             latency_ms=(time.perf_counter() - t0) * 1000))
+                        db.add(
+                            AlertDelivery(
+                                alert_id=alert.id,
+                                channel=ch.name,
+                                attempt=attempt,
+                                status="failed",
+                                detail=_sanitise(f"{type(exc).__name__}: {exc}", secrets_),
+                                latency_ms=(time.perf_counter() - t0) * 1000,
+                            )
+                        )
                         if attempt < MAX_ATTEMPTS:
                             time.sleep(backoff_s * attempt)
                 outcomes.append(ok)
@@ -161,7 +223,12 @@ def dispatch_alert(session_factory: Callable, settings: Settings, alert_id: int,
                 alert.status, alert.delivered_at = "partially_delivered", datetime.now(timezone.utc)
             else:
                 alert.status = "failed"
-        write_audit(db, "alert-service", "alert_dispatched", f"alert/{alert.id}",
-                    {"status": alert.status, "severity": alert.severity, "kind": alert.kind})
+        write_audit(
+            db,
+            "alert-service",
+            "alert_dispatched",
+            f"alert/{alert.id}",
+            {"status": alert.status, "severity": alert.severity, "kind": alert.kind},
+        )
         log.info("alert %s -> %s", alert.id, alert.status)
         return alert.status

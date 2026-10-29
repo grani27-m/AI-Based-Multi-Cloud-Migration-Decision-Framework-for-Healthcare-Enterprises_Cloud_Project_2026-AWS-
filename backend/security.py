@@ -7,6 +7,7 @@ Password hashing  : PBKDF2-HMAC-SHA256, per-user 16-byte salt, 310,000 iteration
 Tokens            : JWT HS256 (PyJWT) with sub, role, iss, aud, iat, exp, jti.
 Roles             : admin, doctor, auditor (people) and device (ingestion service accounts).
 """
+
 from __future__ import annotations
 
 import base64
@@ -59,19 +60,34 @@ class Principal:
     jti: str = ""
 
 
-def create_access_token(user_id: int, username: str, role: str, secret: str, issuer: str, audience: str,
-                        minutes: int) -> tuple[str, datetime]:
+def create_access_token(
+    user_id: int, username: str, role: str, secret: str, issuer: str, audience: str, minutes: int
+) -> tuple[str, datetime]:
     now = datetime.now(timezone.utc)
     exp = now + timedelta(minutes=minutes)
-    payload = {"sub": str(user_id), "username": username, "role": role, "iss": issuer, "aud": audience,
-               "iat": now, "exp": exp, "jti": uuid.uuid4().hex}
+    payload = {
+        "sub": str(user_id),
+        "username": username,
+        "role": role,
+        "iss": issuer,
+        "aud": audience,
+        "iat": now,
+        "exp": exp,
+        "jti": uuid.uuid4().hex,
+    }
     return jwt.encode(payload, secret, algorithm="HS256"), exp
 
 
 def decode_access_token(token: str, secret: str, issuer: str, audience: str) -> Principal:
     """Raises jwt.PyJWTError subclasses on any problem (expired, bad signature, wrong aud/iss)."""
-    p = jwt.decode(token, secret, algorithms=["HS256"], issuer=issuer, audience=audience,
-                   options={"require": ["exp", "iat", "sub", "iss", "aud"]})
+    p = jwt.decode(
+        token,
+        secret,
+        algorithms=["HS256"],
+        issuer=issuer,
+        audience=audience,
+        options={"require": ["exp", "iat", "sub", "iss", "aud"]},
+    )
     if p.get("role") not in ROLES:
         raise jwt.InvalidTokenError("unknown role")
     return Principal(user_id=int(p["sub"]), username=p["username"], role=p["role"], jti=p.get("jti", ""))

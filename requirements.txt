@@ -1,77 +1,16 @@
-# ============================================================
-#  Telemedicine Workload Offloader — Python Dependencies
-#  Production + Development requirements
-# ============================================================
-
-# ── Web Framework ─────────────────────────────────────────────
-fastapi==0.111.0
-uvicorn[standard]==0.29.0
-python-multipart==0.0.9
-
-# ── Pydantic (data validation) ────────────────────────────────
-pydantic==2.7.1
-pydantic-settings==2.2.1
-
-# ── Database ──────────────────────────────────────────────────
-sqlalchemy==2.0.30
-asyncpg==0.29.0          # async PostgreSQL driver
-alembic==1.13.1          # database migrations
-psycopg2-binary==2.9.9   # sync driver (for Alembic CLI)
-
-# ── Redis ─────────────────────────────────────────────────────
-redis==5.0.4
-
-# ── Authentication ────────────────────────────────────────────
-python-jose[cryptography]==3.3.0   # JWT
-passlib[bcrypt]==1.7.4             # bcrypt password hashing
-
-# ── MQTT ──────────────────────────────────────────────────────
-paho-mqtt==1.6.1
-
-# ── ML / Prediction ───────────────────────────────────────────
-numpy==1.26.4
-pandas==2.2.2
-scikit-learn==1.4.2
-tensorflow==2.16.1       # LSTM model (CPU)
-joblib==1.4.2
-
-# ── MLflow ────────────────────────────────────────────────────
-mlflow==2.12.2
-
-# ── HTTP client (alerts, RIPE Atlas) ─────────────────────────
-httpx==0.27.0
-
-# ── Alerts ────────────────────────────────────────────────────
-# (email via built-in smtplib, telegram via httpx — no extra dep needed)
-
-# ── Dashboard ─────────────────────────────────────────────────
-streamlit==1.35.0
-plotly==5.22.0
-
-# ── Monitoring ────────────────────────────────────────────────
-prometheus-client==0.20.0
-
-# ── Data generation ───────────────────────────────────────────
-matplotlib==3.9.0
-requests==2.31.0
-
-# ── Structured Logging ────────────────────────────────────────
-structlog==24.2.0        # JSON-line logs with request_id per request
-
-# ── Rate Limiting ─────────────────────────────────────────────
-slowapi==0.1.9           # FastAPI rate limiter (wraps limits library)
-
-# ── Load Testing ──────────────────────────────────────────────
-locust==2.28.0           # Run: locust -f scripts/load_test.py
-
-# ── PhysioNet ECG data ────────────────────────────────────────
-wfdb==4.1.2              # Read PhysioNet WFDB format (BIDMC vitals)
-
-# ── Testing ───────────────────────────────────────────────────
-pytest==8.2.0
-pytest-asyncio==0.23.7
-pytest-cov==5.0.0
-httpx==0.27.0            # FastAPI TestClient (asyncio)
-
-# ── Linting ───────────────────────────────────────────────────
-ruff==0.4.4
+# Runtime (API, data pipeline, evaluation). Tested on Python 3.13 (works on 3.11+).
+# TensorFlow is NOT needed to serve predictions: the API uses the exported numpy LSTM weights.
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+SQLAlchemy==2.1.6
+alembic==1.20.1
+psycopg2-binary==2.9.13
+PyJWT==2.15.0
+httpx==0.28.1
+requests==2.34.2
+numpy==2.5.3
+pandas==3.0.5
+scikit-learn==1.9.1
+matplotlib==3.11.2
+prometheus-client==0.26.0

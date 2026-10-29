@@ -1,0 +1,34 @@
+flowchart LR
+  subgraph DATA["Data sources (Charles)"]
+    RA[("RIPE Atlas API\nmsm 1001/1004 · 20 probes\n756,495 real pings")]
+    BI[("PhysioNet BIDMC\n53 ICU records")]
+    SIM["Simulator\n(labelled synthetic)"]
+  end
+  subgraph ML["Offline ML pipeline (Charles)"]
+    DL["ripe_atlas.py\ndownload + SHA-256"] --> DS["dataset.py\nclean · chronological split"]
+    DS --> TR["train.py\nstacked LSTM (TensorFlow)"] --> EV["evaluate.py\nvs persistence/EWMA/ridge"]
+    TR --> ART[("models/latency_lstm\nweights.npz + scaler")]
+  end
+  RA --> DL
+  subgraph CLIENTS["Ingestion"]
+    REP["replay / stream_events.py"]
+    MQ["MQTT bridge (optional)"]
+  end
+  BI --> REP
+  SIM --> REP
+  REP -->|"HTTPS + JWT"| API
+  MQ -->|"HTTPS + JWT"| API
+  subgraph APP["FastAPI backend (Rani)"]
+    API["POST /api/v1/events\nvalidation · idempotency"] --> P["predict_service\nnumpy LSTM (Charles)"]
+    P --> D["decide()\nvetoes + AHP (Tanmay)"]
+    D --> X["Executor\nretry · CLOUD→EDGE fallback"]
+    X --> EA["local-edge-simulator\n→ AWS IoT Greengrass (planned)"]
+    X --> CA["local-cloud-object-store\n→ Amazon S3 (IaC ready)"]
+    API --> AU["hash-chained audit"]
+    D --> AL["alerts + delivery log\nTelegram · SMTP · webhook · SNS"]
+  end
+  ART --> P
+  APP --> DB[("PostgreSQL / SQLite\n9 tables · Alembic")]
+  UI["React dashboard\n(all pages via API)"] -->|"REST /api/v1 + JWT"| API
+  APP --> MET["/metrics → Prometheus"]
+  D -.->|"same code"| LAM["AWS Lambda + HTTP API\n(IaC ready, not deployed)"]

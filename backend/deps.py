@@ -4,6 +4,7 @@ backend/deps.py  —  Owner: Rani Gupta
 FastAPI dependencies: DB session, authenticated principal, permission checks,
 per-user rate limiting.
 """
+
 from __future__ import annotations
 
 import threading
@@ -27,19 +28,23 @@ def get_db(request: Request) -> Iterator[Session]:
         yield s
 
 
-def get_principal(request: Request, creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
-                  db: Session = Depends(get_db)) -> Principal:
-    unauthorized = HTTPException(status.HTTP_401_UNAUTHORIZED, "invalid or missing bearer token",
-                                 headers={"WWW-Authenticate": "Bearer"})
+def get_principal(
+    request: Request, creds: HTTPAuthorizationCredentials | None = Depends(_bearer), db: Session = Depends(get_db)
+) -> Principal:
+    unauthorized = HTTPException(
+        status.HTTP_401_UNAUTHORIZED, "invalid or missing bearer token", headers={"WWW-Authenticate": "Bearer"}
+    )
     if creds is None or creds.scheme.lower() != "bearer":
         raise unauthorized
     s = request.app.state.settings
     try:
         p = decode_access_token(creds.credentials, s.secret_key, s.jwt_issuer, s.jwt_audience)
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "token expired", headers={"WWW-Authenticate": "Bearer"})
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED, "token expired", headers={"WWW-Authenticate": "Bearer"}
+        ) from None
     except jwt.PyJWTError:
-        raise unauthorized
+        raise unauthorized from None
     u = db.get(User, p.user_id)
     if u is None or not u.is_active or u.role != p.role:  # deactivated users / changed roles lose access at once
         raise unauthorized
@@ -53,6 +58,7 @@ def require(permission: str):
         if p.role not in allowed:
             raise HTTPException(status.HTTP_403_FORBIDDEN, f"role '{p.role}' may not perform '{permission}'")
         return p
+
     return _dep
 
 
@@ -71,6 +77,7 @@ class RateLimiter:
             while q and now - q[0] > 60:
                 q.popleft()
             if len(q) >= self.per_minute:
-                raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "rate limit exceeded",
-                                    headers={"Retry-After": "60"})
+                raise HTTPException(
+                    status.HTTP_429_TOO_MANY_REQUESTS, "rate limit exceeded", headers={"Retry-After": "60"}
+                )
             q.append(now)

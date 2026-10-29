@@ -17,6 +17,7 @@ aws-s3                       boto3 put_object to S3_BUCKET                Amazon
 Nothing in this module claims an AWS action happened unless the aws-s3 adapter was used
 and S3 returned success.
 """
+
 from __future__ import annotations
 
 import json
@@ -51,11 +52,15 @@ def _processed_record(payload: dict, where: str) -> dict:
     w = payload.get("network_window") or []
     rtts = [o.get("rtt_avg_ms") for o in w if o.get("rtt_avg_ms") is not None]
     return {
-        "event_id": payload["event_id"], "device_id": payload["device_id"], "processed_at": where,
+        "event_id": payload["event_id"],
+        "device_id": payload["device_id"],
+        "processed_at": where,
         "processed_ts": datetime.now(timezone.utc).isoformat(),
-        "criticality": payload.get("criticality"), "vitals": payload.get("vitals"),
+        "criticality": payload.get("criticality"),
+        "vitals": payload.get("vitals"),
         "window_rtt_mean_ms": (sum(rtts) / len(rtts)) if rtts else None,
-        "predicted_rtt_ms": payload.get("predicted_rtt_ms"), "decision_reason": payload.get("reason"),
+        "predicted_rtt_ms": payload.get("predicted_rtt_ms"),
+        "decision_reason": payload.get("reason"),
     }
 
 
@@ -75,8 +80,11 @@ class LocalEdgeAdapter:
         f = self.dir / f"{datetime.now(timezone.utc):%Y-%m-%d}.jsonl"
         with self._lock, f.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(rec) + "\n")
-        return AdapterOutput(self.name, f"file://{f.name}#{payload['event_id']}", {"local_alert_raised": bool(
-            payload.get("reason") == "override_critical_patient")})
+        return AdapterOutput(
+            self.name,
+            f"file://{f.name}#{payload['event_id']}",
+            {"local_alert_raised": bool(payload.get("reason") == "override_critical_patient")},
+        )
 
 
 class LocalCloudObjectStoreAdapter:
@@ -103,6 +111,7 @@ class S3CloudAdapter:
 
     def __init__(self, bucket: str):
         import boto3  # optional dependency, only needed when CLOUD_ADAPTER=s3
+
         self.bucket = bucket
         self.s3 = boto3.client("s3")
 
@@ -112,8 +121,12 @@ class S3CloudAdapter:
         now = datetime.now(timezone.utc)
         key = f"processed/{now:%Y/%m/%d}/{payload['device_id']}/{payload['event_id']}.json"
         try:
-            r = self.s3.put_object(Bucket=self.bucket, Key=key, ServerSideEncryption="AES256",
-                                   Body=json.dumps(_processed_record(payload, "CLOUD")).encode())
+            r = self.s3.put_object(
+                Bucket=self.bucket,
+                Key=key,
+                ServerSideEncryption="AES256",
+                Body=json.dumps(_processed_record(payload, "CLOUD")).encode(),
+            )
         except Exception as exc:  # botocore errors
             raise ExecutionError(f"S3 put_object failed: {type(exc).__name__}") from exc
         return AdapterOutput(self.name, f"s3://{self.bucket}/{key}", {"etag": r.get("ETag")})
@@ -124,7 +137,7 @@ class ExecutionOutcome:
     requested_destination: str
     final_destination: str | None
     adapter: str
-    status: str               # success | fallback_success | failed
+    status: str  # success | fallback_success | failed
     attempts: int
     attempt_log: list
     duration_ms: float
@@ -143,8 +156,7 @@ class Executor:
     a CRITICAL execution_failure alert).
     """
 
-    def __init__(self, edge: ExecutionAdapter, cloud: ExecutionAdapter, max_attempts: int = 3,
-                 backoff_s: float = 0.05):
+    def __init__(self, edge: ExecutionAdapter, cloud: ExecutionAdapter, max_attempts: int = 3, backoff_s: float = 0.05):
         self.adapters = {"EDGE": edge, "CLOUD": cloud}
         self.max_attempts = max_attempts
         self.backoff_s = backoff_s
@@ -155,13 +167,27 @@ class Executor:
             t0 = time.perf_counter()
             try:
                 out = adapter.execute(payload)
-                log.append({"destination": dest, "adapter": adapter.name, "attempt": attempt, "ok": True,
-                            "ms": round((time.perf_counter() - t0) * 1000, 3)})
+                log.append(
+                    {
+                        "destination": dest,
+                        "adapter": adapter.name,
+                        "attempt": attempt,
+                        "ok": True,
+                        "ms": round((time.perf_counter() - t0) * 1000, 3),
+                    }
+                )
                 return out
             except Exception as exc:
-                log.append({"destination": dest, "adapter": adapter.name, "attempt": attempt, "ok": False,
-                            "error": f"{type(exc).__name__}: {exc}"[:300],
-                            "ms": round((time.perf_counter() - t0) * 1000, 3)})
+                log.append(
+                    {
+                        "destination": dest,
+                        "adapter": adapter.name,
+                        "attempt": attempt,
+                        "ok": False,
+                        "error": f"{type(exc).__name__}: {exc}"[:300],
+                        "ms": round((time.perf_counter() - t0) * 1000, 3),
+                    }
+                )
                 if attempt < self.max_attempts:
                     time.sleep(self.backoff_s * attempt)
         return None
@@ -178,8 +204,13 @@ class Executor:
             if out:
                 status, final = "fallback_success", "EDGE"
         return ExecutionOutcome(
-            requested_destination=destination, final_destination=final,
-            adapter=out.adapter if out else self.adapters[destination].name, status=status, attempts=len(log),
-            attempt_log=log, duration_ms=round((time.perf_counter() - t0) * 1000, 3),
+            requested_destination=destination,
+            final_destination=final,
+            adapter=out.adapter if out else self.adapters[destination].name,
+            status=status,
+            attempts=len(log),
+            attempt_log=log,
+            duration_ms=round((time.perf_counter() - t0) * 1000, 3),
             output_ref=out.output_ref if out else None,
-            error=None if status != "failed" else "; ".join(e.get("error", "") for e in log if not e["ok"])[:1000])
+            error=None if status != "failed" else "; ".join(e.get("error", "") for e in log if not e["ok"])[:1000],
+        )

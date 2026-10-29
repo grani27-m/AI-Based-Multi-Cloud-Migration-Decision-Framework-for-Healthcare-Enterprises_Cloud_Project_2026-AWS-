@@ -5,6 +5,7 @@ SQLAlchemy 2.0 engine/session handling. PostgreSQL (docker-compose, recommended 
 the shared system) and SQLite (zero-setup local runs and tests) are both supported;
 the schema is created ONLY by Alembic migrations (migrations/versions/*).
 """
+
 from __future__ import annotations
 
 from contextlib import contextmanager
@@ -35,6 +36,7 @@ def make_engine(url: str) -> Engine:
             cur.execute("PRAGMA foreign_keys=ON")
             cur.execute("PRAGMA journal_mode=WAL")
             cur.close()
+
         return eng
     return create_engine(url, pool_pre_ping=True, pool_size=10, max_overflow=20)
 

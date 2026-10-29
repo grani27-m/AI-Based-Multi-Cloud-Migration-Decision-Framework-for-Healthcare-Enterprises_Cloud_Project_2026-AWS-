@@ -1,4 +1,5 @@
 """Authentication and user management.  Owner: Rani Gupta"""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -26,12 +27,17 @@ def login(body: LoginIn, request: Request, db: Session = Depends(get_db)):
         write_audit(db, body.username[:64], "login_failed", "auth", {})
         db.commit()
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "invalid username or password")
-    token, exp = create_access_token(u.id, u.username, u.role, s.secret_key, s.jwt_issuer, s.jwt_audience,
-                                     s.access_token_minutes)
+    token, exp = create_access_token(
+        u.id, u.username, u.role, s.secret_key, s.jwt_issuer, s.jwt_audience, s.access_token_minutes
+    )
     u.last_login_at = datetime.now(timezone.utc)
     write_audit(db, u.username, "login", "auth", {"role": u.role})
-    return {"access_token": token, "token_type": "bearer", "expires_at": exp.isoformat(),
-            "user": {"id": u.id, "username": u.username, "role": u.role, "full_name": u.full_name}}
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "expires_at": exp.isoformat(),
+        "user": {"id": u.id, "username": u.username, "role": u.role, "full_name": u.full_name},
+    }
 
 
 @router.get("/auth/me")
@@ -46,12 +52,17 @@ def list_users(_: Principal = Depends(require("users:manage")), db: Session = De
 
 
 @router.post("/users", response_model=UserOut, status_code=201)
-def create_user(body: UserCreate, request: Request, p: Principal = Depends(require("users:manage")),
-                db: Session = Depends(get_db)):
+def create_user(
+    body: UserCreate, request: Request, p: Principal = Depends(require("users:manage")), db: Session = Depends(get_db)
+):
     if db.execute(select(User).where(User.username == body.username)).scalar_one_or_none():
         raise HTTPException(status.HTTP_409_CONFLICT, "username already exists")
-    u = User(username=body.username, full_name=body.full_name, role=body.role,
-             password_hash=hash_password(body.password, request.app.state.settings.password_iterations))
+    u = User(
+        username=body.username,
+        full_name=body.full_name,
+        role=body.role,
+        password_hash=hash_password(body.password, request.app.state.settings.password_iterations),
+    )
     db.add(u)
     db.flush()
     write_audit(db, p.username, "user_created", f"user/{u.id}", {"username": u.username, "role": u.role})
@@ -59,8 +70,13 @@ def create_user(body: UserCreate, request: Request, p: Principal = Depends(requi
 
 
 @router.patch("/users/{user_id}", response_model=UserOut)
-def update_user(user_id: int, is_active: bool | None = None, role: str | None = None,
-                p: Principal = Depends(require("users:manage")), db: Session = Depends(get_db)):
+def update_user(
+    user_id: int,
+    is_active: bool | None = None,
+    role: str | None = None,
+    p: Principal = Depends(require("users:manage")),
+    db: Session = Depends(get_db),
+):
     u = db.get(User, user_id)
     if u is None:
         raise HTTPException(404, "user not found")

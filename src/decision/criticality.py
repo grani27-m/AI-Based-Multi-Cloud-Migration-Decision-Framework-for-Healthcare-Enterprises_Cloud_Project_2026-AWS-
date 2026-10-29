@@ -17,6 +17,7 @@ LIMITATIONS (stated wherever the score is shown): temperature, systolic BP,
 consciousness and supplemental O2 are not available, so this is an ILLUSTRATIVE
 research score, not a clinically validated early-warning system.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

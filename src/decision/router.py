@@ -23,6 +23,7 @@ Invalid input never produces a silent decision: DecisionInputError is raised (HT
 A missing latency forecast with a valid criticality returns EDGE with
 reason "prediction_unavailable_safe_default".
 """
+
 from __future__ import annotations
 
 import math
@@ -31,14 +32,22 @@ from dataclasses import asdict, dataclass, field
 from typing import Optional
 
 from src.decision.ahp import weight_set
-from src.decision.override_rules import (EMERGENCY_CRITICALITY_THRESHOLD, LATENCY_VETO_MS,
-                                         check_emergency_override, check_network_veto)
+from src.decision.override_rules import (
+    EMERGENCY_CRITICALITY_THRESHOLD,
+    LATENCY_VETO_MS,
+    check_emergency_override,
+    check_network_veto,
+)
 
 ENGINE_VERSION = "ahp-2stage-1.1"
 LATENCY_NORMALISATION_MS = 500.0
 WEIGHT_SET = os.environ.get("AHP_WEIGHT_SET", "eigenvector")
-REASONS = ("override_critical_patient", "network_degradation_veto", "prediction_unavailable_safe_default",
-           "ahp_decision")
+REASONS = (
+    "override_critical_patient",
+    "network_degradation_veto",
+    "prediction_unavailable_safe_default",
+    "ahp_decision",
+)
 
 
 class DecisionInputError(ValueError):
@@ -55,8 +64,10 @@ class DecisionInput:
     def validate(self) -> None:
         if not isinstance(self.device_id, str) or not self.device_id.strip():
             raise DecisionInputError("device_id is required")
-        for name, v, lo, hi in (("criticality", self.criticality, 0.0, 10.0),
-                                ("cloud_cost_index", self.cloud_cost_index, 0.0, 1.0)):
+        for name, v, lo, hi in (
+            ("criticality", self.criticality, 0.0, 10.0),
+            ("cloud_cost_index", self.cloud_cost_index, 0.0, 1.0),
+        ):
             if not isinstance(v, (int, float)) or isinstance(v, bool) or math.isnan(v) or not lo <= v <= hi:
                 raise DecisionInputError(f"{name} must be a number in [{lo}, {hi}], got {v!r}")
         p = self.predicted_latency_ms
@@ -67,9 +78,9 @@ class DecisionInput:
 @dataclass
 class DecisionResult:
     device_id: str
-    destination: str            # EDGE | CLOUD
-    reason: str                 # one of REASONS
-    veto: str                   # none | emergency | network | missing_prediction
+    destination: str  # EDGE | CLOUD
+    reason: str  # one of REASONS
+    veto: str  # none | emergency | network | missing_prediction
     edge_score: Optional[float]
     cloud_score: Optional[float]
     weights: dict
@@ -85,8 +96,11 @@ class DecisionResult:
 
 
 def normalise(criticality: float, latency_ms: float, cost: float) -> dict:
-    return {"criticality": criticality / 10.0, "latency": min(latency_ms / LATENCY_NORMALISATION_MS, 1.0),
-            "cost": min(max(cost, 0.0), 1.0)}
+    return {
+        "criticality": criticality / 10.0,
+        "latency": min(latency_ms / LATENCY_NORMALISATION_MS, 1.0),
+        "cost": min(max(cost, 0.0), 1.0),
+    }
 
 
 def decide(inp: DecisionInput, weight_set_name: str | None = None) -> DecisionResult:
@@ -97,44 +111,81 @@ def decide(inp: DecisionInput, weight_set_name: str | None = None) -> DecisionRe
     base = dict(device_id=inp.device_id, weights=w, weight_set=ws["name"], thresholds=thresholds)
 
     if check_emergency_override(inp.criticality):
-        return DecisionResult(destination="EDGE", reason="override_critical_patient", veto="emergency",
-                              edge_score=None, cloud_score=None, normalised={},
-                              explanation=f"Criticality {inp.criticality:.2f} >= {EMERGENCY_CRITICALITY_THRESHOLD}: "
-                                          "emergency override forces local EDGE processing; AHP not evaluated.",
-                              **base)
+        return DecisionResult(
+            destination="EDGE",
+            reason="override_critical_patient",
+            veto="emergency",
+            edge_score=None,
+            cloud_score=None,
+            normalised={},
+            explanation=f"Criticality {inp.criticality:.2f} >= {EMERGENCY_CRITICALITY_THRESHOLD}: "
+            "emergency override forces local EDGE processing; AHP not evaluated.",
+            **base,
+        )
     if inp.predicted_latency_ms is None:
-        return DecisionResult(destination="EDGE", reason="prediction_unavailable_safe_default",
-                              veto="missing_prediction", edge_score=None, cloud_score=None, normalised={},
-                              explanation="No latency forecast available; routed to EDGE as the safe default.",
-                              **base)
+        return DecisionResult(
+            destination="EDGE",
+            reason="prediction_unavailable_safe_default",
+            veto="missing_prediction",
+            edge_score=None,
+            cloud_score=None,
+            normalised={},
+            explanation="No latency forecast available; routed to EDGE as the safe default.",
+            **base,
+        )
     if check_network_veto(inp.predicted_latency_ms):
-        return DecisionResult(destination="EDGE", reason="network_degradation_veto", veto="network",
-                              edge_score=None, cloud_score=None, normalised={},
-                              explanation=f"Predicted latency {inp.predicted_latency_ms:.1f} ms >= {LATENCY_VETO_MS} ms: "
-                                          "cloud path considered unreliable; EDGE forced.",
-                              **base)
+        return DecisionResult(
+            destination="EDGE",
+            reason="network_degradation_veto",
+            veto="network",
+            edge_score=None,
+            cloud_score=None,
+            normalised={},
+            explanation=f"Predicted latency {inp.predicted_latency_ms:.1f} ms >= {LATENCY_VETO_MS} ms: "
+            "cloud path considered unreliable; EDGE forced.",
+            **base,
+        )
 
     n = normalise(inp.criticality, inp.predicted_latency_ms, inp.cloud_cost_index)
-    edge_c = {"criticality": w["criticality"] * n["criticality"] ** 2, "latency": w["latency"] * n["latency"],
-              "cost": w["cost"] * n["cost"]}
-    cloud_c = {"criticality": w["criticality"] * (1 - n["criticality"]) ** 2,
-               "latency": w["latency"] * (1 - n["latency"]), "cost": w["cost"] * (1 - n["cost"])}
+    edge_c = {
+        "criticality": w["criticality"] * n["criticality"] ** 2,
+        "latency": w["latency"] * n["latency"],
+        "cost": w["cost"] * n["cost"],
+    }
+    cloud_c = {
+        "criticality": w["criticality"] * (1 - n["criticality"]) ** 2,
+        "latency": w["latency"] * (1 - n["latency"]),
+        "cost": w["cost"] * (1 - n["cost"]),
+    }
     edge, cloud = sum(edge_c.values()), sum(cloud_c.values())
     dest = "EDGE" if edge >= cloud else "CLOUD"
     diff = {k: edge_c[k] - cloud_c[k] for k in edge_c}
     driver = max(diff, key=lambda k: abs(diff[k]) if (diff[k] >= 0) == (dest == "EDGE") else -1)
-    return DecisionResult(destination=dest, reason="ahp_decision", veto="none", edge_score=round(edge, 6),
-                          cloud_score=round(cloud, 6), normalised={k: round(v, 6) for k, v in n.items()},
-                          contributions={"edge": {k: round(v, 6) for k, v in edge_c.items()},
-                                         "cloud": {k: round(v, 6) for k, v in cloud_c.items()}},
-                          explanation=f"AHP score EDGE {edge:.3f} vs CLOUD {cloud:.3f}; {dest} chosen, "
-                                      f"mainly driven by {driver}.",
-                          **base)
+    return DecisionResult(
+        destination=dest,
+        reason="ahp_decision",
+        veto="none",
+        edge_score=round(edge, 6),
+        cloud_score=round(cloud, 6),
+        normalised={k: round(v, 6) for k, v in n.items()},
+        contributions={
+            "edge": {k: round(v, 6) for k, v in edge_c.items()},
+            "cloud": {k: round(v, 6) for k, v in cloud_c.items()},
+        },
+        explanation=f"AHP score EDGE {edge:.3f} vs CLOUD {cloud:.3f}; {dest} chosen, mainly driven by {driver}.",
+        **base,
+    )
 
 
-def route_decision(device_id: str, patient_criticality_score: float, predicted_latency_ms: float,
-                   current_cloud_cost_index: float) -> dict:
+def route_decision(
+    device_id: str, patient_criticality_score: float, predicted_latency_ms: float, current_cloud_cost_index: float
+) -> dict:
     """Backwards-compatible wrapper with the original function signature and keys."""
     r = decide(DecisionInput(device_id, patient_criticality_score, predicted_latency_ms, current_cloud_cost_index))
-    return {"device_id": r.device_id, "routing_decision": r.destination, "reason": r.reason,
-            "cloud_score": r.cloud_score, "edge_score": r.edge_score}
+    return {
+        "device_id": r.device_id,
+        "routing_decision": r.destination,
+        "reason": r.reason,
+        "cloud_score": r.cloud_score,
+        "edge_score": r.edge_score,
+    }

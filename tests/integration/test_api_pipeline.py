@@ -1,4 +1,5 @@
 """End-to-end API tests: ingest -> real predictor -> real AHP -> execution -> DB -> audit -> alerts -> dashboard."""
+
 from __future__ import annotations
 
 from tests.conftest import event
@@ -46,8 +47,9 @@ def test_emergency_vitals_trigger_override_alert_and_delivery_log(client, header
 
 
 def test_degraded_network_triggers_network_veto(client, headers):
-    r = client.post("/api/v1/events", json=event("test-evt-veto", criticality=1.0, base=300, step=15),
-                    headers=headers["device"])
+    r = client.post(
+        "/api/v1/events", json=event("test-evt-veto", criticality=1.0, base=300, step=15), headers=headers["device"]
+    )
     b = r.json()
     if b["prediction"]["predicted_rtt_ms"] >= 300:
         assert b["decision"]["reason"] == "network_degradation_veto" and b["decision"]["destination"] == "EDGE"
@@ -67,16 +69,22 @@ def test_idempotent_duplicate_event_is_not_reprocessed(client, headers):
 
 
 def test_cloud_failure_falls_back_to_edge(client, headers):
-    r = client.post("/api/v1/events", json=event("test-evt-cfail", criticality=0.5, simulate_failure="cloud"),
-                    headers=headers["device"])
+    r = client.post(
+        "/api/v1/events",
+        json=event("test-evt-cfail", criticality=0.5, simulate_failure="cloud"),
+        headers=headers["device"],
+    )
     ex = r.json()["execution"]
     assert ex["requested_destination"] == "CLOUD" and ex["status"] == "fallback_success"
     assert ex["final_destination"] == "EDGE" and ex["attempts"] == 4  # 3 cloud tries + 1 edge
 
 
 def test_edge_failure_is_reported_and_alerted(client, headers):
-    r = client.post("/api/v1/events", json=event("test-evt-efail", criticality=9.5, simulate_failure="both"),
-                    headers=headers["device"])
+    r = client.post(
+        "/api/v1/events",
+        json=event("test-evt-efail", criticality=9.5, simulate_failure="both"),
+        headers=headers["device"],
+    )
     b = r.json()
     assert b["status"] == "failed" and b["execution"]["status"] == "failed"
     assert {a["kind"] for a in b["alerts"]} == {"emergency_override", "execution_failure"}
@@ -89,7 +97,10 @@ def test_invalid_payloads_rejected_without_partial_writes(client, headers):
     short["network_window"] = short["network_window"][:5]
     assert client.post("/api/v1/events", json=short, headers=headers["device"]).status_code == 422
     unordered = event("test-evt-order")
-    unordered["network_window"][3], unordered["network_window"][4] = unordered["network_window"][4], unordered["network_window"][3]
+    unordered["network_window"][3], unordered["network_window"][4] = (
+        unordered["network_window"][4],
+        unordered["network_window"][3],
+    )
     assert client.post("/api/v1/events", json=unordered, headers=headers["device"]).status_code == 422
     both = event("test-evt-both", criticality=2, vitals={"hr": 80, "resp": 15, "spo2": 98})
     assert client.post("/api/v1/events", json=both, headers=headers["device"]).status_code == 422
@@ -108,7 +119,9 @@ def test_oversized_body_rejected(client, headers):
 def test_dashboard_counts_reconcile_with_records(client, headers):
     client.post("/api/v1/events", json=event("t-1", criticality=1.0), headers=headers["device"])
     client.post("/api/v1/events", json=event("t-2", criticality=9.6), headers=headers["device"])
-    client.post("/api/v1/events", json=event("t-3", criticality=0.2, simulate_failure="both"), headers=headers["device"])
+    client.post(
+        "/api/v1/events", json=event("t-3", criticality=0.2, simulate_failure="both"), headers=headers["device"]
+    )
     s = client.get("/api/v1/dashboard/summary", headers=headers["auditor"]).json()
     assert s["events"]["total"] == 3
     assert s["decisions"]["total"] == 3
@@ -133,8 +146,11 @@ def test_audit_chain_records_pipeline_and_verifies(client, headers):
 
 
 def test_demo_run_simulated_and_replay(client, headers):
-    r = client.post("/api/v1/demo/run", json={"mode": "simulate", "count": 25, "scenario": "mixed", "seed": 3},
-                    headers=headers["admin"])
+    r = client.post(
+        "/api/v1/demo/run",
+        json={"mode": "simulate", "count": 25, "scenario": "mixed", "seed": 3},
+        headers=headers["admin"],
+    )
     assert r.status_code == 200 and r.json()["processed"] == 25
     r2 = client.post("/api/v1/demo/run", json={"mode": "replay", "count": 10, "seed": 3}, headers=headers["admin"])
     assert r2.status_code == 200 and r2.json()["processed"] == 10

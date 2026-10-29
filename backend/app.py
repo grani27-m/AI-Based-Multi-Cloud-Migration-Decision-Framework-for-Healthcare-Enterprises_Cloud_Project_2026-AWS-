@@ -7,6 +7,7 @@ the old backend/ package; see INITIAL_PROJECT_AUDIT.md).
     uvicorn backend.app:create_app --factory --host 0.0.0.0 --port 8000
     OpenAPI docs: http://localhost:8000/docs
 """
+
 from __future__ import annotations
 
 import logging
@@ -42,17 +43,26 @@ def _bootstrap_admin(db: Database, s: Settings) -> None:
         if session.execute(select(func.count()).select_from(User)).scalar_one() > 0:
             return
         if not (s.bootstrap_admin_username and s.bootstrap_admin_password):
-            log.warning("No users exist. Set BOOTSTRAP_ADMIN_USERNAME/BOOTSTRAP_ADMIN_PASSWORD or run "
-                        "`python -m scripts.create_user` to create the first admin.")
+            log.warning(
+                "No users exist. Set BOOTSTRAP_ADMIN_USERNAME/BOOTSTRAP_ADMIN_PASSWORD or run "
+                "`python -m scripts.create_user` to create the first admin."
+            )
             return
-        session.add(User(username=s.bootstrap_admin_username, full_name="Bootstrap administrator", role="admin",
-                         password_hash=hash_password(s.bootstrap_admin_password, s.password_iterations)))
+        session.add(
+            User(
+                username=s.bootstrap_admin_username,
+                full_name="Bootstrap administrator",
+                role="admin",
+                password_hash=hash_password(s.bootstrap_admin_password, s.password_iterations),
+            )
+        )
         session.flush()
         write_audit(session, "system", "user_bootstrapped", f"user/{s.bootstrap_admin_username}", {"role": "admin"})
 
 
-def create_app(settings: Settings | None = None, predictor: LatencyPredictor | None = None,
-               alert_channels: list | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None, predictor: LatencyPredictor | None = None, alert_channels: list | None = None
+) -> FastAPI:
     s = settings or Settings.from_env()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
@@ -61,9 +71,13 @@ def create_app(settings: Settings | None = None, predictor: LatencyPredictor | N
         yield
         app.state.db.dispose()
 
-    app = FastAPI(title="Healthcare Edge/Cloud Routing API", version=API_VERSION, lifespan=lifespan,
-                  description="Predict (LSTM on RIPE Atlas) -> decide (AHP + safety vetoes) -> execute (edge/cloud) "
-                              "-> persist, audit, alert. Research prototype; not a medical device.")
+    app = FastAPI(
+        title="Healthcare Edge/Cloud Routing API",
+        version=API_VERSION,
+        lifespan=lifespan,
+        description="Predict (LSTM on RIPE Atlas) -> decide (AHP + safety vetoes) -> execute (edge/cloud) "
+        "-> persist, audit, alert. Research prototype; not a medical device.",
+    )
     if s.auto_migrate:
         run_migrations(s.database_url)
     db = Database(s.database_url)
@@ -81,8 +95,13 @@ def create_app(settings: Settings | None = None, predictor: LatencyPredictor | N
     app.state.metrics = Metrics()
     app.state.dispatch_alert = partial(dispatch_alert, db.session, s, channels=channels)
 
-    app.add_middleware(CORSMiddleware, allow_origins=s.cors_origins, allow_credentials=False,
-                       allow_methods=["GET", "POST", "PATCH"], allow_headers=["Authorization", "Content-Type"])
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=s.cors_origins,
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "PATCH"],
+        allow_headers=["Authorization", "Content-Type"],
+    )
 
     @app.middleware("http")
     async def guard_and_time(request: Request, call_next):
@@ -105,6 +124,7 @@ def create_app(settings: Settings | None = None, predictor: LatencyPredictor | N
         return response
 
     from backend.routers import auth, dashboard, events, records
+
     for r in (auth.router, events.router, records.router, dashboard.router):
         app.include_router(r)
 
@@ -141,4 +161,5 @@ def create_app(settings: Settings | None = None, predictor: LatencyPredictor | N
             if full_path and f.is_file() and dist.resolve() in f.parents:
                 return FileResponse(f)
             return FileResponse(dist / "index.html")
+
     return app

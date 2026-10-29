@@ -4,6 +4,7 @@ backend/schemas.py  —  Owner: Rani Gupta (contract agreed with Charles and Tan
 Pydantic request/response models = the single shared event contract
 (documented in integration/API_CONTRACT.md).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -19,6 +20,7 @@ Source = Literal["simulated", "replay", "live", "test"]
 
 class NetworkObservation(BaseModel):
     """One network measurement round (same schema as a RIPE Atlas ping result after parsing)."""
+
     model_config = ConfigDict(extra="forbid")
     timestamp: datetime
     rtt_avg_ms: Optional[float] = Field(None, ge=0, le=5000)
@@ -46,8 +48,9 @@ class Vitals(BaseModel):
 
 class EventIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    event_id: Optional[str] = Field(None, pattern=ID_PATTERN,
-                                    description="client idempotency key; server generates one if absent")
+    event_id: Optional[str] = Field(
+        None, pattern=ID_PATTERN, description="client idempotency key; server generates one if absent"
+    )
     device_id: str = Field(..., pattern=ID_PATTERN)
     device_kind: str = Field("unknown", max_length=32)
     source: Source

@@ -1,0 +1,22 @@
+{
+  "grid": {
+    "criticality": "0-8.75 step 0.25",
+    "latency_ms": "0-290 step 10",
+    "cost": "0-1 step 0.1",
+    "points": 11880
+  },
+  "edge_share": {
+    "eigenvector": 0.3366161616161616,
+    "report": 0.33644781144781144,
+    "column_normalisation": 0.3366161616161616
+  },
+  "disagree_with_eigenvector": {
+    "report": 14,
+    "column_normalisation": 16
+  },
+  "edge_threshold_criticality_at_40ms_cost0.3": {
+    "eigenvector": 7.04,
+    "report": 7.02,
+    "column_normalisation": 7.07
+  }
+}

@@ -1,13 +1,22 @@
 """Tanmay's decision engine: AHP maths, vetoes, validation, determinism, explanations."""
+
 from __future__ import annotations
 
 import math
 
 import pytest
 
-from src.decision.ahp import (DEFAULT_PAIRWISE_MATRIX, AHPError, REPORTED_WEIGHTS, ahp_report,
-                              column_normalisation_weights, consistency, principal_eigenvector, validate_matrix,
-                              weight_set)
+from src.decision.ahp import (
+    DEFAULT_PAIRWISE_MATRIX,
+    AHPError,
+    REPORTED_WEIGHTS,
+    ahp_report,
+    column_normalisation_weights,
+    consistency,
+    principal_eigenvector,
+    validate_matrix,
+    weight_set,
+)
 from src.decision.criticality import criticality_from_vitals
 from src.decision.router import DecisionInput, DecisionInputError, decide, route_decision
 
@@ -49,6 +58,7 @@ def test_inconsistent_matrix_rejected():
     bad = [[1, 9, 1 / 9], [1 / 9, 1, 9], [9, 1 / 9, 1]]
     with pytest.raises(AHPError):
         from src.decision import ahp
+
         ahp.weight_set("eigenvector", bad)
 
 
@@ -76,9 +86,20 @@ def test_missing_prediction_is_safe_edge_default():
     assert r.destination == "EDGE" and r.reason == "prediction_unavailable_safe_default"
 
 
-@pytest.mark.parametrize("args", [("", 1, 10, .1), ("D", -0.1, 10, .1), ("D", 10.1, 10, .1), ("D", 1, -5, .1),
-                                  ("D", 1, 10, 1.5), ("D", math.nan, 10, .1), ("D", 1, math.nan, .1),
-                                  ("D", "5", 10, .1), ("D", True, 10, .1)])
+@pytest.mark.parametrize(
+    "args",
+    [
+        ("", 1, 10, 0.1),
+        ("D", -0.1, 10, 0.1),
+        ("D", 10.1, 10, 0.1),
+        ("D", 1, -5, 0.1),
+        ("D", 1, 10, 1.5),
+        ("D", math.nan, 10, 0.1),
+        ("D", 1, math.nan, 0.1),
+        ("D", "5", 10, 0.1),
+        ("D", True, 10, 0.1),
+    ],
+)
 def test_invalid_inputs_raise(args):
     with pytest.raises(DecisionInputError):
         decide(DecisionInput(*args))
@@ -114,12 +135,18 @@ def test_deterministic():
 
 def test_backward_compatible_wrapper():
     r = route_decision("ECG-101", 9.5, 210.5, 0.4)
-    assert r == {"device_id": "ECG-101", "routing_decision": "EDGE", "reason": "override_critical_patient",
-                 "cloud_score": None, "edge_score": None}
+    assert r == {
+        "device_id": "ECG-101",
+        "routing_decision": "EDGE",
+        "reason": "override_critical_patient",
+        "cloud_score": None,
+        "edge_score": None,
+    }
 
 
-@pytest.mark.parametrize("v,agg,score", [((75, 16, 98), 0, 0.0), ((95, 22, 95), 4, 5.71),
-                                          ((135, 26, 90), 9, 10.0), ((105, 21, 93), 5, 7.14)])
+@pytest.mark.parametrize(
+    "v,agg,score", [((75, 16, 98), 0, 0.0), ((95, 22, 95), 4, 5.71), ((135, 26, 90), 9, 10.0), ((105, 21, 93), 5, 7.14)]
+)
 def test_partial_news2_criticality(v, agg, score):
     r = criticality_from_vitals(*v)
     assert r.aggregate == agg and r.score == score
@@ -128,7 +155,7 @@ def test_partial_news2_criticality(v, agg, score):
 def test_news2_emergency_maps_to_override():
     assert criticality_from_vitals(120, 25, 92).aggregate == 7  # 2 + 3 + 2
     assert criticality_from_vitals(120, 25, 92).score >= 9.0
-    assert criticality_from_vitals(120, 25, 94).score < 9.0     # aggregate 6
+    assert criticality_from_vitals(120, 25, 94).score < 9.0  # aggregate 6
 
 
 def test_criticality_rejects_implausible():

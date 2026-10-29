@@ -21,6 +21,7 @@ downloaded; the age/gender header files are not needed and are not stored.
 Usage:  python -m data_ingestion.physionet_bidmc download
         python -m data_ingestion.physionet_bidmc build
 """
+
 from __future__ import annotations
 
 import argparse
@@ -68,19 +69,34 @@ def download() -> int:
         ok = digest == sums[n]
         if not ok:
             log.error("checksum mismatch for %s", n)
-        entries.append({"file": str(dest.relative_to(ROOT)), "url": f"{BASE}/{n}",
-                        "sha256": digest, "checksum_matches_physionet": ok})
+        entries.append(
+            {
+                "file": str(dest.relative_to(ROOT)),
+                "url": f"{BASE}/{n}",
+                "sha256": digest,
+                "checksum_matches_physionet": ok,
+            }
+        )
     (RAW / "LICENSE").write_bytes(_get(f"{BASE}/LICENSE"))
     META.parent.mkdir(parents=True, exist_ok=True)
-    META.write_text(json.dumps({
-        "dataset": "BIDMC PPG and Respiration Dataset v1.0.0",
-        "source": "https://physionet.org/content/bidmc/1.0.0/",
-        "licence": "Open Data Commons Attribution License v1.0",
-        "retrieved_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "files": entries,
-    }, indent=2), encoding="utf-8")
-    log.info("downloaded/verified %d numerics files (%d checksum failures)",
-             len(entries), sum(not e["checksum_matches_physionet"] for e in entries))
+    META.write_text(
+        json.dumps(
+            {
+                "dataset": "BIDMC PPG and Respiration Dataset v1.0.0",
+                "source": "https://physionet.org/content/bidmc/1.0.0/",
+                "licence": "Open Data Commons Attribution License v1.0",
+                "retrieved_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "files": entries,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    log.info(
+        "downloaded/verified %d numerics files (%d checksum failures)",
+        len(entries),
+        sum(not e["checksum_matches_physionet"] for e in entries),
+    )
     return 0 if all(e["checksum_matches_physionet"] for e in entries) else 1
 
 
@@ -107,8 +123,13 @@ def build() -> pd.DataFrame:
     clean = raw.dropna(subset=["hr", "resp", "spo2"]).drop_duplicates(["record_id", "t_s"])
     OUT.parent.mkdir(parents=True, exist_ok=True)
     clean.to_csv(OUT, index=False)
-    report = {"rows_raw": n_raw, "rows_clean": len(clean), "records": int(clean.record_id.nunique()),
-              "out_of_range_set_to_nan": invalid, "rows_dropped_unrecoverable": n_raw - len(clean)}
+    report = {
+        "rows_raw": n_raw,
+        "rows_clean": len(clean),
+        "records": int(clean.record_id.nunique()),
+        "out_of_range_set_to_nan": invalid,
+        "rows_dropped_unrecoverable": n_raw - len(clean),
+    }
     (ROOT / "dataset" / "metadata" / "bidmc_quality.json").write_text(json.dumps(report, indent=2))
     log.info("BIDMC build: %s", report)
     return clean

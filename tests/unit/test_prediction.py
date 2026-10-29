@@ -1,4 +1,5 @@
 """Charles's prediction pipeline: parsing, features, windows/splits, model inference, service contract."""
+
 from __future__ import annotations
 
 import json
@@ -20,8 +21,18 @@ ROOT = Path(__file__).resolve().parents[2]
 MODEL_DIR = ROOT / "models" / "latency_lstm"
 HAS_MODEL = (MODEL_DIR / "weights.npz").exists()
 
-PING = {"type": "ping", "msm_id": 1001, "prb_id": 1, "timestamp": 1792541012, "sent": 3, "rcvd": 3,
-        "min": 13.39, "max": 14.22, "avg": 13.86, "result": [{"rtt": 14.22}, {"rtt": 13.39}, {"rtt": 13.97}]}
+PING = {
+    "type": "ping",
+    "msm_id": 1001,
+    "prb_id": 1,
+    "timestamp": 1792541012,
+    "sent": 3,
+    "rcvd": 3,
+    "min": 13.39,
+    "max": 14.22,
+    "avg": 13.86,
+    "result": [{"rtt": 14.22}, {"rtt": 13.39}, {"rtt": 13.97}],
+}
 
 
 def test_parse_valid_ping_and_derived_fields():
@@ -35,9 +46,17 @@ def test_parse_total_loss_keeps_row_without_rtt():
     assert r["invalid_reason"] == "" and r["loss_pct"] == 100.0 and math.isnan(r["rtt_avg_ms"])
 
 
-@pytest.mark.parametrize("patch,reason", [({"sent": 0}, "bad_counts"), ({"rcvd": 5}, "bad_counts"),
-                                          ({"avg": 99999}, "bad_rtt"), ({"min": 20}, "bad_rtt"),
-                                          ({"error": "x"}, "probe_error"), ({"type": "traceroute"}, "not_ping")])
+@pytest.mark.parametrize(
+    "patch,reason",
+    [
+        ({"sent": 0}, "bad_counts"),
+        ({"rcvd": 5}, "bad_counts"),
+        ({"avg": 99999}, "bad_rtt"),
+        ({"min": 20}, "bad_rtt"),
+        ({"error": "x"}, "probe_error"),
+        ({"type": "traceroute"}, "not_ping"),
+    ],
+)
 def test_parse_flags_invalid(patch, reason):
     assert parse_result({**PING, **patch})["invalid_reason"] == reason
 
@@ -63,9 +82,20 @@ def _toy_frame(n=200, gap_at=None):
     ts = np.arange(n) * 240 + 1_700_000_000
     if gap_at:
         ts[gap_at:] += 3600
-    df = pd.DataFrame({"msm_id": 1001, "prb_id": 1, "timestamp": ts, "rtt_avg_ms": 20 + np.sin(np.arange(n)),
-                       "rtt_min_ms": 19.0, "rtt_max_ms": 22.0, "jitter_ms": 0.5, "loss_pct": 0.0,
-                       "group": "access_network", "series_id": "1001-1"})
+    df = pd.DataFrame(
+        {
+            "msm_id": 1001,
+            "prb_id": 1,
+            "timestamp": ts,
+            "rtt_avg_ms": 20 + np.sin(np.arange(n)),
+            "rtt_min_ms": 19.0,
+            "rtt_max_ms": 22.0,
+            "jitter_ms": 0.5,
+            "loss_pct": 0.0,
+            "group": "access_network",
+            "series_id": "1001-1",
+        }
+    )
     df["rtt_min_ms"] = df["rtt_avg_ms"] - 1
     gap = df["timestamp"].diff()
     df["segment"] = (gap.isna() | (gap > 360)).cumsum()
@@ -103,10 +133,15 @@ def test_fallback_is_explicitly_labelled(tmp_path):
     assert r.predicted_rtt_ms == 42.0  # = last observed RTT, NOT last*1.1
 
 
-@pytest.mark.parametrize("mutate,msg", [(lambda w: w[:19], "exactly 20"),
-                                        (lambda w: list(reversed(w)), "strictly increasing"),
-                                        (lambda w: [{**o, "loss_pct": 101} for o in w], "loss_pct"),
-                                        (lambda w: [{**o, "rtt_avg_ms": None} for o in w], "required")])
+@pytest.mark.parametrize(
+    "mutate,msg",
+    [
+        (lambda w: w[:19], "exactly 20"),
+        (lambda w: list(reversed(w)), "strictly increasing"),
+        (lambda w: [{**o, "loss_pct": 101} for o in w], "loss_pct"),
+        (lambda w: [{**o, "rtt_avg_ms": None} for o in w], "required"),
+    ],
+)
 def test_service_rejects_bad_windows(tmp_path, mutate, msg):
     with pytest.raises(PredictionInputError, match=msg):
         LatencyPredictor.load(tmp_path).predict(mutate(window()))

@@ -1,4 +1,5 @@
 """Telemetry ingestion and event history.  Owner: Rani Gupta"""
+
 from __future__ import annotations
 
 from typing import Optional
@@ -27,8 +28,9 @@ def schedule_alerts(request: Request, background: BackgroundTasks | None, alert_
 
 
 @router.post("/events", status_code=201)
-def ingest(body: EventIn, request: Request, background: BackgroundTasks,
-           p: Principal = Depends(require("events:create"))):
+def ingest(
+    body: EventIn, request: Request, background: BackgroundTasks, p: Principal = Depends(require("events:create"))
+):
     request.app.state.rate_limiter.check(p.user_id)
     try:
         result, alert_ids = process_event(request.app.state.pipeline, body, p)
@@ -40,10 +42,17 @@ def ingest(body: EventIn, request: Request, background: BackgroundTasks,
 
 
 @router.get("/events")
-def list_events(source: Optional[str] = None, device_id: Optional[str] = None, status: Optional[str] = None,
-                destination: Optional[str] = None, reason: Optional[str] = None,
-                limit: int = Query(50, ge=1, le=500), offset: int = Query(0, ge=0),
-                _: Principal = Depends(require("records:read")), db: Session = Depends(get_db)):
+def list_events(
+    source: Optional[str] = None,
+    device_id: Optional[str] = None,
+    status: Optional[str] = None,
+    destination: Optional[str] = None,
+    reason: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    _: Principal = Depends(require("records:read")),
+    db: Session = Depends(get_db),
+):
     q = select(TelemetryEvent)
     if destination or reason:
         q = q.join(RoutingDecision, RoutingDecision.telemetry_event_id == TelemetryEvent.id)
@@ -51,8 +60,11 @@ def list_events(source: Optional[str] = None, device_id: Optional[str] = None, s
             q = q.where(RoutingDecision.destination == destination)
         if reason:
             q = q.where(RoutingDecision.reason == reason)
-    for col, val in ((TelemetryEvent.source, source), (TelemetryEvent.device_id, device_id),
-                     (TelemetryEvent.status, status)):
+    for col, val in (
+        (TelemetryEvent.source, source),
+        (TelemetryEvent.device_id, device_id),
+        (TelemetryEvent.status, status),
+    ):
         if val:
             q = q.where(col == val)
     total = db.execute(select(func.count()).select_from(q.subquery())).scalar_one()
@@ -60,14 +72,27 @@ def list_events(source: Optional[str] = None, device_id: Optional[str] = None, s
     items = []
     for ev in rows:
         d, pr = ev.decision, ev.prediction
-        items.append({"event_id": ev.event_id, "device_id": ev.device_id, "source": ev.source, "status": ev.status,
-                      "observed_at": ev.observed_at.isoformat(), "received_at": ev.received_at.isoformat(),
-                      "criticality": ev.criticality, "criticality_method": ev.criticality_method,
-                      "cloud_cost_index": ev.cloud_cost_index, "last_rtt_ms": ev.last_rtt_ms,
-                      "predicted_rtt_ms": pr.predicted_rtt_ms if pr else None,
-                      "prediction_method": pr.method if pr else None, "risk": pr.risk if pr else None,
-                      "destination": d.destination if d else None, "reason": d.reason if d else None,
-                      "edge_score": d.edge_score if d else None, "cloud_score": d.cloud_score if d else None})
+        items.append(
+            {
+                "event_id": ev.event_id,
+                "device_id": ev.device_id,
+                "source": ev.source,
+                "status": ev.status,
+                "observed_at": ev.observed_at.isoformat(),
+                "received_at": ev.received_at.isoformat(),
+                "criticality": ev.criticality,
+                "criticality_method": ev.criticality_method,
+                "cloud_cost_index": ev.cloud_cost_index,
+                "last_rtt_ms": ev.last_rtt_ms,
+                "predicted_rtt_ms": pr.predicted_rtt_ms if pr else None,
+                "prediction_method": pr.method if pr else None,
+                "risk": pr.risk if pr else None,
+                "destination": d.destination if d else None,
+                "reason": d.reason if d else None,
+                "edge_score": d.edge_score if d else None,
+                "cloud_score": d.cloud_score if d else None,
+            }
+        )
     return {"total": total, "limit": limit, "offset": offset, "items": items}
 
 

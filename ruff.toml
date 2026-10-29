@@ -1,0 +1,10 @@
+line-length = 120
+target-version = "py311"
+extend-exclude = ["frontend", "dataset", "migrations/versions", "infra/aws/build"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "S"]
+ignore = ["S101", "S311", "B008", "S603", "S607", "I001", "B905", "E501"]
+
+[lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S107", "S108", "B017"]

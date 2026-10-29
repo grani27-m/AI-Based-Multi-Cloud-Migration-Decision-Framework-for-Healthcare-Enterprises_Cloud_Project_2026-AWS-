@@ -4,6 +4,7 @@ backend/config.py  —  Owner: Rani Gupta (24BIT0543)
 All configuration comes from environment variables (optionally a local .env that is
 git-ignored). Nothing secret has a default value.
 """
+
 from __future__ import annotations
 
 import logging
@@ -49,10 +50,10 @@ class Settings:
     rate_limit_per_minute: int = 600
     model_dir: Path = ROOT / "models" / "latency_lstm"
     runtime_dir: Path = ROOT / "runtime"
-    cloud_adapter: str = "local"         # local | s3
+    cloud_adapter: str = "local"  # local | s3
     s3_bucket: str = ""
     execution_max_attempts: int = 3
-    alerts_sync: bool = False            # True = dispatch inside the request (tests / demos)
+    alerts_sync: bool = False  # True = dispatch inside the request (tests / demos)
     alert_notify_severities: list[str] = field(default_factory=lambda: ["CRITICAL"])
     telegram_bot_token: str = ""
     telegram_chat_id: str = ""
@@ -107,6 +108,8 @@ class Settings:
             if s.environment == "production":
                 raise RuntimeError("SECRET_KEY must be set in production")
             s.secret_key = secrets.token_hex(32)
-            log.warning("SECRET_KEY not set: generated a random key for this process; tokens will not "
-                        "survive a restart. Set SECRET_KEY in .env.")
+            log.warning(
+                "SECRET_KEY not set: generated a random key for this process; tokens will not "
+                "survive a restart. Set SECRET_KEY in .env."
+            )
         return s
