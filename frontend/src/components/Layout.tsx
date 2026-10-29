@@ -12,15 +12,15 @@ import {
 type LiveState = 'live' | 'offline';
 
 const NAV = [
-  { to: '/',          label: 'Overview',     icon: LayoutDashboard,  roles: ['admin','doctor','auditor'] },
-  { to: '/monitor',   label: 'Live Monitor', icon: Monitor,          roles: ['admin','doctor','auditor'] },
-  { to: '/devices',   label: 'Devices',      icon: Cpu,              roles: ['admin','doctor','auditor'] },
-  { to: '/alerts',    label: 'Alerts',       icon: Bell,             roles: ['admin','doctor','auditor'] },
-  { to: '/decisionlab',label: 'Decision Lab',icon: FlaskConical,     roles: ['admin','doctor','auditor'] },
-  { to: '/model',     label: 'Model & Data', icon: BrainCircuit,     roles: ['admin','doctor','auditor'] },
-  { to: '/audit',     label: 'Audit',        icon: ShieldCheck,      roles: ['admin','auditor']         },
-  { to: '/system',    label: 'System',       icon: Settings,         roles: ['admin','auditor']         },
-  { to: '/admin',     label: 'Admin',        icon: Activity,         roles: ['admin']                   },
+  { to: '/',             label: 'Overview',     icon: LayoutDashboard, roles: ['admin','doctor','auditor'] },
+  { to: '/events',       label: 'Live events',  icon: Monitor,         roles: ['admin','doctor','auditor'] },
+  { to: '/devices',      label: 'Devices',      icon: Cpu,             roles: ['admin','doctor','auditor'] },
+  { to: '/alerts',       label: 'Alerts',       icon: Bell,            roles: ['admin','doctor','auditor'] },
+  { to: '/decision-lab', label: 'Decision lab', icon: FlaskConical,    roles: ['admin','doctor','auditor'] },
+  { to: '/model',        label: 'Model & data', icon: BrainCircuit,    roles: ['admin','doctor','auditor'] },
+  { to: '/audit',        label: 'Audit',        icon: ShieldCheck,     roles: ['admin','auditor']         },
+  { to: '/system',       label: 'System',       icon: Settings,        roles: ['admin','doctor','auditor'] },
+  { to: '/admin',        label: 'Admin',        icon: Activity,        roles: ['admin']                   },
 ];
 
 export default function Layout() {
@@ -29,6 +29,7 @@ export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
   const [apiStatus, setApiStatus] = useState<LiveState>('offline');
+  const [modelInfo, setModelInfo] = useState<string>('');
 
   // Apply dark theme
   useEffect(() => {
@@ -39,9 +40,9 @@ export default function Layout() {
   // Poll API health every 10s
   useEffect(() => {
     const check = () =>
-      api.health()
-        .then(() => setApiStatus('live'))
-        .catch(() => setApiStatus('offline'));
+      api.ready()
+        .then(r => { setApiStatus(r.ready ? 'live' : 'offline'); setModelInfo(r.model_loaded ? r.model_version : 'model not loaded — fallback'); })
+        .catch(() => { setApiStatus('offline'); setModelInfo(''); });
     check();
     const id = setInterval(check, 10_000);
     return () => clearInterval(id);
@@ -65,13 +66,13 @@ export default function Layout() {
         <div className="flex items-center gap-3 px-4 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
           {!collapsed && (
             <span className="font-bold text-sm leading-tight" style={{ color: 'var(--text)' }}>
-              Telemedicine<br />
-              <span style={{ color: 'var(--cloud)' }}>Operations Portal</span>
+              Edge/Cloud Routing<br />
+              <span style={{ color: 'var(--cloud)' }}>Healthcare Ops Portal</span>
             </span>
           )}
           <button
             onClick={() => setCollapsed(c => !c)}
-            className="ml-auto rounded p-1 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="ml-auto rounded p-1 hover:opacity-70"
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <ChevronLeft
@@ -93,7 +94,7 @@ export default function Layout() {
                 `flex items-center gap-3 px-4 py-2.5 mx-2 my-0.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? 'text-white'
-                    : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                    : 'hover:opacity-70'
                 }`
               }
               style={({ isActive }) => isActive ? { background: 'var(--cloud)' } : { color: 'var(--muted)' }}
@@ -149,11 +150,12 @@ export default function Layout() {
             <Globe size={12} />
             <span>Asia/Kolkata (IST)</span>
           </div>
+          {modelInfo && <span className="hidden md:inline text-xs font-mono" style={{ color: 'var(--muted)' }}>{modelInfo}</span>}
 
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={() => window.location.reload()}
-              className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="p-1.5 rounded hover:opacity-70"
               aria-label="Refresh"
               title="Refresh"
             >
@@ -161,7 +163,7 @@ export default function Layout() {
             </button>
             <button
               onClick={() => setDark(d => !d)}
-              className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="p-1.5 rounded hover:opacity-70"
               aria-label="Toggle theme"
               title="Toggle light/dark"
             >

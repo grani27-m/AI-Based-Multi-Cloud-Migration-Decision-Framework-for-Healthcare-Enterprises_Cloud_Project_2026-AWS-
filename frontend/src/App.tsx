@@ -1,71 +1,65 @@
-// src/App.tsx
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+// src/App.tsx — routes. Every page reads the FastAPI backend through src/lib/api.ts.
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect, type ReactNode } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-
-import Layout      from './components/Layout';
-import SignIn      from './pages/SignIn';
-import Overview    from './pages/Overview';
+import { setUnauthorizedHandler } from './lib/api';
+import Layout from './components/Layout';
+import SignIn from './pages/SignIn';
+import Overview from './pages/Overview';
 import LiveMonitor from './pages/LiveMonitor';
-import Devices     from './pages/Devices';
-import Alerts      from './pages/Alerts';
+import Devices from './pages/Devices';
+import Alerts from './pages/Alerts';
 import DecisionLab from './pages/DecisionLab';
-import SystemInfo  from './pages/SystemInfo';
-import Placeholder from './pages/Placeholder';
+import ModelData from './pages/ModelData';
+import Audit from './pages/Audit';
+import SystemInfo from './pages/SystemInfo';
+import Admin from './pages/Admin';
 
-const qc = new QueryClient({
-  defaultOptions: { queries: { retry: 2, staleTime: 5_000 } },
-});
+const qc = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 3_000 } } });
 
-/** Redirect to /login if not authenticated */
-function RequireAuth({ children }: { children: React.ReactNode }) {
+function RequireAuth({ children, roles }: { children: ReactNode; roles?: string[] }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
+  if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
-/** Redirect to / if already logged in */
-function PublicOnly({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
-  if (user) return <Navigate to="/" replace />;
-  return <>{children}</>;
+function SessionWatcher() {
+  const { logout } = useAuth();
+  const nav = useNavigate();
+  useEffect(() => setUnauthorizedHandler(() => { logout(); nav('/login'); }), [logout, nav]);
+  return null;
 }
 
 function AppRoutes() {
+  const { user } = useAuth();
   return (
-    <Routes>
-      {/* Public */}
-      <Route path="/login" element={
-        <PublicOnly><SignIn /></PublicOnly>
-      } />
-
-      {/* Protected — inside the Layout shell */}
-      <Route element={<RequireAuth><Layout /></RequireAuth>}>
-        <Route index element={<Overview />} />
-        <Route path="monitor"    element={<LiveMonitor />} />
-        <Route path="devices"    element={<Devices />} />
-        <Route path="alerts"     element={<Alerts />} />
-        <Route path="decisionlab" element={<DecisionLab />} />
-        <Route path="model"      element={<Placeholder title="Model & Data" desc="Model version, MAE/RMSE vs baseline, predicted vs actual chart — Phase F4." />} />
-        <Route path="audit"      element={<Placeholder title="Audit" desc="Hash-chained log with Verify chain button — Track B Phase F4." />} />
-        <Route path="system"     element={<SystemInfo />} />
-        <Route path="admin"      element={<Placeholder title="Admin" desc="Users, thresholds, simulator console — Track B Phase F4." />} />
-      </Route>
-
-      {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <SessionWatcher />
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/" replace /> : <SignIn />} />
+        <Route element={<RequireAuth><Layout /></RequireAuth>}>
+          <Route index element={<Overview />} />
+          <Route path="events" element={<LiveMonitor />} />
+          <Route path="devices" element={<Devices />} />
+          <Route path="alerts" element={<Alerts />} />
+          <Route path="decision-lab" element={<DecisionLab />} />
+          <Route path="model" element={<ModelData />} />
+          <Route path="audit" element={<RequireAuth roles={['admin', 'auditor']}><Audit /></RequireAuth>} />
+          <Route path="system" element={<SystemInfo />} />
+          <Route path="admin" element={<RequireAuth roles={['admin']}><Admin /></RequireAuth>} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 
 export default function App() {
   return (
     <QueryClientProvider client={qc}>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
+      <AuthProvider><BrowserRouter><AppRoutes /></BrowserRouter></AuthProvider>
     </QueryClientProvider>
   );
 }

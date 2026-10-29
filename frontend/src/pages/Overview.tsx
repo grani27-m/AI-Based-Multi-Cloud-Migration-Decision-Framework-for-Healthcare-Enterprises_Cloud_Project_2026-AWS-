@@ -1,231 +1,130 @@
-// src/pages/Overview.tsx
-// Guide §3 Overview page — KPI row, latency chart, routing donut,
-// decision reasons bar, latest alerts. All values from /api/v1/*.
+// src/pages/Overview.tsx — KPIs, latency forecast vs observed, routing split, reasons, reconciliation.
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine,
-  LineChart, Line, Tooltip as LT,
-} from 'recharts';
+import { Link } from 'react-router-dom';
+import { Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line, Pie, PieChart, ReferenceLine,
+  ResponsiveContainer, Scatter, Tooltip, XAxis, YAxis } from 'recharts';
+import { Activity, AlertTriangle, BellRing, Cloud, Cpu, ShieldCheck } from 'lucide-react';
 import { api } from '../lib/api';
-import { fmtCount, fmtPct, fmtLatency, fmtTimeShort, fmtReason } from '../lib/utils';
-import { TrendingUp, Cloud, Zap, AlertTriangle, Bell, Clock } from 'lucide-react';
+import { fmtCount, fmtPct, fmtReason, fmtTimeShort } from '../lib/utils';
+import { Card, Empty, ErrorState, Kpi, Loading, Select, tooltipStyle } from '../components/ui';
 
-// Design tokens
-const C = {
-  cloud:     'var(--cloud)',
-  edge:      'var(--edge)',
-  emergency: 'var(--emergency)',
-  veto:      'var(--veto)',
-  ok:        'var(--ok)',
-};
-
-function KpiCard({
-  label, value, sub, icon: Icon, accent,
-}: { label: string; value: string; sub?: string; icon: React.ElementType; accent: string }) {
-  return (
-    <div className="rounded-xl p-5 border flex flex-col gap-1"
-      style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-      <div className="flex items-center gap-2 mb-1">
-        <div className="rounded-lg p-1.5" style={{ background: `${accent}18` }}>
-          <Icon size={15} style={{ color: accent }} />
-        </div>
-        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-          {label}
-        </span>
-      </div>
-      <span className="text-3xl font-bold leading-none" style={{ color: 'var(--text)', fontSize: 36 }}>
-        {value}
-      </span>
-      {sub && <span className="text-xs" style={{ color: 'var(--muted)' }}>{sub}</span>}
-    </div>
-  );
-}
-
-function Skeleton({ h = 'h-8' }: { h?: string }) {
-  return <div className={`${h} rounded-lg animate-pulse`} style={{ background: 'var(--border)' }} />;
-}
+const SOURCES: [string, string][] = [['', 'All sources'], ['replay', 'Replay (real data)'], ['simulated', 'Simulated'],
+  ['live', 'Live'], ['test', 'Test']];
 
 export default function Overview() {
-  const { data: summary, isLoading: loadingS, error: errS } =
-    useQuery({ queryKey: ['metrics-summary'], queryFn: () => api.metricsSummary(), refetchInterval: 15_000 });
-
-  const { data: decisions, isLoading: loadingD } =
-    useQuery({ queryKey: ['decisions'], queryFn: () => api.decisions(100), refetchInterval: 15_000 });
-
-  if (loadingS) return (
-    <div className="space-y-6">
-      <Skeleton h="h-12" />
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {[...Array(6)].map((_, i) => <Skeleton key={i} h="h-28" />)}
-      </div>
-    </div>
-  );
-
-  if (errS) return (
-    <div className="text-center py-20" style={{ color: 'var(--emergency)' }}>
-      Failed to load metrics — is the API backend running?<br />
-      <code className="text-sm">python -m uvicorn src.api.main:app --port 8000</code>
-    </div>
-  );
-
-  const s = summary!;
-
-  // Prepare charts data
-  const donutData = [
-    { name: 'CLOUD', value: s.cloud.count, color: C.cloud },
-    { name: 'EDGE',  value: s.edge.count,  color: C.edge  },
-  ];
-
-  const reasonsData = [
-    { name: 'AHP Decision',              value: s.reasons.ahp_decision,             color: C.cloud },
-    { name: 'Network Veto',              value: s.reasons.network_degradation_veto, color: C.veto  },
-    { name: 'Emergency Override',        value: s.reasons.emergency_override,        color: C.emergency },
-    { name: 'Uncategorised',             value: s.reasons.uncategorised,             color: '#94A3B8' },
-  ].filter(r => r.value > 0);
-
-  // Latency series from recent decisions
-  const latSeries = (decisions?.items ?? [])
-    .slice().reverse()
-    .map((d, i) => ({
-      i,
-      latency: +d.predicted_latency_ms.toFixed(1),
-      decision: d.routing_decision,
-    }));
-
-  // Latest alerts (emergency overrides only)
-  const alerts = (decisions?.items ?? []).filter(d => d.reason === 'override_critical_patient').slice(0, 5);
+  const [source, setSource] = useState('');
+  const sQ = useQuery({ queryKey: ['summary', source], queryFn: () => api.summary(source || undefined), refetchInterval: 10_000 });
+  const tQ = useQuery({ queryKey: ['ts', source], queryFn: () => api.timeseries(150, source || undefined), refetchInterval: 10_000 });
+  const s = sQ.data;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Overview</h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
-          Real-time IoMT routing metrics · IST timezone · source: {s.source_filter}
-        </p>
-      </div>
-
-      {/* ── KPI row ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <KpiCard label="Total Decisions" value={fmtCount(s.total_decisions)} icon={TrendingUp} accent={C.cloud} />
-        <KpiCard label="EDGE"  value={fmtCount(s.edge.count)}  sub={fmtPct(s.edge.pct)}  icon={Zap}   accent={C.edge}  />
-        <KpiCard label="CLOUD" value={fmtCount(s.cloud.count)} sub={fmtPct(s.cloud.pct)} icon={Cloud} accent={C.cloud} />
-        <KpiCard label="Emergency Overrides" value={fmtCount(s.alerts.emergency_overrides)} icon={AlertTriangle} accent={C.emergency} />
-        <KpiCard label="Network Vetoes" value={fmtCount(s.reasons.network_degradation_veto)} icon={Clock} accent={C.veto} />
-        <KpiCard
-          label="Alerts Delivered" icon={Bell} accent={C.ok}
-          value={fmtCount(s.alerts.delivered)}
-          sub={s.alerts.failed > 0 ? `${s.alerts.failed} failed` : 'Telegram + Gmail'}
-        />
-      </div>
-
-      {/* ── Charts row ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Latency trend */}
-        <div className="lg:col-span-2 rounded-xl border p-5"
-          style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-          <h2 className="font-semibold text-sm mb-4" style={{ color: 'var(--text)' }}>
-            Predicted Latency Trend
-            <span className="ml-2 text-xs font-normal" style={{ color: 'var(--muted)' }}>(last 100 events)</span>
-          </h2>
-          {loadingD ? <Skeleton h="h-52" /> : latSeries.length === 0
-            ? <div className="h-52 flex items-center justify-center text-sm" style={{ color: 'var(--muted)' }}>No data yet</div>
-            : (
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={latSeries} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="i" hide />
-                  <LT
-                    formatter={(v) => v != null ? [`${Number(v).toFixed(1)} ms`, 'Predicted'] : ['—', 'Predicted']}
-                    contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }}
-                  />
-                  <ReferenceLine y={75}  stroke={C.veto}      strokeDasharray="4 2" label={{ value: '75 ms',  position: 'right', fontSize: 10, fill: C.veto  }} />
-                  <ReferenceLine y={150} stroke={C.veto}      strokeDasharray="4 2" label={{ value: '150 ms', position: 'right', fontSize: 10, fill: C.veto  }} />
-                  <ReferenceLine y={300} stroke={C.emergency} strokeDasharray="4 2" label={{ value: '300 ms (veto)', position: 'right', fontSize: 10, fill: C.emergency }} />
-                  <Line type="monotone" dataKey="latency" dot={false} stroke={C.cloud} strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-        </div>
-
-        {/* Routing donut */}
-        <div className="rounded-xl border p-5"
-          style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-          <h2 className="font-semibold text-sm mb-4" style={{ color: 'var(--text)' }}>Routing Split</h2>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie data={donutData} cx="50%" cy="50%" innerRadius={55} outerRadius={85}
-                dataKey="value" nameKey="name"
-                label={({ name, value }) => `${name}: ${fmtCount(value)}`}
-                labelLine={true}>
-                {donutData.map((d, i) => <Cell key={i} fill={d.color} />)}
-              </Pie>
-              <Legend formatter={(v) => <span style={{ color: 'var(--text)', fontSize: 12 }}>{v}</span>} />
-              <Tooltip formatter={(v) => fmtCount(Number(v))} contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8 }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* ── Reasons + Alerts ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Decision reasons bar */}
-        <div className="rounded-xl border p-5"
-          style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-          <h2 className="font-semibold text-sm mb-1" style={{ color: 'var(--text)' }}>Decision Reasons</h2>
-          <p className="text-xs mb-4" style={{ color: 'var(--muted)' }}>
-            Sum: {fmtCount(reasonsData.reduce((a, r) => a + r.value, 0))} of {fmtCount(s.total_decisions)} total
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-end gap-3">
+        <div>
+          <h1 className="text-xl font-bold">Routing overview</h1>
+          <p className="text-sm" style={{ color: 'var(--muted)' }}>
+            Every figure is computed by the API from the database. {s && <>Updated {fmtTimeShort(s.generated_at)} IST.</>}
           </p>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={reasonsData} margin={{ top: 5, right: 10, left: 0, bottom: 30 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--muted)' }} angle={-15} textAnchor="end" interval={0} />
-              <YAxis tick={{ fontSize: 10, fill: 'var(--muted)' }} />
-              <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }} />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {reasonsData.map((d, i) => <Cell key={i} fill={d.color} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+        </div>
+        <div className="ml-auto"><Select label="Source" value={source} onChange={setSource} options={SOURCES} /></div>
+      </div>
+
+      {sQ.isLoading && <Loading />}
+      {sQ.error && <ErrorState error={sQ.error} onRetry={() => sQ.refetch()} />}
+      {s && s.events.total === 0 && (
+        <Card><Empty title="No events stored yet"
+          hint={<>Push real replayed data or simulated scenarios from <Link to="/admin" className="underline">Admin → Demo runner</Link>,
+          or stream with <code>python -m scripts.stream_events</code>.</>} /></Card>)}
+
+      {s && s.events.total > 0 && <>
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+          <Kpi label="Events" value={fmtCount(s.events.total)} icon={Activity} accent="var(--cloud)"
+            sub={`${fmtCount(s.events.by_status.completed ?? 0)} completed · ${fmtCount(s.events.by_status.failed ?? 0)} failed`} />
+          <Kpi label="Routed to EDGE" value={fmtCount(s.decisions.edge.count)} icon={Cpu} accent="var(--edge)" sub={fmtPct(s.decisions.edge.pct)} />
+          <Kpi label="Routed to CLOUD" value={fmtCount(s.decisions.cloud.count)} icon={Cloud} accent="var(--cloud)" sub={fmtPct(s.decisions.cloud.pct)} />
+          <Kpi label="Emergency overrides" value={fmtCount(s.decisions.by_reason.override_critical_patient)} icon={AlertTriangle}
+            accent="var(--emergency)" sub={`${fmtCount(s.decisions.by_reason.network_degradation_veto)} network vetoes`} />
+          <Kpi label="Alerts triggered" value={fmtCount(s.alerts.triggered)} icon={BellRing} accent="var(--veto)"
+            sub={`${fmtCount(s.alerts.delivered)} delivered · ${fmtCount(s.alerts.failed)} failed · ${fmtCount(s.alerts.not_configured)} no channel`} />
+          <Kpi label="Prediction method" value={fmtCount(s.predictions.by_method.lstm ?? 0)} icon={ShieldCheck} accent="var(--ok)"
+            sub={`LSTM · ${fmtCount(s.predictions.by_method.persistence_fallback ?? 0)} fallback`} />
         </div>
 
-        {/* Latest alerts */}
-        <div className="rounded-xl border p-5"
-          style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-          <h2 className="font-semibold text-sm mb-4" style={{ color: 'var(--text)' }}>
-            Latest Emergency Alerts
-          </h2>
-          {alerts.length === 0 ? (
-            <div className="text-sm py-8 text-center" style={{ color: 'var(--muted)' }}>
-              No emergency alerts in current data
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {alerts.map((a, i) => (
-                <li key={i} className="flex items-start justify-between rounded-lg px-3 py-2.5 text-sm"
-                  style={{ background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.2)' }}>
-                  <div>
-                    <span className="font-semibold" style={{ color: 'var(--emergency)' }}>
-                      {a.device_id}
-                    </span>
-                    <span className="mx-1.5" style={{ color: 'var(--muted)' }}>·</span>
-                    <span style={{ color: 'var(--muted)' }}>Criticality {a.patient_criticality_score.toFixed(1)}/10</span>
-                    <br />
-                    <span className="text-xs" style={{ color: 'var(--muted)' }}>
-                      {fmtLatency(a.predicted_latency_ms)} · Telegram + Gmail dispatched
-                    </span>
-                  </div>
-                  <span className="text-xs shrink-0" style={{ color: 'var(--muted)' }}>
-                    {fmtTimeShort(a.stored_at)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <Card className="xl:col-span-2" title="Observed vs LSTM-predicted round-trip time"
+            sub="Last observed RTT in each window and the model's next-interval forecast. Thresholds: 75 / 150 ms risk, 300 ms veto.">
+            {tQ.error && <ErrorState error={tQ.error} />}
+            {tQ.data && <ResponsiveContainer width="100%" height={280}>
+              <ComposedChart data={tQ.data.items.map((p, i) => ({ ...p, i, edge: p.destination === 'EDGE' ? p.predicted_rtt_ms : null }))}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="i" tick={{ fontSize: 11, fill: 'var(--muted)' }} label={{ value: 'event (oldest → newest)', fontSize: 11, fill: 'var(--muted)', position: 'insideBottom', offset: -2 }} />
+                <YAxis tick={{ fontSize: 11, fill: 'var(--muted)' }} unit=" ms" width={62} scale="log" domain={[1, 'auto']} allowDataOverflow />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v) => (v == null ? '—' : `${Number(v).toFixed(1)} ms`)}
+                  labelFormatter={(i) => { const p = tQ.data!.items[Number(i)]; return p ? `${p.device_id} · ${fmtReason(p.reason)}` : ''; }} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <ReferenceLine y={75} stroke="var(--veto)" strokeDasharray="4 4" />
+                <ReferenceLine y={150} stroke="var(--emergency)" strokeDasharray="4 4" />
+                <ReferenceLine y={300} stroke="var(--emergency)" label={{ value: 'veto 300 ms', fontSize: 10, fill: 'var(--emergency)' }} />
+                <Line dataKey="last_rtt_ms" name="observed (last)" stroke="var(--muted)" dot={false} strokeWidth={1} isAnimationActive={false} />
+                <Line dataKey="predicted_rtt_ms" name="LSTM forecast" stroke="var(--cloud)" dot={false} strokeWidth={1.6} isAnimationActive={false} />
+                <Scatter dataKey="edge" name="routed to EDGE" fill="var(--edge)" isAnimationActive={false} />
+              </ComposedChart>
+            </ResponsiveContainer>}
+          </Card>
+
+          <Card title="EDGE vs CLOUD" sub={`${fmtCount(s.decisions.total)} routing decisions`}>
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie data={[{ n: 'EDGE', v: s.decisions.edge.count }, { n: 'CLOUD', v: s.decisions.cloud.count }]}
+                  dataKey="v" nameKey="n" innerRadius={62} outerRadius={96} paddingAngle={2} isAnimationActive={false}>
+                  <Cell fill="var(--edge)" /><Cell fill="var(--cloud)" />
+                </Pie>
+                <Tooltip contentStyle={tooltipStyle} /><Legend wrapperStyle={{ fontSize: 12 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
         </div>
-      </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <Card title="Why readings were routed" sub="Decision reasons (all categories, including safe defaults)">
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart layout="vertical" data={Object.entries(s.decisions.by_reason).map(([k, v]) => ({ k: fmtReason(k), v, raw: k }))}
+                margin={{ left: 20 }}>
+                <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--muted)' }} allowDecimals={false} />
+                <YAxis type="category" dataKey="k" width={150} tick={{ fontSize: 11, fill: 'var(--text)' }} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Bar dataKey="v" name="decisions" isAnimationActive={false}>
+                  {Object.keys(s.decisions.by_reason).map(k => <Cell key={k} fill={k === 'override_critical_patient' ? 'var(--emergency)'
+                    : k === 'ahp_decision' ? 'var(--cloud)' : 'var(--veto)'} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <Card title="Alert accounting" sub="Triggered ≠ delivered: every channel attempt is logged">
+            <table className="w-full text-sm">
+              <tbody>{[['Triggered', s.alerts.triggered], ['Delivered (≥1 channel)', s.alerts.delivered], ['Failed', s.alerts.failed],
+                ['No channel configured', s.alerts.not_configured], ['Recorded only (WARNING)', s.alerts.by_status.not_notified ?? 0],
+                ['Pending dispatch', s.alerts.pending]].map(([k, v]) => (
+                <tr key={k as string} className="border-b last:border-0" style={{ borderColor: 'var(--border)' }}>
+                  <td className="py-1.5" style={{ color: 'var(--muted)' }}>{k}</td><td className="text-right tabular-nums font-medium">{fmtCount(v as number)}</td></tr>))}
+              </tbody>
+            </table>
+          </Card>
+
+          <Card title="Count reconciliation" sub="Checks the dashboard totals against the stored rows">
+            <ul className="space-y-1.5 text-sm">
+              {Object.entries(s.reconciliation).filter(([, v]) => typeof v === 'boolean').map(([k, v]) => (
+                <li key={k} className="flex gap-2 items-start">
+                  <span style={{ color: v ? 'var(--ok)' : 'var(--emergency)' }}>{v ? '✔' : '✘'}</span>
+                  <span>{k.replace(/_/g, ' ')}</span></li>))}
+              <li className="text-xs pt-1" style={{ color: 'var(--muted)' }}>
+                Failed before decision: {String(s.reconciliation.failed_before_decision)} · in flight: {String(s.reconciliation.in_flight)}</li>
+            </ul>
+          </Card>
+        </div>
+      </>}
     </div>
   );
 }

@@ -25,7 +25,7 @@ export default function SignIn() {
       await login(username, password);
       attempts.current = 0;
       navigate('/', { replace: true });
-    } catch (err) {
+    } catch {
       attempts.current += 1;
       if (attempts.current >= 5) {
         setLocked(true);
@@ -51,7 +51,7 @@ export default function SignIn() {
             <Activity size={28} color="white" />
           </div>
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
-            Telemedicine Operations Portal
+            Healthcare Edge/Cloud Routing Portal
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
             BCSE355L Cloud Architecture Design · VIT University
@@ -120,7 +120,7 @@ export default function SignIn() {
           </form>
 
           <p className="text-xs mt-5 text-center" style={{ color: 'var(--muted)' }}>
-            Demo: <strong>admin</strong> / <strong>hospital123</strong>
+            Accounts are created by an administrator (<code>python -m scripts.create_user</code>). No default passwords.
           </p>
         </div>
       </div>

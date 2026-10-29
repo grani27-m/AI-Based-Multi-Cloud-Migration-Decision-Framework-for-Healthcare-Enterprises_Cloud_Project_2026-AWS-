@@ -12,6 +12,7 @@
   --veto:       #B45309;
   --ok:         #15803D;
   --border:     #E2E8F0;
+  --chip:       #E2E8F0;
   --radius:     8px;
 }
 
@@ -26,6 +27,7 @@
   --veto:       #FBBF24;
   --ok:         #4ADE80;
   --border:     #1E293B;
+  --chip:       #334155;
 }
 
 body {
