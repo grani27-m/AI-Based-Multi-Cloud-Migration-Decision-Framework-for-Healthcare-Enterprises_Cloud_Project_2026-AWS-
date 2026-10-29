@@ -17,6 +17,7 @@ Leakage controls
       fall inside that split's interval;
     * the scaler is fitted on training windows only (see train.py).
 """
+
 from __future__ import annotations
 
 import json
@@ -36,7 +37,7 @@ PROC = ROOT / "dataset" / "processed"
 META = ROOT / "dataset" / "metadata"
 CONFIG = ROOT / "dataset" / "config" / "ripe_atlas_selection.json"
 
-MAX_GAP_S = 360          # > 1.5 x 240 s interval => the series is broken into a new segment
+MAX_GAP_S = 360  # > 1.5 x 240 s interval => the series is broken into a new segment
 SPLIT_FRACTIONS = (0.70, 0.15, 0.15)
 log = logging.getLogger("dataset")
 
@@ -69,10 +70,12 @@ def load_clean(raw_dir: Path = RAW_DIR) -> tuple[pd.DataFrame, dict]:
     q["rows_jitter_undefined"] = int(df["jitter_ms"].isna().sum() - (df["rcvd"] == 0).sum())
     q["series"] = int(df["series_id"].nunique())
     q["segments"] = int(df["segment"].nunique())
-    q["time_range_utc"] = [datetime.fromtimestamp(int(df.timestamp.min()), timezone.utc).isoformat(),
-                           datetime.fromtimestamp(int(df.timestamp.max()), timezone.utc).isoformat()]
+    q["time_range_utc"] = [
+        datetime.fromtimestamp(int(df.timestamp.min()), timezone.utc).isoformat(),
+        datetime.fromtimestamp(int(df.timestamp.max()), timezone.utc).isoformat(),
+    ]
     rtt = df["rtt_avg_ms"].dropna()
-    q["rtt_avg_ms"] = {k: round(float(v), 3) for k, v in rtt.describe(percentiles=[.5, .95, .99]).items()}
+    q["rtt_avg_ms"] = {k: round(float(v), 3) for k, v in rtt.describe(percentiles=[0.5, 0.95, 0.99]).items()}
     q["rows_rtt_ge_150ms"] = int((rtt >= 150).sum())
     q["rows_rtt_ge_300ms"] = int((rtt >= 300).sum())
     q["rows_per_group"] = {k: int(v) for k, v in df["group"].value_counts().items()}
@@ -85,7 +88,7 @@ def make_windows(df: pd.DataFrame, cutoffs: tuple[int, int]) -> dict:
     t1, t2 = cutoffs
     parts = {s: {"X": [], "y": [], "last": [], "ts": [], "sid": [], "grp": []} for s in ("train", "val", "test")}
     sid_codes = {s: i for i, s in enumerate(sorted(df.series_id.unique()))}
-    for seg, g in df.groupby("segment", sort=False):
+    for _seg, g in df.groupby("segment", sort=False):
         if len(g) <= WINDOW:
             continue
         ts = g["timestamp"].to_numpy()
@@ -96,9 +99,13 @@ def make_windows(df: pd.DataFrame, cutoffs: tuple[int, int]) -> dict:
         idx = np.arange(n)
         valid = ~np.isnan(target_raw[WINDOW:])  # target round must have an RTT (not 100 % loss)
         start_ts, end_ts = ts[idx], ts[idx + WINDOW]
-        split = np.where(end_ts < t1, "train", np.where((start_ts >= t1) & (end_ts < t2), "val",
-                                                         np.where(start_ts >= t2, "test", "boundary")))
+        split = np.where(
+            end_ts < t1,
+            "train",
+            np.where((start_ts >= t1) & (end_ts < t2), "val", np.where(start_ts >= t2, "test", "boundary")),
+        )
         from numpy.lib.stride_tricks import sliding_window_view
+
         win = sliding_window_view(feats, (WINDOW, feats.shape[1]))[:, 0][:n]
         for s in ("train", "val", "test"):
             m = valid & (split == s)
@@ -107,7 +114,7 @@ def make_windows(df: pd.DataFrame, cutoffs: tuple[int, int]) -> dict:
             p = parts[s]
             p["X"].append(win[m].astype(np.float32))
             p["y"].append(target_raw[WINDOW:][m])
-            p["last"].append(last_raw[WINDOW - 1:-1][m])
+            p["last"].append(last_raw[WINDOW - 1 : -1][m])
             p["ts"].append(end_ts[m])
             p["sid"].append(np.full(m.sum(), sid_codes[g["series_id"].iat[0]]))
             p["grp"].append(np.full(m.sum(), g["group"].iat[0]))
@@ -135,10 +142,14 @@ def build() -> dict:
     w = make_windows(df, cut)
     np.savez_compressed(PROC / "windows_w20.npz", **w)
     iso = lambda t: datetime.fromtimestamp(t, timezone.utc).isoformat()  # noqa: E731
-    splits = {"method": "global chronological cut-offs; whole window must lie inside one split",
-              "fractions": SPLIT_FRACTIONS, "train": [iso(tmin), iso(cut[0])], "val": [iso(cut[0]), iso(cut[1])],
-              "test": [iso(cut[1]), iso(tmax)],
-              "windows": {s: int(len(w[f"y_{s}"])) for s in ("train", "val", "test")}}
+    splits = {
+        "method": "global chronological cut-offs; whole window must lie inside one split",
+        "fractions": SPLIT_FRACTIONS,
+        "train": [iso(tmin), iso(cut[0])],
+        "val": [iso(cut[0]), iso(cut[1])],
+        "test": [iso(cut[1]), iso(tmax)],
+        "windows": {s: int(len(w[f"y_{s}"])) for s in ("train", "val", "test")},
+    }
     (META / "ripe_atlas_splits.json").write_text(json.dumps(splits, indent=2))
     q["built_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     q["windows"] = splits["windows"]
@@ -150,6 +161,7 @@ def build() -> dict:
 
 if __name__ == "__main__":
     import sys
+
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     if len(sys.argv) < 2 or sys.argv[1] != "build":
         print("usage: python -m src.prediction.dataset build")

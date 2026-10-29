@@ -14,6 +14,7 @@ Baselines
 
 Outputs: results/model/metrics.json, results/model/*.png
 """
+
 from __future__ import annotations
 
 import json
@@ -39,22 +40,32 @@ def risk_class(ms: np.ndarray) -> np.ndarray:
 
 def metrics(y: np.ndarray, p: np.ndarray) -> dict:
     e = p - y
-    return {"mae_ms": float(np.mean(np.abs(e))), "rmse_ms": float(np.sqrt(np.mean(e ** 2))),
-            "median_ae_ms": float(np.median(np.abs(e))),
-            "risk_class_accuracy": float(np.mean(risk_class(y) == risk_class(p))), "n": int(len(y))}
+    return {
+        "mae_ms": float(np.mean(np.abs(e))),
+        "rmse_ms": float(np.sqrt(np.mean(e**2))),
+        "median_ae_ms": float(np.median(np.abs(e))),
+        "risk_class_accuracy": float(np.mean(risk_class(y) == risk_class(p))),
+        "n": int(len(y)),
+    }
 
 
 def spike_scores(y: np.ndarray, p: np.ndarray, thr: float) -> dict:
     t, h = y >= thr, p >= thr
     tp = int((t & h).sum())
-    return {"threshold_ms": thr, "actual_events": int(t.sum()), "predicted_events": int(h.sum()), "true_positives": tp,
-            "precision": (tp / h.sum()) if h.sum() else None, "recall": (tp / t.sum()) if t.sum() else None}
+    return {
+        "threshold_ms": thr,
+        "actual_events": int(t.sum()),
+        "predicted_events": int(h.sum()),
+        "true_positives": tp,
+        "precision": (tp / h.sum()) if h.sum() else None,
+        "recall": (tp / t.sum()) if t.sum() else None,
+    }
 
 
 def predict_lstm(X: np.ndarray, scaler: Scaler, target_mode: str, batch: int = 8192) -> np.ndarray:
     """Use the SAME numpy inference path as the API."""
     net = NumpyLSTM(MODEL_DIR / "weights.npz")
-    out = scaler.y_inverse(np.concatenate([net.predict(scaler.x(X[i:i + batch])) for i in range(0, len(X), batch)]))
+    out = scaler.y_inverse(np.concatenate([net.predict(scaler.x(X[i : i + batch])) for i in range(0, len(X), batch)]))
     if target_mode == "residual":
         out = out + last_log_rtt(X)
     return target_from_model(out)
@@ -68,11 +79,15 @@ def main() -> int:
     X, y = d["X_test"], d["y_ms_test"]
     rtt_win = np.expm1(X[:, :, RTT_COL].astype(np.float64))  # carried-forward RTTs of the window
 
-    preds = {"lstm": predict_lstm(X, scaler, meta.get("target_mode", "level")), "persistence": d["last_ms_test"].astype(np.float64),
-             "mean20": rtt_win.mean(1)}
+    preds = {
+        "lstm": predict_lstm(X, scaler, meta.get("target_mode", "level")),
+        "persistence": d["last_ms_test"].astype(np.float64),
+        "mean20": rtt_win.mean(1),
+    }
     w = 0.3 * (0.7 ** np.arange(rtt_win.shape[1])[::-1])
     preds["ewma"] = (rtt_win * w).sum(1) / w.sum()
     from sklearn.linear_model import Ridge
+
     Xtr = d["X_train"]
     # ridge baseline gets the same residual target as the LSTM (fair comparison)
     resid = meta.get("target_mode") == "residual"
@@ -81,9 +96,14 @@ def main() -> int:
     pr = ridge.predict(scaler.x(X).reshape(len(X), -1)) + (last_log_rtt(X) if resid else 0)
     preds["ridge"] = target_from_model(pr)
 
-    res = {"model_version": meta["model_version"], "test_windows": int(len(y)),
-           "test_period_utc": json.loads((ROOT / "dataset/metadata/ripe_atlas_splits.json").read_text())["test"],
-           "overall": {k: metrics(y, p) for k, p in preds.items()}, "by_group": {}, "spikes": {}}
+    res = {
+        "model_version": meta["model_version"],
+        "test_windows": int(len(y)),
+        "test_period_utc": json.loads((ROOT / "dataset/metadata/ripe_atlas_splits.json").read_text())["test"],
+        "overall": {k: metrics(y, p) for k, p in preds.items()},
+        "by_group": {},
+        "spikes": {},
+    }
     for g in np.unique(d["group_test"]):
         m = d["group_test"] == g
         res["by_group"][str(g)] = {k: metrics(y[m], p[m]) for k, p in preds.items()}
@@ -94,29 +114,39 @@ def main() -> int:
         o = res["overall"][k]
         o["mae_skill_vs_persistence"] = 1 - o["mae_ms"] / pers["mae_ms"]
         o["rmse_skill_vs_persistence"] = 1 - o["rmse_ms"] / pers["rmse_ms"]
-    res["objective_1_met"] = bool(res["overall"]["lstm"]["mae_ms"] < pers["mae_ms"]
-                                  and res["overall"]["lstm"]["rmse_ms"] < pers["rmse_ms"])
+    res["objective_1_met"] = bool(
+        res["overall"]["lstm"]["mae_ms"] < pers["mae_ms"] and res["overall"]["lstm"]["rmse_ms"] < pers["rmse_ms"]
+    )
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "metrics.json").write_text(json.dumps(res, indent=2))
     _plots(d, preds, y)
     for k, v in res["overall"].items():
-        log.info("%-12s MAE %.3f ms  RMSE %.3f ms  skill(MAE) %+.3f", k, v["mae_ms"], v["rmse_ms"],
-                 v["mae_skill_vs_persistence"])
+        log.info(
+            "%-12s MAE %.3f ms  RMSE %.3f ms  skill(MAE) %+.3f",
+            k,
+            v["mae_ms"],
+            v["rmse_ms"],
+            v["mae_skill_vs_persistence"],
+        )
     log.info("objective 1 (LSTM beats persistence on MAE and RMSE): %s", res["objective_1_met"])
     return 0
 
 
 def _plots(d, preds, y) -> None:
     import matplotlib
+
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     hist = json.loads((MODEL_DIR / "training_history.json").read_text())
     fig, ax = plt.subplots(figsize=(7, 4))
-    ax.plot(hist["loss"], label="train loss")
-    ax.plot(hist["val_loss"], label="validation loss")
+    meta = json.loads((MODEL_DIR / "preprocessing.json").read_text())
+    ep = range(1, len(hist["loss"]) + 1)
+    ax.plot(ep, hist["loss"], label="train loss")
+    ax.plot(ep, hist["val_loss"], label="validation loss")
+    ax.axvline(meta["training"]["best_epoch"], color="#999", ls="--", lw=1, label="best epoch (restored)")
     ax.set_xlabel("epoch")
-    ax.set_ylabel("MSE (scaled log-RTT)")
+    ax.set_ylabel(f"{meta['training']['loss']} loss ({meta.get('target_mode', 'level')} target, scaled)")
     ax.set_title("LSTM training history (RIPE Atlas, real data)")
     ax.legend()
     fig.tight_layout()

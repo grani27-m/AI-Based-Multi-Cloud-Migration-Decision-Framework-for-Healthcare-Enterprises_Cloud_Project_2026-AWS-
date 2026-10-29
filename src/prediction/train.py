@@ -11,6 +11,7 @@ Artifacts written to models/latency_lstm/
     preprocessing.json     features, window, scaler (fitted on TRAIN only), version, data hash
     training_history.json  per-epoch loss/MAE on train and validation
 """
+
 from __future__ import annotations
 
 import argparse
@@ -55,6 +56,7 @@ def main(argv=None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
     import tensorflow as tf
+
     tf.keras.utils.set_random_seed(a.seed)
 
     d = np.load(WINDOWS)
@@ -62,8 +64,9 @@ def main(argv=None) -> int:
     if a.target_mode == "residual":  # predict change of log-RTT relative to the last observation
         ytr = (ytr - last_log_rtt(Xtr)).astype(np.float32)
         yva = (yva - last_log_rtt(Xva)).astype(np.float32)
-    log.info("train windows %s  val windows %s  target=%s loss=%s lr=%g", Xtr.shape, Xva.shape,
-             a.target_mode, a.loss, a.lr)
+    log.info(
+        "train windows %s  val windows %s  target=%s loss=%s lr=%g", Xtr.shape, Xva.shape, a.target_mode, a.loss, a.lr
+    )
     scaler = Scaler.fit(Xtr.reshape(-1, Xtr.shape[-1]), ytr)  # TRAIN ONLY
     Xtr_s, Xva_s = scaler.x(Xtr), scaler.x(Xva)
     ytr_s, yva_s = scaler.y(ytr), scaler.y(yva)
@@ -71,8 +74,16 @@ def main(argv=None) -> int:
     model = build_keras_model(lr=a.lr, loss=a.loss)
     cb = [tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=a.patience, restore_best_weights=True)]
     t0 = time.time()
-    hist = model.fit(Xtr_s, ytr_s, validation_data=(Xva_s, yva_s), epochs=a.epochs, batch_size=a.batch,
-                     shuffle=True, callbacks=cb, verbose=2)
+    hist = model.fit(
+        Xtr_s,
+        ytr_s,
+        validation_data=(Xva_s, yva_s),
+        epochs=a.epochs,
+        batch_size=a.batch,
+        shuffle=True,
+        callbacks=cb,
+        verbose=2,
+    )
     secs = time.time() - t0
 
     # validation MAE in milliseconds (model selection uses VALIDATION only, never test)
@@ -90,25 +101,47 @@ def main(argv=None) -> int:
     version = datetime.now(timezone.utc).strftime("lstm-%Y%m%d-%H%M")
     meta = {
         "model_version": version,
-        "architecture": {"type": "stacked LSTM", "units": UNITS, "dense": DENSE, "dropout": DROPOUT,
-                         "params": int(model.count_params())},
-        "window": WINDOW, "features": FEATURES, "target_mode": a.target_mode,
-        "target": f"next {TARGET}: log1p, " + ("minus log1p(last RTT), " if a.target_mode == "residual" else "")
-                  + "standardised",
+        "architecture": {
+            "type": "stacked LSTM",
+            "units": UNITS,
+            "dense": DENSE,
+            "dropout": DROPOUT,
+            "params": int(model.count_params()),
+        },
+        "window": WINDOW,
+        "features": FEATURES,
+        "target_mode": a.target_mode,
+        "target": f"next {TARGET}: log1p, "
+        + ("minus log1p(last RTT), " if a.target_mode == "residual" else "")
+        + "standardised",
         "horizon": "one measurement interval (240 s for RIPE Atlas built-in pings)",
-        "scaler": scaler.to_dict(), "scaler_fitted_on": "training windows only",
-        "training": {"epochs_run": len(hist.history["loss"]), "best_epoch": best + 1, "batch": a.batch,
-                     "seed": a.seed, "optimizer": f"Adam({a.lr:g})", "loss": a.loss,
-                     "val_mae_ms": val_mae_ms, "val_persistence_mae_ms": val_pers_ms, "seconds": round(secs, 1),
-                     "train_windows": int(len(ytr)), "val_windows": int(len(yva)),
-                     "tensorflow": tf.__version__},
-        "data": {"windows_file": str(WINDOWS.relative_to(ROOT)), "windows_sha256": file_sha256(WINDOWS),
-                 "source": "RIPE Atlas built-in pings msm 1001/1004, see dataset/metadata"},
+        "scaler": scaler.to_dict(),
+        "scaler_fitted_on": "training windows only",
+        "training": {
+            "epochs_run": len(hist.history["loss"]),
+            "best_epoch": best + 1,
+            "batch": a.batch,
+            "seed": a.seed,
+            "optimizer": f"Adam({a.lr:g})",
+            "loss": a.loss,
+            "val_mae_ms": val_mae_ms,
+            "val_persistence_mae_ms": val_pers_ms,
+            "seconds": round(secs, 1),
+            "train_windows": int(len(ytr)),
+            "val_windows": int(len(yva)),
+            "tensorflow": tf.__version__,
+        },
+        "data": {
+            "windows_file": str(WINDOWS.relative_to(ROOT)),
+            "windows_sha256": file_sha256(WINDOWS),
+            "source": "RIPE Atlas built-in pings msm 1001/1004, see dataset/metadata",
+        },
         "trained_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
     (out_dir / "preprocessing.json").write_text(json.dumps(meta, indent=2))
-    (out_dir / "training_history.json").write_text(json.dumps(
-        {k: [float(v) for v in vals] for k, vals in hist.history.items()}, indent=2))
+    (out_dir / "training_history.json").write_text(
+        json.dumps({k: [float(v) for v in vals] for k, vals in hist.history.items()}, indent=2)
+    )
     log.info("saved %s (best epoch %d, %.0fs)", version, best + 1, secs)
     return 0
 

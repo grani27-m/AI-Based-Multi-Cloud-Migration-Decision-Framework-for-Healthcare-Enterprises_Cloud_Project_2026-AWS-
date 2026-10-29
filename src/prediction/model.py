@@ -13,6 +13,7 @@ Two implementations of the SAME network:
                             TensorFlow. tests/unit/test_prediction.py checks that both give the
                             same output (tolerance 1e-4) for the saved model.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -38,9 +39,11 @@ def build_keras_model(lr: float = 1e-3, loss: str = "huber"):
     x = keras.layers.Dense(DENSE, activation="relu", name="dense_relu")(x)
     out = keras.layers.Dense(1, name="output")(x)
     model = keras.Model(inp, out, name="latency_lstm")
-    model.compile(optimizer=keras.optimizers.Adam(learning_rate=lr),
-                  loss=keras.losses.Huber(delta=1.0) if loss == "huber" else "mse",
-                  metrics=[tf.keras.metrics.MeanAbsoluteError(name="mae")])
+    model.compile(
+        optimizer=keras.optimizers.Adam(learning_rate=lr),
+        loss=keras.losses.Huber(delta=1.0) if loss == "huber" else "mse",
+        metrics=[tf.keras.metrics.MeanAbsoluteError(name="mae")],
+    )
     return model
 
 
@@ -76,7 +79,12 @@ class NumpyLSTM:
         seq = []
         for t in range(steps):
             z = x[:, t, :] @ k + h @ rk + b
-            i, f, g, o = _sigmoid(z[:, :n]), _sigmoid(z[:, n:2 * n]), np.tanh(z[:, 2 * n:3 * n]), _sigmoid(z[:, 3 * n:])
+            i, f, g, o = (
+                _sigmoid(z[:, :n]),
+                _sigmoid(z[:, n : 2 * n]),
+                np.tanh(z[:, 2 * n : 3 * n]),
+                _sigmoid(z[:, 3 * n :]),
+            )
             c = f * c + i * g
             h = o * np.tanh(c)
             if return_sequences:

@@ -13,6 +13,7 @@ One time step = one RIPE Atlas ping round (or one equivalent device observation)
 Target: rtt_avg_ms of the NEXT round (one measurement interval ahead, 240 s for
 RIPE built-in measurements).
 """
+
 from __future__ import annotations
 
 import math

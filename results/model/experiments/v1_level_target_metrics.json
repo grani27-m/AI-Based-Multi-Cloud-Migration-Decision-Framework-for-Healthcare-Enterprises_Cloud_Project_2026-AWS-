@@ -1,0 +1,218 @@
+{
+  "model_version": "lstm-20261029-0503",
+  "test_windows": 113077,
+  "test_period_utc": [
+    "2026-10-19T14:23:54+00:00",
+    "2026-10-27T23:59:54+00:00"
+  ],
+  "overall": {
+    "lstm": {
+      "mae_ms": 2.075540281475446,
+      "rmse_ms": 6.635678437635189,
+      "median_ae_ms": 0.5400294431326227,
+      "risk_class_accuracy": 0.9899272177365865,
+      "n": 113077,
+      "mae_skill_vs_persistence": -0.27103096748520383,
+      "rmse_skill_vs_persistence": 0.1698736550320138
+    },
+    "persistence": {
+      "mae_ms": 1.632958074642353,
+      "rmse_ms": 7.993576493336197,
+      "median_ae_ms": 0.16536466666666882,
+      "risk_class_accuracy": 0.9875394642588678,
+      "n": 113077,
+      "mae_skill_vs_persistence": 0.0,
+      "rmse_skill_vs_persistence": 0.0
+    },
+    "mean20": {
+      "mae_ms": 1.781402367545232,
+      "rmse_ms": 6.688072849594192,
+      "median_ae_ms": 0.21563125710771835,
+      "risk_class_accuracy": 0.9892639528816647,
+      "n": 113077,
+      "mae_skill_vs_persistence": -0.09090514643824577,
+      "rmse_skill_vs_persistence": 0.16331909062612093
+    },
+    "ewma": {
+      "mae_ms": 1.5287804268656702,
+      "rmse_ms": 6.406737948020246,
+      "median_ae_ms": 0.17138895146401367,
+      "risk_class_accuracy": 0.9903163331181407,
+      "n": 113077,
+      "mae_skill_vs_persistence": 0.06379689068226668,
+      "rmse_skill_vs_persistence": 0.19851421283561999
+    },
+    "ridge": {
+      "mae_ms": 1.495717985832069,
+      "rmse_ms": 6.4067696761741395,
+      "median_ae_ms": 0.22334828345449953,
+      "risk_class_accuracy": 0.9899802789249803,
+      "n": 113077,
+      "mae_skill_vs_persistence": 0.08404385326325181,
+      "rmse_skill_vs_persistence": 0.19851024362935543
+    }
+  },
+  "by_group": {
+    "access_network": {
+      "lstm": {
+        "mae_ms": 1.188332617056629,
+        "rmse_ms": 3.890336768379307,
+        "median_ae_ms": 0.5316143085427782,
+        "risk_class_accuracy": 0.9986422038938451,
+        "n": 89115
+      },
+      "persistence": {
+        "mae_ms": 0.6503202180665433,
+        "rmse_ms": 4.323773050978832,
+        "median_ae_ms": 0.19579099999999983,
+        "risk_class_accuracy": 0.9984177747853896,
+        "n": 89115
+      },
+      "mean20": {
+        "mae_ms": 0.9043631919321189,
+        "rmse_ms": 4.20624612472784,
+        "median_ae_ms": 0.2274117050897111,
+        "risk_class_accuracy": 0.9983953318745441,
+        "n": 89115
+      },
+      "ewma": {
+        "mae_ms": 0.6602352085688858,
+        "rmse_ms": 3.6248505966236397,
+        "median_ae_ms": 0.18867459130456332,
+        "risk_class_accuracy": 0.9987095326263816,
+        "n": 89115
+      },
+      "ridge": {
+        "mae_ms": 0.6746700780242049,
+        "rmse_ms": 3.5447031414348165,
+        "median_ae_ms": 0.23425687316441657,
+        "risk_class_accuracy": 0.9986870897155361,
+        "n": 89115
+      }
+    },
+    "datacentre": {
+      "lstm": {
+        "mae_ms": 5.375077507695415,
+        "rmse_ms": 12.308633128175858,
+        "median_ae_ms": 0.8441415076453094,
+        "risk_class_accuracy": 0.9575160671062516,
+        "n": 23962
+      },
+      "persistence": {
+        "mae_ms": 5.287401467879699,
+        "rmse_ms": 15.2317118824438,
+        "median_ae_ms": 0.05847350000000251,
+        "risk_class_accuracy": 0.947082881228612,
+        "n": 23962
+      },
+      "mean20": {
+        "mae_ms": 5.043122847253211,
+        "rmse_ms": 12.05339390074585,
+        "median_ae_ms": 0.11008799348487242,
+        "risk_class_accuracy": 0.955304231700192,
+        "n": 23962
+      },
+      "ewma": {
+        "mae_ms": 4.758911765172904,
+        "rmse_ms": 12.034611200258215,
+        "median_ae_ms": 0.07606935033191775,
+        "risk_class_accuracy": 0.9591019113596528,
+        "n": 23962
+      },
+      "ridge": {
+        "mae_ms": 4.549206188164839,
+        "rmse_ms": 12.123151829577127,
+        "median_ae_ms": 0.13237285771622498,
+        "risk_class_accuracy": 0.9575995325932727,
+        "n": 23962
+      }
+    }
+  },
+  "spikes": {
+    "150": {
+      "lstm": {
+        "threshold_ms": 150.0,
+        "actual_events": 29,
+        "predicted_events": 4,
+        "true_positives": 2,
+        "precision": 0.5,
+        "recall": 0.06896551724137931
+      },
+      "persistence": {
+        "threshold_ms": 150.0,
+        "actual_events": 29,
+        "predicted_events": 29,
+        "true_positives": 20,
+        "precision": 0.6896551724137931,
+        "recall": 0.6896551724137931
+      },
+      "mean20": {
+        "threshold_ms": 150.0,
+        "actual_events": 29,
+        "predicted_events": 10,
+        "true_positives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "ewma": {
+        "threshold_ms": 150.0,
+        "actual_events": 29,
+        "predicted_events": 25,
+        "true_positives": 19,
+        "precision": 0.76,
+        "recall": 0.6551724137931034
+      },
+      "ridge": {
+        "threshold_ms": 150.0,
+        "actual_events": 29,
+        "predicted_events": 15,
+        "true_positives": 13,
+        "precision": 0.8666666666666667,
+        "recall": 0.4482758620689655
+      }
+    },
+    "300": {
+      "lstm": {
+        "threshold_ms": 300.0,
+        "actual_events": 2,
+        "predicted_events": 0,
+        "true_positives": 0,
+        "precision": null,
+        "recall": 0.0
+      },
+      "persistence": {
+        "threshold_ms": 300.0,
+        "actual_events": 2,
+        "predicted_events": 2,
+        "true_positives": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "mean20": {
+        "threshold_ms": 300.0,
+        "actual_events": 2,
+        "predicted_events": 0,
+        "true_positives": 0,
+        "precision": null,
+        "recall": 0.0
+      },
+      "ewma": {
+        "threshold_ms": 300.0,
+        "actual_events": 2,
+        "predicted_events": 0,
+        "true_positives": 0,
+        "precision": null,
+        "recall": 0.0
+      },
+      "ridge": {
+        "threshold_ms": 300.0,
+        "actual_events": 2,
+        "predicted_events": 0,
+        "true_positives": 0,
+        "precision": null,
+        "recall": 0.0
+      }
+    }
+  },
+  "objective_1_met": false
+}

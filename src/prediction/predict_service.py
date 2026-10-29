@@ -21,6 +21,7 @@ Output (PredictionResult.to_dict()):
                             Never presented as a model prediction (the old code silently
                             returned last_latency * 1.1 and reported it as the LSTM's output).
 """
+
 from __future__ import annotations
 
 import json
@@ -77,8 +78,10 @@ def _to_unix(ts: Any) -> float:
 
 def validate_window(window: Sequence[dict]) -> tuple[np.ndarray, np.ndarray]:
     if not isinstance(window, (list, tuple)) or len(window) != WINDOW:
-        raise PredictionInputError(f"window must contain exactly {WINDOW} observations, got "
-                                   f"{len(window) if hasattr(window, '__len__') else type(window).__name__}")
+        raise PredictionInputError(
+            f"window must contain exactly {WINDOW} observations, got "
+            f"{len(window) if hasattr(window, '__len__') else type(window).__name__}"
+        )
     ts = np.array([_to_unix(o.get("timestamp")) for o in window])
     if np.any(np.diff(ts) <= 0):
         raise PredictionInputError("timestamps must be strictly increasing (oldest -> newest)")
@@ -137,13 +140,25 @@ class LatencyPredictor:
         else:
             pred, method, version = last, "persistence_fallback", "none"
         pred = max(0.0, pred)
-        return PredictionResult(predicted_rtt_ms=round(pred, 3), risk=classify_risk(pred), method=method,
-                                model_version=version, horizon_s=240,
-                                inference_ms=round((time.perf_counter() - t0) * 1000, 3),
-                                last_observed_rtt_ms=round(last, 3))
+        return PredictionResult(
+            predicted_rtt_ms=round(pred, 3),
+            risk=classify_risk(pred),
+            method=method,
+            model_version=version,
+            horizon_s=240,
+            inference_ms=round((time.perf_counter() - t0) * 1000, 3),
+            last_observed_rtt_ms=round(last, 3),
+        )
 
     def info(self) -> dict:
-        return {"loaded": self.model_loaded, "model_version": self.model_version, "load_error": self.load_error,
-                "window": WINDOW, "features": self.meta.get("features"), "architecture": self.meta.get("architecture"),
-                "training": self.meta.get("training"), "trained_at": self.meta.get("trained_at"),
-                "risk_thresholds_ms": RISK_THRESHOLDS_MS}
+        return {
+            "loaded": self.model_loaded,
+            "model_version": self.model_version,
+            "load_error": self.load_error,
+            "window": WINDOW,
+            "features": self.meta.get("features"),
+            "architecture": self.meta.get("architecture"),
+            "training": self.meta.get("training"),
+            "trained_at": self.meta.get("trained_at"),
+            "risk_thresholds_ms": RISK_THRESHOLDS_MS,
+        }
