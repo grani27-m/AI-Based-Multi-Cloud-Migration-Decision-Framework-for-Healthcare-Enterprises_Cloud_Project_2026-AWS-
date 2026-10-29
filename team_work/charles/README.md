@@ -3,6 +3,14 @@
 **Role:** turn real network measurements into a trained, honestly evaluated forecaster, and provide the data streams
 (replay of real data, labelled simulator) that drive the rest of the system.
 
+## Run my part on its own
+**Workstream:** A — Prediction & data pipeline (see `docs/WORKSTREAM_MAPPING.md`, every file's owner in `docs/FILE_OWNERSHIP_MATRIX.md`).
+
+Standalone package: **`standalone_demos/charles/`** — copy the folder anywhere, `python -m venv .venv`, `pip install -r requirements.txt`, then
+`01_inspect_datasets.py → 02_validate_and_preprocess.py → 03_train_or_load_model.py → 04_evaluate_predictions.py → streamlit run 05_dashboard.py`. Instructions: `standalone_demos/charles/README.md`. Verified outside the repository in a fresh environment:
+25 passed + 1 skipped (TensorFlow not installed) — `standalone_demos/charles/TEST_REPORT.md`.
+
+
 ## Canonical source
 | File | What it does |
 |---|---|
@@ -31,7 +39,7 @@ pytest tests/unit/test_prediction.py -q
 ```
 
 ## Results (details: `reports/DATASET_REPORT.md`, `reports/MODEL_EVALUATION_REPORT.md`)
-* **756,495** real RIPE Atlas ping results downloaded (20 Indian probes, 2 measurements, 8 weeks) → **753,410** clean rows → 475k / 111k / 113k chronological windows.
+* **756,495** real RIPE Atlas ping results downloaded (20 Indian probes returned data — 19 feed the model, probe 1000689 was 100 % loss — 2 measurements, 8 weeks) → **753,410** clean rows → 475k / 111k / 113k chronological windows.
 * **53** real BIDMC ICU recordings, checksums verified.
 * Held-out test: **LSTM MAE 1.307 ms vs persistence 1.633 ms (−20 %)**, RMSE 6.515 vs 7.994 ms → report Objective 1 met.
   EWMA and ridge have a slightly lower RMSE (6.407 ms); spikes ≥ 300 ms (2 in test) are not predicted by any method.

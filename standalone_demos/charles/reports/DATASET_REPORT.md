@@ -19,7 +19,7 @@ python -m src.prediction.dataset build            # clean table + chronological 
 | Source | RIPE NCC, RIPE Atlas REST API v2 — `https://atlas.ripe.net/api/v2/measurements/<id>/results/` |
 | Licence / terms | RIPE Atlas public measurement data, RIPE NCC Terms & Conditions; cite RIPE NCC Staff (2015), *Internet Protocol Journal* 18(3) |
 | Measurements | **1001** (ping k.root-servers.net 193.0.14.129) and **1004** (ping f.root-servers.net 192.5.5.241), built-in, IPv4, every 240 s, ongoing since 2010 |
-| Probes | 20 public probes in India with data (21 selected; probe 1001134 returned no results for these measurements). 14 access-network probes (Airtel, BSNL, ACT, Hathway, Excitel, home networks) and 6 data-centre probes (AWS Mumbai AS16509, Oracle Mumbai/Hyderabad AS31898, E2E Noida, OVH) |
+| Probes | 20 public probes in India with data (21 selected; probe 1001134 returned no results for these measurements). Probe 1000689 (OVH data centre) returned rows but reported 100 % packet loss to both targets in every round, so it contributes no RTT values and no model windows — **19 probes actually feed the model**. 14 access-network probes (Airtel, BSNL, ACT, Hathway, Excitel, home networks) and 6 data-centre probes (AWS Mumbai AS16509, Oracle Mumbai/Hyderabad AS31898, E2E Noida, OVH) |
 | Selection rule | public, connected on 2026-10-29, IPv4 ASN, highest total uptime; documented in `dataset/config/ripe_atlas_selection.json` |
 | Period | 2026-09-02 00:00 → 2026-10-28 00:00 UTC (8 weeks), downloaded 2026-10-29 |
 | Raw storage | 336 gzip JSON chunks (measurement × probe × week), 30 MB, `dataset/raw/ripe_atlas/` — never overwritten |

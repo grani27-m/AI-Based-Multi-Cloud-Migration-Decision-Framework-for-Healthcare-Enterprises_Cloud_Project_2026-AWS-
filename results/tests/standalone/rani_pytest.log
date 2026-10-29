@@ -1,0 +1,5 @@
+### python -m pytest tests -q
+    df.reset_index(inplace=True)  # noqa: PD002
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+69 passed, 9 warnings in 31.46s

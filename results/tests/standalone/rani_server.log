@@ -1,0 +1,146 @@
+2026-10-29 07:36:02,290 INFO alembic.runtime.plugins setup plugin alembic.autogenerate.schemas
+2026-10-29 07:36:02,290 INFO alembic.runtime.plugins setup plugin alembic.autogenerate.tables
+2026-10-29 07:36:02,291 INFO alembic.runtime.plugins setup plugin alembic.autogenerate.types
+2026-10-29 07:36:02,291 INFO alembic.runtime.plugins setup plugin alembic.autogenerate.constraints
+2026-10-29 07:36:02,291 INFO alembic.runtime.plugins setup plugin alembic.autogenerate.defaults
+2026-10-29 07:36:02,291 INFO alembic.runtime.plugins setup plugin alembic.autogenerate.comments
+2026-10-29 07:36:02,291 INFO alembic.runtime.plugins setup plugin alembic.ext.checkconstraint_byname
+2026-10-29 07:36:02,321 INFO alembic.runtime.migration Context impl SQLiteImpl.
+2026-10-29 07:36:02,321 INFO alembic.runtime.migration Will assume non-transactional DDL.
+INFO:     Started server process [2358]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:39550 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39552 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39566 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39572 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39572 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+2026-10-29 07:36:10,868 INFO alerts alert 2 -> mock_delivered
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 200 OK
+2026-10-29 07:36:11,377 INFO alerts alert 3 -> mock_delivered
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:39572 - "GET /api/v1/events/sim-59468-normal-00000-bad HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:39572 - "POST /api/v1/events HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:39572 - "GET /api/v1/audit HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:39572 - "GET /api/v1/events HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:39572 - "GET /api/v1/events HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:39572 - "GET /api/v1/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39572 - "GET /api/v1/audit/verify HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39572 - "GET /api/v1/dashboard/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58722 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58732 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58744 - "GET /api/v1/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58758 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58760 - "GET /api/v1/dashboard/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58768 - "GET /api/v1/system/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58782 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58792 - "GET /api/v1/events?limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58800 - "GET /api/v1/events/replay-1001-1000726-1792520828-b46-443 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58808 - "GET /api/v1/audit?limit=1000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58814 - "GET /api/v1/executions?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58828 - "GET /api/v1/alerts?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58842 - "GET /api/v1/audit/verify HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58850 - "GET /api/v1/audit?limit=300 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33202 - "GET /login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33202 - "GET /assets/index-DdlDJwpX.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /assets/index-EReY0DyV.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33202 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33234 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /api/v1/dashboard/timeseries?limit=150 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33202 - "GET /api/v1/dashboard/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33202 - "GET /project HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33242 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33256 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33202 - "GET /api/v1/system/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /api/v1/audit/verify HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33234 - "GET /api/v1/dashboard/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33234 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33234 - "GET /api/v1/dashboard/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33202 - "GET /api/v1/dashboard/timeseries?limit=150 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33202 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /api/v1/events?limit=25&offset=0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /trace HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33202 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /api/v1/events?limit=40 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33202 - "GET /api/v1/alerts?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39630 - "GET /api/v1/audit?limit=1000&offset=0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /api/v1/events/replay-1001-1000726-1792520828-b46-443 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /multi-cloud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39630 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /api/v1/events?limit=1&source=replay HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "POST /api/v1/decision/rank HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /decision-lab HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39630 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /api/v1/system/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "POST /api/v1/decision/preview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39630 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /api/v1/system/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /alerts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /assets/index-DdlDJwpX.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:33218 - "GET /api/v1/alerts?limit=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39630 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39630 - "GET /audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33218 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39630 - "GET /api/v1/audit?limit=50&offset=0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39630 - "GET /system HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39630 - "GET /assets/index-EReY0DyV.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:33218 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39630 - "GET /api/v1/system/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59450 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59462 - "GET /login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59462 - "GET /assets/index-DdlDJwpX.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59470 - "GET /assets/index-EReY0DyV.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59462 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59476 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59470 - "GET /api/v1/dashboard/timeseries?limit=150 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59462 - "GET /api/v1/dashboard/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59462 - "GET /project HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59490 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59462 - "GET /api/v1/system/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59470 - "GET /api/v1/dashboard/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59476 - "GET /api/v1/audit/verify HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59496 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56124 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56134 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56136 - "GET /api/v1/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56152 - "GET /ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56162 - "GET /api/v1/dashboard/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56178 - "GET /api/v1/system/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56186 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56190 - "GET /api/v1/events?limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56192 - "GET /api/v1/events/replay-1001-1000726-1792520828-b46-443 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56194 - "GET /api/v1/audit?limit=1000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56200 - "GET /api/v1/executions?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56208 - "GET /api/v1/alerts?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56218 - "GET /api/v1/audit/verify HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56222 - "GET /api/v1/audit?limit=300 HTTP/1.1" 200 OK

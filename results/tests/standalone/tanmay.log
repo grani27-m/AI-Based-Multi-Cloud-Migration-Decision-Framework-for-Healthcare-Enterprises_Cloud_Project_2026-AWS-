@@ -1,0 +1,120 @@
+package: tanmay   copied to /tmp/claude-0/clean/tanmay (outside the repository), fresh venv
+Thu Oct 29 07:34:14 UTC 2026
+Python 3.13.18
+Linux x86_64
+numpy==2.5.4
+pandas==3.1.0
+plotly==6.9.0
+pytest==9.2.0
+streamlit==1.66.1
+uvicorn==0.54.0
+
+### python 01_load_criteria.py
+Criteria
+  criticality  Patient criticality          unit: 0-10 score             n_c = criticality / 10       -> EDGE when high (squared term)
+  latency      Predicted network latency    unit: ms (next-round RTT)    n_l = min(latency / 500, 1)  -> EDGE when high
+  cost         Cloud cost index             unit: 0-1 index              n_k = cost                   -> EDGE when high
+
+Pairwise comparison matrix (Saaty 1-9 scale), rows/cols = criticality, latency, cost
+  criticality    1.000   3.000   5.000
+  latency        0.333   1.000   3.000
+  cost           0.200   0.333   1.000
+
+Thresholds: emergency criticality >= 9.0, network veto >= 300.0 ms, CR limit < 0.1; latency normalised by 500 ms
+
+  [PASS] matrix matches code
+  [PASS] emergency threshold matches code
+  [PASS] veto threshold matches code
+  [PASS] reported weights recorded as in report
+exit=0
+
+### python 02_calculate_ahp.py
+Step 1 - matrix
+  criticality    1.0000   3.0000   5.0000
+  latency        0.3333   1.0000   3.0000
+  cost           0.2000   0.3333   1.0000
+
+Step 2 - principal eigenvector by power iteration (w <- M w / sum)
+  iteration  1: 0.605381  0.291480  0.103139   change 2.72e-01
+  iteration  2: 0.639674  0.257307  0.103019   change 3.43e-02
+  iteration  3: 0.637343  0.257886  0.104771   change 2.33e-03
+  iteration  4: 0.636947  0.258303  0.104751   change 4.17e-04
+  iteration  5: 0.636982  0.258290  0.104729   change 3.48e-05
+  iteration 14: 0.636986  0.258285  0.104729   change 9.98e-14
+
+Step 3 - consistency: lambda_max = 3.0385, CI = (lambda_max - n)/(n - 1) = 0.01926
+  CR = CI / RI(n=3) = 0.01926 / 0.58 = 0.0332  -> CONSISTENT (limit 0.1)
+  with the alternative RI = 0.52: CR = 0.0370
+
+Step 4 - weights
+  criticality  0.6370
+  latency      0.2583
+  cost         0.1047
+
+Comparison with other values for the same matrix:
+  method                           criticality     latency        cost      CR
+  principal eigenvector (used)          0.6370      0.2583      0.1047  0.0332
+  column normalisation (old code)       0.6333      0.2605      0.1062  0.0334
+  printed in project report             0.6396      0.2583      0.1021   0.037
+  -> the report's criticality/cost weights cannot be derived from this matrix; latency matches.
+exit=0
+
+### python 03_compare_candidates.py
+Part A - 127 cached events
+  by source/destination/reason: {('replay', 'CLOUD', 'ahp_decision'): 58, ('replay', 'EDGE', 'ahp_decision'): 2, ('simulated', 'CLOUD', 'ahp_decision'): 35, ('simulated', 'EDGE', 'network_degradation_veto'): 20, ('simulated', 'EDGE', 'override_critical_patient'): 12}
+  recomputed decision == decision stored by the integrated system: 127/127
+  first 8 rows:
+    replay-1001-24916-1792738533-b35-120   crit  1.43 lat    14.1 ms cost 0.67 -> CLOUD ahp_decision
+    replay-1004-52835-1792707354-b16-101   crit  2.86 lat    14.3 ms cost 0.25 -> CLOUD ahp_decision
+    replay-1004-54620-1793129927-b38-448   crit  0.00 lat    21.9 ms cost 0.25 -> CLOUD ahp_decision
+    replay-1004-17590-1792705767-b38-161   crit  1.43 lat    13.2 ms cost 0.25 -> CLOUD ahp_decision
+    replay-1004-29959-1793000903-b31-31    crit  0.00 lat    15.1 ms cost 0.69 -> CLOUD ahp_decision
+    replay-1001-52835-1792934591-b42-413   crit  1.43 lat    31.1 ms cost 0.46 -> CLOUD ahp_decision
+    replay-1001-1003379-1793058542-b20-280 crit  0.00 lat   126.4 ms cost 0.25 -> CLOUD ahp_decision
+    replay-1001-11978-1792866412-b01-376   crit  4.29 lat    26.7 ms cost 0.25 -> CLOUD ahp_decision
+
+Part B - multi-cloud ranking (HYPOTHETICAL inputs), criticality 2.0
+  aws-ap-south-1 (Mumbai)        cloud score 0.7091
+  aws-eu-north-1 (Stockholm)     cloud score 0.6644
+  EDGE                           edge  score 0.0871
+  other-provider-us-east         cloud excluded: network veto (310 ms)
+  -> aws-ap-south-1 (Mumbai): aws-ap-south-1 (Mumbai) has the highest AHP score 0.709 (vs aws-eu-north-1 (Stockholm) 0.664, EDGE 0.087); excluded: other-provider-us-east (network veto (310 ms)).
+exit=0
+
+### python 04_explain_decision.py --vitals 118,24,93 --latency 80 --cost 0.4
+Vitals HR 118.0 RR 24.0 SpO2 93.0 -> partial NEWS2 points {'resp': 2, 'spo2': 2, 'hr': 2} = 6 -> criticality 8.57
+  (partial_news2_v1 (RR, SpO2, HR) - illustrative, not clinically validated)
+
+Weights (eigenvector): criticality 0.6370, latency 0.2583, cost 0.1047
+Normalised inputs: criticality 0.8570, latency 0.1600, cost 0.4000
+criterion         EDGE     CLOUD
+criticality     0.4678    0.0130
+latency         0.0413    0.2170
+cost            0.0419    0.0628
+total           0.5511    0.2928
+
+DECISION: EDGE  (reason: ahp_decision)
+AHP score EDGE 0.551 vs CLOUD 0.293; EDGE chosen, mainly driven by criticality.
+exit=0
+
+### python 04_explain_decision.py --criticality 3 --cloud mumbai:30:0.5 --cloud stockholm:150:0.2 --cloud far:320:0.1
+
+Weights (eigenvector): {'criticality': 0.6369855717447745, 'latency': 0.2582849943744825, 'cost': 0.104729433880743}
+  mumbai               cloud score 0.6073  contributions {'criticality': 0.312123, 'latency': 0.242788, 'cost': 0.052365}
+  stockholm            cloud score 0.5767  contributions {'criticality': 0.312123, 'latency': 0.180799, 'cost': 0.083784}
+  EDGE                 edge  score 0.1252  contributions {'criticality': 0.057329, 'latency': 0.015497, 'cost': 0.052365}
+  far                  cloud excluded: network veto (320 ms)
+
+DECISION: mumbai (ahp_decision)
+mumbai has the highest AHP score 0.607 (vs stockholm 0.577, EDGE 0.125); excluded: far (network veto (320 ms)).
+exit=0
+
+### python 04_explain_decision.py --criticality 3 --latency nan
+REJECTED (explicit error, no decision made): predicted_latency_ms must be >= 0 or null, got nan
+exit=2
+
+### python -m pytest tests -q
+........................................................................ [ 39%]
+........................................................................ [ 78%]
+........................................                                 [100%]
+184 passed in 1.93s

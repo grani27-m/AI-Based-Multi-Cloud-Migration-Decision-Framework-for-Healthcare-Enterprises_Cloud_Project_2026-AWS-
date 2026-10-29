@@ -31,10 +31,16 @@ have) · **Not done**.
 | 22 | MQTT ingestion | **Partial** | bridge + test without broker; broker run not recorded | Rani |
 | 23 | Docker image + Compose | **Verified** (image build + container runs); full `docker compose up` not run here | `infrastructure_runs.md` | Rani |
 | 24 | CI workflow | **Partial** | written; every job's commands run locally and pass; not yet run on GitHub | Rani |
-| 25 | AWS deployment | **Blocked** | IaC + deploy/teardown scripts ready; no credentials; nothing deployed | All |
+| 25 | AWS deployment | **Prepared, not executed** | eu-north-1 plan, templates and staged guide `docs/AWS_DEPLOYMENT.md`; the team runs every command with their own least-privilege identity; nothing deployed until then | All |
 | 26 | Member folders with ownership + evidence | **Verified** | `team_work/*`, `.github/CODEOWNERS` | All |
-| 27 | Multi-cloud (several providers) | **Not done** | report scopes it as future work | Tanmay |
+| 27 | Multi-cloud (several providers) | **Partial** | `src/decision/candidates.py` ranks EDGE vs N cloud destinations (139 tests incl. 126-case equivalence with `decide()`), `POST /api/v1/decision/rank`, Multi-cloud page; candidate latencies other than the measured LSTM forecast are hypothetical — no second provider is measured | Tanmay |
 | 28 | ECG classification (PTB-XL) | **Not in scope** | not an objective in the report | — |
+| 29 | Each member's part runnable on its own | **Verified** | `standalone_demos/{charles,tanmay,rani}` copied outside the repo, fresh venvs: 25+1 skipped / 184 / 69 tests pass, all numbered scripts exit 0; `*/TEST_REPORT.md`, `results/tests/standalone/` | All |
+| 30 | One dashboard presenting the whole project | **Verified** | React Project tour, Request trace and Multi-cloud pages, all data from the API; `results/screenshots/final/` | Rani |
+| 31 | Alert testing without real e-mails | **Verified** | `ALERT_MOCK_FILE` channel, status `mock_delivered` never counted as delivered; tests | Rani |
+
+## Test totals at the time of this update
+Main repository: **274 passed** (`python -m pytest -q`). Standalone packages: Charles 25 passed + 1 skipped (TensorFlow absent), Tanmay 184, Rani 69.
 
 ## 2. Open issues
 1. One unexplained `NoResultFound` in an early PostgreSQL concurrency run (not reproduced in 4 reruns).
@@ -54,9 +60,9 @@ have) · **Not done**.
 
 ## 4. Sections of the PDF report the team must update
 * **Abstract, §3 Objective 1, §9.1, §13.1:** dataset size, "trained" wording, test results (MAE/RMSE table from `MODEL_EVALUATION_REPORT.md`).
-* **§6 Dataset table:** size 30 MB raw / 756,495 rows; 2 measurements, 20 probes, dates; feature list; BIDMC now "used" (criticality); licence lines filled.
+* **§6 Dataset table:** size 30 MB raw / 756,495 rows; 2 measurements, 20 probes with data (19 usable), dates; feature list; BIDMC now "used" (criticality); licence lines filled.
 * **§3/§9 AHP weights:** use the verified numbers and add the one-paragraph discrepancy note.
-* **§8.2 Tools:** FastAPI 0.162, SQLAlchemy 2.1, PostgreSQL 16/SQLite, TensorFlow 2.21 (training only), React 19 + Vite; no Redis/MLflow/Streamlit.
+* **§8.2 Tools:** FastAPI 0.162, SQLAlchemy 2.1, PostgreSQL 16/SQLite, TensorFlow 2.21 (training only), React 19 + Vite; Streamlit + Plotly only for the three standalone member dashboards; no Redis/MLflow.
 * **§10 Tests:** T04 now passes (reconciliation), T05/T06 verified by tests, T07 delivery log (webhook evidence; Telegram/e-mail blocked), T08 = 122 tests, T09 load test numbers, T10 concurrency test.
 * **§10.3 Baselines:** forecaster baselines now evaluated; routing baselines partly (`ROUTING_EVALUATION_REPORT.md` §4).
 * **§11 Limitations:** add the dormant-veto finding and the AI-assisted integration statement (`TEAM_CONTRIBUTIONS.md`).

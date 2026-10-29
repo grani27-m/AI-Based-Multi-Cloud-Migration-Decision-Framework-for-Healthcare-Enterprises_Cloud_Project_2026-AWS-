@@ -1,5 +1,10 @@
 # AWS deployment report
 
+> **Current plan (supersedes the SAM-only plan below):** the complete system is deployed to **eu-north-1** on one EC2
+> instance with S3, SNS, CloudWatch and SSM, by a least-privilege IAM user working in AWS CloudShell — see
+> [`docs/AWS_DEPLOYMENT.md`](../docs/AWS_DEPLOYMENT.md) and `deploy/aws/`. The section below documents the earlier optional
+> Lambda-only template, kept for reference.
+
 **Status: nothing is deployed.** No AWS credentials or Learner Lab session were available while this version was built, and this
 report does not claim otherwise. The current, machine-readable status shown on the dashboard's *System* page is
 `infra/aws/service_status.json`.

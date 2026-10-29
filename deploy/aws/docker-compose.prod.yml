@@ -1,0 +1,47 @@
+# Production compose used ON the EC2 instance by hcf-update (deploy/aws/instance/hcf-update.sh).
+# Local check without AWS: docker compose -f deploy/aws/docker-compose.prod.yml -f deploy/aws/docker-compose.localcheck.yml up --build
+x-logging: &awslogs
+  driver: awslogs
+  options:
+    awslogs-region: ${HCF_REGION:-eu-north-1}
+    awslogs-group: ${HCF_LOG_GROUP:-/hcf/prod}
+    awslogs-create-group: "false"
+    tag: "{{.Name}}"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hcf
+      POSTGRES_USER: hcf
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD missing}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hcf -d hcf"]
+      interval: 5s
+      retries: 20
+    mem_limit: 256m
+    logging: *awslogs
+
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/aws/Dockerfile.ec2
+    restart: unless-stopped
+    env_file: ../../.env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://hcf:${POSTGRES_PASSWORD}@postgres:5432/hcf
+      RUNTIME_DIR: /app/runtime
+    command: ["uvicorn", "backend.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000",
+              "--proxy-headers", "--workers", "2"]
+    ports: ["80:8000"]
+    volumes: [runtime:/app/runtime]
+    depends_on:
+      postgres: {condition: service_healthy}
+    mem_limit: 640m
+    logging: *awslogs
+
+volumes:
+  pgdata:
+  runtime:

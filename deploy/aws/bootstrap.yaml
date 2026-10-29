@@ -1,0 +1,202 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Healthcare Cloud Framework - ONE-TIME account setup (stack name: hcf-bootstrap, region eu-north-1).
+  Run ONCE by the account administrator (root only for this initial setup). Creates NO compute and costs nothing by
+  itself: the least-privilege deployer group + policy, and the EC2 instance role the app server uses. (The monthly budget alert is created
+  with scripts/admin_create_budget.sh because AWS Budgets is not a CloudFormation resource in eu-north-1.)
+  Routine deployment is then done by an IAM user in the hcf-deployers group (console sign-in with MFA, AWS CloudShell, no access keys).
+
+Resources:
+  # ------------------------------------------------------------------ deployer (humans)
+  DeployerPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: hcf-deployer-policy
+      Description: Least-privilege rights to deploy/operate/tear down ONLY the hcf-app stack in eu-north-1.
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: CloudFormationOnlyHcfStacks
+            Effect: Allow
+            Action:
+              - cloudformation:CreateStack
+              - cloudformation:UpdateStack
+              - cloudformation:DeleteStack
+              - cloudformation:CreateChangeSet
+              - cloudformation:ExecuteChangeSet
+              - cloudformation:DeleteChangeSet
+              - cloudformation:Describe*
+              - cloudformation:GetTemplate*
+              - cloudformation:ListStackResources
+            Resource:
+              - !Sub arn:aws:cloudformation:eu-north-1:${AWS::AccountId}:stack/hcf-app/*
+              - !Sub arn:aws:cloudformation:eu-north-1:${AWS::AccountId}:changeSet/*
+          - Sid: CloudFormationReadAndValidate
+            Effect: Allow
+            Action: [cloudformation:ValidateTemplate, cloudformation:ListStacks, cloudformation:DescribeStacks, cloudformation:GetTemplateSummary]
+            Resource: "*"
+          - Sid: Ec2InStockholmOnly
+            Effect: Allow
+            Action:
+              - ec2:Describe*
+              - ec2:RunInstances
+              - ec2:StartInstances
+              - ec2:StopInstances
+              - ec2:RebootInstances
+              - ec2:TerminateInstances
+              - ec2:CreateTags
+              - ec2:DeleteTags
+              - ec2:CreateSecurityGroup
+              - ec2:DeleteSecurityGroup
+              - ec2:AuthorizeSecurityGroupIngress
+              - ec2:RevokeSecurityGroupIngress
+              - ec2:AuthorizeSecurityGroupEgress
+              - ec2:RevokeSecurityGroupEgress
+              - ec2:ModifyInstanceMetadataOptions
+              - ec2:GetConsoleOutput
+            Resource: "*"
+            Condition:
+              StringEquals: {aws:RequestedRegion: eu-north-1}
+          - Sid: PassOnlyTheAppInstanceRole
+            Effect: Allow
+            Action: iam:PassRole
+            Resource: !GetAtt InstanceRole.Arn
+            Condition:
+              StringEquals: {iam:PassedToService: ec2.amazonaws.com}
+          - Sid: ReadInstanceProfile
+            Effect: Allow
+            Action: [iam:GetInstanceProfile, iam:GetRole]
+            Resource:
+              - !GetAtt InstanceProfile.Arn
+              - !GetAtt InstanceRole.Arn
+          - Sid: AppBucketOnly
+            Effect: Allow
+            Action: [s3:CreateBucket, s3:DeleteBucket, s3:ListBucket, s3:GetObject, s3:PutObject, s3:DeleteObject,
+                     s3:GetBucket*, s3:PutBucket*, s3:PutEncryptionConfiguration, s3:GetEncryptionConfiguration,
+                     s3:PutLifecycleConfiguration, s3:GetLifecycleConfiguration, s3:ListBucketVersions, s3:DeleteObjectVersion]
+            Resource:
+              - !Sub arn:aws:s3:::hcf-app-${AWS::AccountId}-eu-north-1
+              - !Sub arn:aws:s3:::hcf-app-${AWS::AccountId}-eu-north-1/*
+          - Sid: AlertTopicOnly
+            Effect: Allow
+            Action: [sns:CreateTopic, sns:DeleteTopic, sns:Subscribe, sns:Unsubscribe, sns:GetTopicAttributes,
+                     sns:SetTopicAttributes, sns:ListSubscriptionsByTopic, sns:Publish, sns:TagResource, sns:GetSubscriptionAttributes]
+            Resource: !Sub arn:aws:sns:eu-north-1:${AWS::AccountId}:hcf-*
+          - Sid: SnsListForConsole
+            Effect: Allow
+            Action: [sns:ListTopics, sns:ListSubscriptions]
+            Resource: "*"
+          - Sid: LogsOnlyHcf
+            Effect: Allow
+            Action: [logs:CreateLogGroup, logs:DeleteLogGroup, logs:PutRetentionPolicy, logs:DeleteRetentionPolicy,
+                     logs:TagResource, logs:TagLogGroup, logs:GetLogEvents, logs:FilterLogEvents, logs:DescribeLogStreams]
+            Resource:
+              - !Sub arn:aws:logs:eu-north-1:${AWS::AccountId}:log-group:/hcf/*
+              - !Sub arn:aws:logs:eu-north-1:${AWS::AccountId}:log-group:/hcf/*:*
+          - Sid: LogsDescribe
+            Effect: Allow
+            Action: [logs:DescribeLogGroups]
+            Resource: "*"
+          - Sid: AlarmsOnlyHcf
+            Effect: Allow
+            Action: [cloudwatch:PutMetricAlarm, cloudwatch:DeleteAlarms, cloudwatch:TagResource]
+            Resource: !Sub arn:aws:cloudwatch:eu-north-1:${AWS::AccountId}:alarm:hcf-*
+          - Sid: CloudWatchRead
+            Effect: Allow
+            Action: [cloudwatch:DescribeAlarms, cloudwatch:GetMetricData, cloudwatch:GetMetricStatistics, cloudwatch:ListMetrics]
+            Resource: "*"
+          - Sid: AppParametersOnly
+            Effect: Allow
+            Action: [ssm:PutParameter, ssm:GetParameter, ssm:GetParameters, ssm:GetParametersByPath, ssm:DeleteParameter,
+                     ssm:DeleteParameters, ssm:AddTagsToResource]
+            Resource:
+              - !Sub arn:aws:ssm:eu-north-1:${AWS::AccountId}:parameter/hcf/*
+              - arn:aws:ssm:eu-north-1::parameter/aws/service/ami-amazon-linux-latest/*
+          - Sid: DescribeParameters
+            Effect: Allow
+            Action: [ssm:DescribeParameters]
+            Resource: "*"
+          - Sid: RunCommandsOnlyOnHcfInstances
+            Effect: Allow
+            Action: [ssm:SendCommand, ssm:StartSession]
+            Resource: !Sub arn:aws:ec2:eu-north-1:${AWS::AccountId}:instance/*
+            Condition:
+              StringEquals: {ssm:resourceTag/Project: hcf}
+          - Sid: RunCommandDocuments
+            Effect: Allow
+            Action: [ssm:SendCommand, ssm:StartSession]
+            Resource:
+              - arn:aws:ssm:eu-north-1::document/AWS-RunShellScript
+              - !Sub arn:aws:ssm:eu-north-1:${AWS::AccountId}:document/SSM-SessionManagerRunShell
+              - arn:aws:ssm:eu-north-1::document/AWS-StartPortForwardingSession
+          - Sid: CommandResultsAndOwnSessions
+            Effect: Allow
+            Action: [ssm:ListCommands, ssm:ListCommandInvocations, ssm:GetCommandInvocation, ssm:DescribeInstanceInformation,
+                     ssm:DescribeSessions, ssm:GetConnectionStatus]
+            Resource: "*"
+          - Sid: EndOwnSessions
+            Effect: Allow
+            Action: [ssm:TerminateSession, ssm:ResumeSession]
+            Resource: arn:aws:ssm:*:*:session/${aws:username}-*
+          - Sid: WhoAmI
+            Effect: Allow
+            Action: [sts:GetCallerIdentity, iam:GetUser, iam:ListMFADevices, iam:ChangePassword, iam:GetAccountPasswordPolicy]
+            Resource: "*"
+
+  DeployerGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: hcf-deployers
+      ManagedPolicyArns:
+        - !Ref DeployerPolicy
+        - arn:aws:iam::aws:policy/AWSCloudShellFullAccess   # browser shell; no access keys needed
+
+  # ------------------------------------------------------------------ the app server (machine identity)
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: hcf-ec2-role
+      Description: Identity of the hcf app server. Reads its release + secrets, writes logs/objects/backups, publishes alerts.
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ec2.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore   # Session Manager / Run Command, so port 22 stays closed
+      Policies:
+        - PolicyName: hcf-app-runtime
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: ReleaseAndAppObjects
+                Effect: Allow
+                Action: [s3:GetObject, s3:PutObject, s3:ListBucket]
+                Resource:
+                  - !Sub arn:aws:s3:::hcf-app-${AWS::AccountId}-eu-north-1
+                  - !Sub arn:aws:s3:::hcf-app-${AWS::AccountId}-eu-north-1/*
+              - Sid: ReadOwnSecrets
+                Effect: Allow
+                Action: [ssm:GetParameter, ssm:GetParameters, ssm:GetParametersByPath]
+                Resource: !Sub arn:aws:ssm:eu-north-1:${AWS::AccountId}:parameter/hcf/prod/*
+              - Sid: ShipContainerLogs
+                Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents, logs:DescribeLogStreams]
+                Resource: !Sub arn:aws:logs:eu-north-1:${AWS::AccountId}:log-group:/hcf/prod:*
+              - Sid: PublishAlerts
+                Effect: Allow
+                Action: sns:Publish
+                Resource: !Sub arn:aws:sns:eu-north-1:${AWS::AccountId}:hcf-alerts
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: hcf-ec2-profile
+      Roles: [!Ref InstanceRole]
+
+Outputs:
+  DeployerGroup: {Value: !Ref DeployerGroup}
+  InstanceProfileName: {Value: !Ref InstanceProfile, Export: {Name: hcf-ec2-profile-name}}
+  InstanceRoleArn: {Value: !GetAtt InstanceRole.Arn}
+  AppBucketName: {Value: !Sub "hcf-app-${AWS::AccountId}-eu-north-1"}

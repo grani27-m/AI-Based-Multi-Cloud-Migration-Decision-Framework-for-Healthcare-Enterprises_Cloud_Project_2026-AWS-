@@ -1,0 +1,185 @@
+### python 00_setup_env.py
+Created .env. Demo accounts (also stored in .env):
+  admin      / <printed once, not logged>
+  doctor     / <printed once, not logged>
+  sim-device / <printed once, not logged>
+exit=0
+
+### python 01_initialize_database.py
+database: sqlite:///runtime/app.db
+  created user admin (admin)
+  created user doctor (doctor)
+  created user sim-device (device)
+
+tables (migration head applied):
+  alembic_version
+  alert_deliveries          0 rows
+  alerts                    0 rows
+  audit_log                 1 rows
+  devices                   0 rows
+  execution_records         0 rows
+  predictions               0 rows
+  routing_decisions         0 rows
+  telemetry_events          0 rows
+  users                     3 rows
+
+next: python 02_start_backend.py
+exit=0
+
+### python 02_start_backend.py  (background)
+GET /health -> {"status":"ok","version":"2.0.0"}
+GET / (React build) -> HTTP 200
+
+### python 03_run_execution_demo.py
+API http://127.0.0.1:8000  (device and admin logged in)
+
+--- 20 REAL replay events (RIPE Atlas test-period windows + PhysioNet BIDMC vitals) ---
+  1 replay (real data)     ICU-BIDMC-44    crit= 0.00 pred=   95.1ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+  2 replay (real data)     ICU-BIDMC-35    crit= 1.43 pred=   37.1ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+  3 replay (real data)     ICU-BIDMC-08    crit= 7.14 pred=   70.5ms EDGE  ahp_decision                     exec=success/EDGE attempts=1 alerts=0
+  4 replay (real data)     ICU-BIDMC-16    crit= 5.71 pred=   14.0ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+  5 replay (real data)     ICU-BIDMC-35    crit= 1.43 pred=   33.6ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+  6 replay (real data)     ICU-BIDMC-16    crit= 1.43 pred=  114.2ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+  7 replay (real data)     ICU-BIDMC-51    crit= 0.00 pred=   17.1ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+  8 replay (real data)     ICU-BIDMC-27    crit= 1.43 pred=  114.9ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+  9 replay (real data)     ICU-BIDMC-08    crit= 4.29 pred=   16.4ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 10 replay (real data)     ICU-BIDMC-51    crit= 0.00 pred=   16.5ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 11 replay (real data)     ICU-BIDMC-50    crit= 0.00 pred=   67.9ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 12 replay (real data)     ICU-BIDMC-07    crit= 1.43 pred=   13.7ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 13 replay (real data)     ICU-BIDMC-39    crit= 0.00 pred=   75.0ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 14 replay (real data)     ICU-BIDMC-45    crit= 0.00 pred=   16.9ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 15 replay (real data)     ICU-BIDMC-16    crit= 1.43 pred=   66.4ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 16 replay (real data)     ICU-BIDMC-48    crit= 1.43 pred=   95.2ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 17 replay (real data)     ICU-BIDMC-42    crit= 1.43 pred=   96.2ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 18 replay (real data)     ICU-BIDMC-21    crit= 2.86 pred=   34.4ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 19 replay (real data)     ICU-BIDMC-34    crit= 0.00 pred=   13.6ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+ 20 replay (real data)     ICU-BIDMC-33    crit= 2.86 pred=   95.9ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+
+--- labelled SIMULATED scenarios (synthetic inputs, real pipeline) ---
+  1 simulated normal       SIM-ECG-101     crit= 0.00 pred=   19.9ms CLOUD ahp_decision                     exec=success/CLOUD attempts=1 alerts=0
+  2 simulated degraded     SIM-ECG-101     crit= 0.00 pred=  466.7ms EDGE  network_degradation_veto         exec=success/EDGE attempts=1 alerts=1
+  3 simulated emergency    SIM-ECG-101     crit=10.00 pred=   23.4ms EDGE  override_critical_patient        exec=success/EDGE attempts=1 alerts=1
+  4 simulated failure      SIM-ECG-101     crit= 0.00 pred=   23.1ms CLOUD ahp_decision                     exec=fallback_success/EDGE attempts=4 alerts=0
+
+--- cloud AND edge adapters both fail ---
+    HTTP 201 status=failed execution=failed error=ExecutionError: injected cloud failure (test/demo flag); ExecutionError: injected cloud failure (test/demo flag); ExecutionError: injected cloud failure (test/demo flag); ExecutionError: injected edge failure (test/demo flag); ExecutionError: injected edge failure (test/demo flag); ExecutionError: injected edge failure (test/demo flag)
+
+--- idempotency: re-send the same event_id ---
+    HTTP 200 duplicate=True
+
+--- invalid input is rejected (422) and nothing is stored ---
+    short window: HTTP 422
+    SpO2 140 %:   HTTP 422
+
+--- authorisation ---
+    no token -> POST /events         HTTP 401
+    device -> GET /audit             HTTP 403
+    device -> GET /events            HTTP 403
+    forged token -> GET /events      HTTP 401
+    admin -> GET /audit              HTTP 200
+
+--- summary from GET /api/v1/dashboard/summary ---
+    events: {'total': 25, 'by_status': {'completed': 24, 'failed': 1}, 'by_source': {'replay': 20, 'simulated': 5}}
+    decisions: {'total': 25, 'edge': {'count': 3, 'pct': 12.0}, 'cloud': {'count': 22, 'pct': 88.0}, 'by_reason': {'override_critical_patient': 1, 'network_degradation_veto': 1, 'prediction_unavailable_safe_default': 0, 'ahp_decision': 23}}
+    executions: {'by_status': {'failed': 1, 'fallback_success': 1, 'success': 23}}
+    alerts: {'triggered': 3, 'by_status': {'mock_delivered': 2, 'not_notified': 1}, 'by_kind': {'emergency_override': 1, 'execution_failure': 1, 'network_veto': 1}, 'delivered': 0, 'failed': 0, 'not_configured': 0, 'mock_delivered': 2, 'pending': 0}
+
+--- checks ---
+  [PASS] emergency vitals -> EDGE override  override_critical_patient
+  [PASS] degraded network -> not CLOUD  network_degradation_veto
+  [PASS] cloud failure -> fallback to EDGE recorded  fallback_success CLOUD->EDGE
+  [PASS] both adapters fail -> stored as failed, not lost  HTTP 201
+  [PASS] same event_id twice -> duplicate, no second execution  
+  [PASS] window of 5 instead of 20 -> 422  
+  [PASS] SpO2 140 -> 422  
+  [PASS] rejected event not stored (GET -> 404)  HTTP 404
+  [PASS] no token rejected  
+  [PASS] device cannot read audit  
+  [PASS] device cannot read records  
+  [PASS] forged token rejected  
+  [PASS] admin can read audit  
+  [PASS] audit hash chain valid  59 entries
+
+14/14 checks passed
+exit=0
+
+### python 04_inspect_audit_logs.py --limit 8
+database: sqlite:///runtime/app.db
+
+table rows:
+  alert_deliveries          10
+  alerts                     3
+  audit_log                 59
+  devices                   16
+  execution_records         25
+  predictions               25
+  routing_decisions         25
+  telemetry_events          25
+  users                      3
+
+last 8 audit entries (append-only, hash-chained):
+  #52    2026-10-29T07:36:10 pipeline               event_processed          event/sim-59470-emergency-00000    f8486611f805… prev b97326a99a8f…
+  #53    2026-10-29T07:36:10 alert-service          alert_dispatched         alert/2                            d43ee9b9fbf4… prev f8486611f805…
+  #54    2026-10-29T07:36:10 sim-device             event_received           event/sim-59471-failure-00000      7bda6946a88d… prev d43ee9b9fbf4…
+  #55    2026-10-29T07:36:11 pipeline               event_processed          event/sim-59471-failure-00000      d10f7d1320c0… prev 7bda6946a88d…
+  #56    2026-10-29T07:36:11 sim-device             event_received           event/sim-59568-normal-00000       cbb52ae26a2a… prev d10f7d1320c0…
+  #57    2026-10-29T07:36:11 pipeline               alert_triggered          alert/3                            9463954f61ed… prev cbb52ae26a2a…
+  #58    2026-10-29T07:36:11 pipeline               event_processed          event/sim-59568-normal-00000       59d6be5d14af… prev 9463954f61ed…
+  #59    2026-10-29T07:36:11 alert-service          alert_dispatched         alert/3                            b98a7d0b79e5… prev 59d6be5d14af…
+
+hash chain: VALID - 59 entries checked, head b98a7d0b79e57e73…
+
+execution history (last 8):
+  #18    replay-1001-1000726-1792906510-b21 CLOUD -> CLOUD success           adapter=local-cloud-object-store attempts=1 0.4 ms
+  #19    replay-1004-25375-1792632508-b34-4 CLOUD -> CLOUD success           adapter=local-cloud-object-store attempts=1 0.2 ms
+  #20    replay-1001-54081-1792726826-b33-3 CLOUD -> CLOUD success           adapter=local-cloud-object-store attempts=1 0.2 ms
+  #21    sim-59468-normal-00000             CLOUD -> CLOUD success           adapter=local-cloud-object-store attempts=1 0.4 ms
+  #22    sim-59469-degraded-00000            EDGE -> EDGE  success           adapter=local-edge-simulator   attempts=1 0.2 ms
+  #23    sim-59470-emergency-00000           EDGE -> EDGE  success           adapter=local-edge-simulator   attempts=1 0.3 ms
+  #24    sim-59471-failure-00000            CLOUD -> EDGE  fallback_success  adapter=local-edge-simulator   attempts=4 152.2 ms
+  #25    sim-59568-normal-00000             CLOUD -> None  failed            adapter=local-cloud-object-store attempts=6 301.0 ms
+
+alerts and delivery attempts (last 8):
+  alert #1 WARNING  network_veto         status=not_notified
+  alert #2 CRITICAL emergency_override   status=mock_delivered
+      -> telegram   attempt 0 skipped    channel not configured
+      -> email      attempt 0 skipped    channel not configured
+      -> webhook    attempt 0 skipped    channel not configured
+      -> aws-sns    attempt 0 skipped    channel not configured
+      -> mock-file  attempt 1 sent       MOCK: written to mock_alerts.jsonl; no message left this machine
+  alert #3 CRITICAL execution_failure    status=mock_delivered
+      -> telegram   attempt 0 skipped    channel not configured
+      -> email      attempt 0 skipped    channel not configured
+      -> webhook    attempt 0 skipped    channel not configured
+      -> aws-sns    attempt 0 skipped    channel not configured
+      -> mock-file  attempt 1 sent       MOCK: written to mock_alerts.jsonl; no message left this machine
+exit=0
+
+### python 04_inspect_audit_logs.py --tamper-demo
+copy: /tmp/claude-0/clean/rani/runtime/tamper_demo_copy.db
+before tampering: {'valid': True, 'checked': 59, 'first_broken_id': None, 'problem': None, 'head_hash': 'b98a7d0b79e57e734f72cbe8b922bbbe0c6545f453d5494b26468bc625969100'}
+editing audit row id=30 action=event_received: actor 'sim-device' -> 'attacker'
+after tampering:  {'valid': False, 'checked': 30, 'first_broken_id': 30, 'problem': 'content hash mismatch (row edited)', 'head_hash': None}
+
+Tamper detected at the edited row.
+exit=0
+
+### python 06_persistence_check.py
+[1] starting backend on http://127.0.0.1:8011
+    stored replay-1004-25375-1792951228-b12-286 -> ('CLOUD', 'success')
+    stored replay-1004-25375-1792954348-b47-270 -> ('CLOUD', 'success')
+    stored replay-1001-1000726-1792520828-b46-443 -> ('CLOUD', 'success')
+[2] stopping backend pid 2374
+[3] backend stopped: reachable=False
+[4] starting a NEW backend process on the same database
+
+checks:
+  [PASS] event replay-1004-25375-1792951228-b12-286 still stored with same decision/execution
+  [PASS] event replay-1004-25375-1792954348-b47-270 still stored with same decision/execution
+  [PASS] event replay-1001-1000726-1792520828-b46-443 still stored with same decision/execution
+  [PASS] event count unchanged across restart (28 -> 28)
+  [PASS] audit chain valid after restart (68 entries, was 67)
+  [PASS] login works after restart (users persisted)
+
+6/6 checks passed
+exit=0

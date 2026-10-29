@@ -1,15 +1,69 @@
 {
   "updated": "2026-10-29",
-  "note": "No AWS credentials were available while building this version, so NOTHING is deployed. 'local/mock' = a working local stand-in exists and infra/aws/template.yaml defines the real resource; deploy with infra/aws/deploy.sh and update this file with evidence from results/aws/.",
+  "note": "NOTHING is deployed yet. The eu-north-1 deployment (EC2 + S3 + SNS + CloudWatch + SSM) is prepared in deploy/aws and docs/AWS_DEPLOYMENT.md and is run by the team with their own least-privilege IAM user; 'local/mock' = a working local stand-in exists. Update this file with evidence after Stage 5.",
   "services": [
-    {"service": "Amazon S3", "role": "model artifacts; processed CLOUD-path objects", "local": "runtime/cloud_objects (local-cloud-object-store); S3CloudAdapter ready (CLOUD_ADAPTER=s3)", "status": "local/mock", "evidence": "IaC: DataBucket in template.yaml; adapter tested locally"},
-    {"service": "AWS Lambda + HTTP API", "role": "AHP decision engine (Tanmay) as a function", "local": "same src/decision code inside FastAPI", "status": "local/mock", "evidence": "handler tested locally (tests/unit/test_lambda_handler.py)"},
-    {"service": "Amazon SNS", "role": "emergency alert fan-out", "local": "Telegram / SMTP / webhook channels with delivery log", "status": "local/mock", "evidence": "IaC: AlertTopic; SNS channel enabled by SNS_TOPIC_ARN"},
-    {"service": "Amazon CloudWatch", "role": "logs, error alarm", "local": "structured logs + Prometheus /metrics", "status": "local/mock", "evidence": "IaC: DecisionLogs, DecisionErrorAlarm"},
-    {"service": "IAM", "role": "least-privilege Lambda role", "local": "app-level JWT roles", "status": "local/mock", "evidence": "IaC: DecisionRole (or Learner Lab LabRole)"},
-    {"service": "Amazon SageMaker", "role": "hosted LSTM inference", "local": "numpy LSTM inside the API (no TensorFlow needed)", "status": "planned", "evidence": "not required: CPU inference takes ~1 ms"},
-    {"service": "AWS IoT Core / Greengrass", "role": "device ingestion / on-prem edge runtime", "local": "REST ingestion + local-edge-simulator", "status": "planned", "evidence": "-"},
-    {"service": "Amazon DynamoDB", "role": "hot storage", "local": "PostgreSQL / SQLite via SQLAlchemy", "status": "planned", "evidence": "relational schema chosen (joins, FKs, migrations)"},
-    {"service": "Amazon Cognito", "role": "user pool", "local": "JWT + PBKDF2 users table", "status": "planned", "evidence": "-"}
+    {
+      "service": "Amazon S3",
+      "role": "model artifacts; processed CLOUD-path objects",
+      "local": "runtime/cloud_objects (local-cloud-object-store); S3CloudAdapter ready (CLOUD_ADAPTER=s3)",
+      "status": "local/mock",
+      "evidence": "IaC: DataBucket in template.yaml; adapter tested locally"
+    },
+    {
+      "service": "AWS Lambda + HTTP API",
+      "role": "AHP decision engine (Tanmay) as a function",
+      "local": "same src/decision code inside FastAPI",
+      "status": "local/mock",
+      "evidence": "handler tested locally (tests/unit/test_lambda_handler.py)"
+    },
+    {
+      "service": "Amazon SNS",
+      "role": "emergency alert fan-out",
+      "local": "Telegram / SMTP / webhook channels with delivery log",
+      "status": "local/mock",
+      "evidence": "IaC: AlertTopic; SNS channel enabled by SNS_TOPIC_ARN"
+    },
+    {
+      "service": "Amazon CloudWatch",
+      "role": "logs, error alarm",
+      "local": "structured logs + Prometheus /metrics",
+      "status": "local/mock",
+      "evidence": "IaC: DecisionLogs, DecisionErrorAlarm"
+    },
+    {
+      "service": "IAM",
+      "role": "least-privilege Lambda role",
+      "local": "app-level JWT roles",
+      "status": "local/mock",
+      "evidence": "deploy/aws/bootstrap.yaml: hcf-deployers policy + hcf-ec2-role (not yet created)"
+    },
+    {
+      "service": "Amazon SageMaker",
+      "role": "hosted LSTM inference",
+      "local": "numpy LSTM inside the API (no TensorFlow needed)",
+      "status": "planned",
+      "evidence": "not required: CPU inference takes ~1 ms"
+    },
+    {
+      "service": "AWS IoT Core / Greengrass",
+      "role": "device ingestion / on-prem edge runtime",
+      "local": "REST ingestion + local-edge-simulator",
+      "status": "planned",
+      "evidence": "-"
+    },
+    {
+      "service": "Amazon DynamoDB",
+      "role": "hot storage",
+      "local": "PostgreSQL / SQLite via SQLAlchemy",
+      "status": "planned",
+      "evidence": "relational schema chosen (joins, FKs, migrations)"
+    },
+    {
+      "service": "Amazon Cognito",
+      "role": "user pool",
+      "local": "JWT + PBKDF2 users table",
+      "status": "planned",
+      "evidence": "-"
+    }
   ]
 }

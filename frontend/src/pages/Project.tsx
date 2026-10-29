@@ -120,8 +120,8 @@ export default function Project() {
         'AWS (eu-north-1) deployment templates and a staged, least-privilege guide; the team runs the commands with their own account.',
         'Reports: dataset, model evaluation, routing evaluation, security & tests, deployment, final status.'],
       live: [['AWS status', aws.note ? String(aws.note).split('.')[0] : '—'], ['Planned services', (aws.services ?? []).map((x: { service: string }) => x.service).join(', ')]],
-      files: ['Dockerfile', 'docker-compose.yml', '.github/workflows/ci.yml', 'infra/aws/', 'reports/'],
-      verify: ['docker compose up --build', 'see docs/AWS_DEPLOYMENT.md'], link: ['/system', 'System page'] },
+      files: ['Dockerfile', 'docker-compose.yml', '.github/workflows/ci.yml', 'deploy/aws/ (eu-north-1)', 'reports/'],
+      verify: ['docker compose up --build', 'bash deploy/aws/scripts/00_preflight.sh  # read-only', 'see docs/AWS_DEPLOYMENT.md'], link: ['/system', 'System page'] },
   ];
   const st = stages.find(x => x.id === sel)!;
 

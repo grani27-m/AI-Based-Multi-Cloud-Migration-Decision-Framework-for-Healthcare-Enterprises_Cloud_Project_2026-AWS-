@@ -3,6 +3,14 @@
 **Role:** the layer that makes the other two modules *do* something: receive telemetry, call Charles's predictor and
 Tanmay's decision engine, execute the decision, persist everything, audit it, alert people and show it in the UI.
 
+## Run my part on its own
+**Workstream:** C — Execution & security; D — API, dashboard & monitoring (lead); E — deployment (lead) (see `docs/WORKSTREAM_MAPPING.md`, every file's owner in `docs/FILE_OWNERSHIP_MATRIX.md`).
+
+Standalone package: **`standalone_demos/rani/`** — copy the folder anywhere, `python -m venv .venv`, `pip install -r requirements.txt`, then
+`00_setup_env.py → 01_initialize_database.py → 02_start_backend.py → 03_run_execution_demo.py → 04_inspect_audit_logs.py → streamlit run 05_dashboard.py → 06_persistence_check.py`. Instructions: `standalone_demos/rani/README.md`. Verified outside the repository in a fresh environment:
+69 passed; execution demo 14/14 checks, persistence 6/6 — `standalone_demos/rani/TEST_REPORT.md`.
+
+
 ## Canonical source
 
 | Area | Files |

@@ -1,0 +1,200 @@
+package: charles   copied to /tmp/claude-0/clean/charles (outside the repository), fresh venv
+Thu Oct 29 07:34:19 UTC 2026
+Python 3.13.18
+Linux x86_64
+numpy==2.5.4
+pandas==3.1.0
+plotly==6.9.0
+pytest==9.2.0
+scikit-learn==1.9.1
+streamlit==1.66.1
+uvicorn==0.54.0
+
+### python 01_inspect_datasets.py
+==============================================================================
+RIPE Atlas network measurements (REAL data)
+==============================================================================
+API: https://atlas.ripe.net/api/v2   period: 2026-09-02T00:00:00Z -> 2026-10-28T00:00:00Z
+  msm 1001: ping -> k.root-servers.net  interval 240 s
+  msm 1004: ping -> f.root-servers.net  interval 240 s
+  REJECTED msm 228839605: ping -> 200.14.75.253  interval 240 s  (Checked 2026-10-29: user-defined one-off campaign with 1 probe, start ...)
+
+Probes (21 selected):
+     24916  access_network  AS133661  RIPE Probe - Amritsar (Punjab)
+     25375  access_network  AS24560   Netgen STPI
+     17590  access_network  AS24560   DD
+     29959  access_network  AS9829    AS9829 HP
+     25398  access_network  AS24560   RamShanker_01
+     25250  access_network  AS134858  Excitel-Delhi
+     11978  access_network  AS24560   RB01-HOME-Airtel
+   1000458  access_network  AS18209   ACTHYD-DC
+     53613  access_network  AS24560   Probe - Kullu (H.P.)
+     54620  access_network  AS9829    AS9829 - Pathanamthitta
+   1000726  access_network  AS17488   Hathway / Fiber / Delhi / IN on Docker@Pi
+     25261  access_network  AS136902  Varun Sinai Priolkar India HOME NET
+     55694  access_network  AS24560   AS9829 Shimla H.P
+     52835  access_network  AS136902  ftver_ripe_probe_1
+     54081  access_network  AS149794  Probe hosted in a home network
+   1003379  datacentre      AS16509   AWS - Asia Pacific (Mumbai)
+   1000979  datacentre      AS31898   Hosted on Oracle Cloud in Mumbai
+   1002359  datacentre      AS31898   FiLabs OCI Hyderabad
+   1001134  datacentre      AS14061   Digital-Ocean-Bengaluru
+   1003760  datacentre      AS132420  E2E Networks, Atlas Probe Noida
+   1000689  datacentre      AS16276   AS16276 probe India
+
+Raw files: 336 chunks, 756,495 raw results (retrieved 2026-10-29T04:53:56+00:00)
+  probes that returned no results for a measurement: [1001134]
+Checksum verification: 336/336 raw files match the download manifest
+
+Cleaning (from dataset/metadata/ripe_atlas_quality.json):
+  rows_raw                  756,495
+  rows_after_validity       753,410
+  duplicates_removed              0
+  rows_clean                753,410
+  rows_total_loss            43,412
+  rows_rtt_ge_150ms             573
+  rows_rtt_ge_300ms              47
+  series                         40
+  segments                      710
+  invalid by reason      {'bad_counts': 3085}
+
+Processed table dataset/processed/ripe_atlas_clean.csv.gz: 753,410 rows x 14 columns
+Missing values per column (NaN RTT = round with 100 % loss; NaN jitter = fewer than 2 replies):
+  msm_id              0
+  prb_id              0
+  timestamp           0
+  sent                0
+  rcvd                0
+  rtt_avg_ms     43,412
+  rtt_min_ms     43,412
+  rtt_max_ms     43,412
+  loss_pct            0
+  jitter_ms      43,667
+  group               0
+  series_id           0
+  segment             0
+
+Per measurement x probe:
+                 rows                     first                      last  median_rtt  loss_rounds
+msm_id prb_id                                                                                     
+1001   11978    20150 2026-09-02 00:02:54+00:00 2026-10-27 23:58:54+00:00   28.534811           51
+       17590    17970 2026-09-02 00:00:45+00:00 2026-10-27 23:56:48+00:00   14.343945           16
+       24916    11944 2026-09-20 13:47:34+00:00 2026-10-27 23:59:35+00:00   14.032601          294
+       25250    20160 2026-09-02 00:01:00+00:00 2026-10-27 23:56:59+00:00   41.705888          299
+       25261    12382 2026-09-23 13:16:35+00:00 2026-10-27 23:56:38+00:00   39.450218           54
+       25375    20156 2026-09-02 00:03:41+00:00 2026-10-27 23:59:39+00:00   19.293726           13
+       25398    19899 2026-09-02 00:02:34+00:00 2026-10-27 23:58:34+00:00    6.481830           54
+       29959    20158 2026-09-02 00:03:35+00:00 2026-10-27 23:59:37+00:00   15.114602          410
+       52835    19830 2026-09-02 00:03:12+00:00 2026-10-27 23:59:14+00:00   39.319194           94
+       53613    20155 2026-09-02 00:03:22+00:00 2026-10-27 23:59:23+00:00   17.445250            4
+       54081    12566 2026-09-02 00:00:23+00:00 2026-10-27 23:56:23+00:00   78.839320            3
+       54620    20151 2026-09-02 00:02:00+00:00 2026-10-27 23:57:58+00:00   53.377910          217
+       55694    20157 2026-09-02 00:02:26+00:00 2026-10-27 23:58:26+00:00   14.405209           10
+       1000458  20160 2026-09-02 00:01:55+00:00 2026-10-27 23:57:56+00:00   26.980793            5
+       1000689  20156 2026-09-02 00:00:28+00:00 2026-10-27 23:56:29+00:00         NaN        20156
+       1000726  20074 2026-09-02 00:03:07+00:00 2026-10-27 23:59:07+00:00    6.855523           10
+       1000979  20158 2026-09-02 00:02:11+00:00 2026-10-27 23:58:11+00:00   24.356856            8
+       1002359  20160 2026-09-02 00:03:06+00:00 2026-10-27 23:59:06+00:00   80.054355           12
+       1003379  20156 2026-09-02 00:01:05+00:00 2026-10-27 23:57:05+00:00  125.237017            1
+       1003760  20160 2026-09-02 00:03:20+00:00 2026-10-27 23:59:17+00:00   43.803814            8
+1004   11978    20150 2026-09-02 00:03:39+00:00 2026-10-27 23:59:40+00:00    4.440341           46
+       17590    17966 2026-09-02 00:01:24+00:00 2026-10-27 23:57:24+00:00   12.864403           11
+       24916    11943 2026-09-20 13:48:14+00:00 2026-10-27 23:56:14+00:00   13.819993          298
+       25250    20160 2026-09-02 00:01:37+00:00 2026-10-27 23:57:36+00:00    1.952283          295
+       25261    12383 2026-09-23 13:17:15+00:00 2026-10-27 23:57:14+00:00   14.262300           47
+       25375    20156 2026-09-02 00:00:28+00:00 2026-10-27 23:56:27+00:00   14.399032            8
+       25398    19908 2026-09-02 00:03:26+00:00 2026-10-27 23:59:25+00:00    4.112586           67
+       29959    20157 2026-09-02 00:00:25+00:00 2026-10-27 23:56:25+00:00   15.958173          408
+       52835    19846 2026-09-02 00:03:52+00:00 2026-10-27 23:59:52+00:00   14.487236           82
+       53613    20153 2026-09-02 00:00:02+00:00 2026-10-27 23:56:04+00:00   15.998848           34
+       54081    12565 2026-09-02 00:01:03+00:00 2026-10-27 23:57:05+00:00   54.233132            3
+       54620    20154 2026-09-02 00:02:50+00:00 2026-10-27 23:58:48+00:00   21.499195          212
+       55694    20157 2026-09-02 00:03:09+00:00 2026-10-27 23:59:08+00:00   14.239042           12
+       1000458  20152 2026-09-02 00:02:36+00:00 2026-10-27 23:58:34+00:00    0.588050            0
+       1000689  20156 2026-09-02 00:01:15+00:00 2026-10-27 23:57:16+00:00         NaN        20156
+       1000726  20070 2026-09-02 00:03:49+00:00 2026-10-27 23:59:48+00:00    5.150639           10
+       1000979  20156 2026-09-02 00:02:56+00:00 2026-10-27 23:58:58+00:00    1.632650            1
+       1002359  20160 2026-09-02 00:03:52+00:00 2026-10-27 23:59:54+00:00   13.825100            2
+       1003379  20156 2026-09-02 00:01:53+00:00 2026-10-27 23:57:51+00:00    1.147028            0
+       1003760  20160 2026-09-02 00:00:00+00:00 2026-10-27 23:56:01+00:00    2.391212            1
+
+Quality checks:
+  [PASS] row_count_matches_metadata
+  [PASS] no_duplicate_keys
+  [PASS] rtt_order_min_avg_max
+  [PASS] loss_in_0_100
+  [PASS] timestamps_in_period
+
+==============================================================================
+PhysioNet BIDMC vital signs (REAL data, used only for patient criticality)
+==============================================================================
+BIDMC PPG and Respiration Dataset v1.0.0 - https://physionet.org/content/bidmc/1.0.0/ - licence Open Data Commons Attribution License v1.0
+53 numerics files, 53 match PhysioNet SHA256SUMS; quality: {'rows_raw': 25493, 'rows_clean': 25485, 'records': 53, 'out_of_range_set_to_nan': {'hr': 4, 'pulse': 128, 'resp': 375, 'spo2': 128}, 'rows_dropped_unrecoverable': 8}
+
+written results/inspection_report.json
+exit=0
+
+### python 02_validate_and_preprocess.py
+2026-10-29 07:34:51,959 INFO quality: {"raw_files": 336, "rows_raw": 756495, "invalid_by_reason": {"bad_counts": 3085}, "rows_after_validity": 753410, "duplicates_removed": 0, "rows_clean": 753410, "rows_total_loss": 43412, "rows_jitter_undefined": 255, "series": 40, "segments": 710, "time_range_utc": ["2026-09-02T00:00:00+00:00", "2026-10-27T23:59:54+00:00"], "rtt_avg_ms": {"count": 709998.0, "mean": 24.994, "std": 27.771, "min": 0.376, "50%": 15.236, "95%": 86.958, "99%": 126.432, "max": 1030.007}, "rows_rtt_ge_150ms": 573, "rows_rtt_ge_300ms": 47, "rows_per_group": {"access_network": 551832, "datacentre": 201578}, "rows_per_pro
+2026-10-29 07:34:51,960 INFO splits: {'method': 'global chronological cut-offs; whole window must lie inside one split', 'fractions': (0.7, 0.15, 0.15), 'train': ['2026-09-02T00:00:00+00:00', '2026-10-11T04:47:55+00:00'], 'val': ['2026-10-11T04:47:55+00:00', '2026-10-19T14:23:54+00:00'], 'test': ['2026-10-19T14:23:54+00:00', '2026-10-27T23:59:54+00:00'], 'windows': {'train': 475196, 'val': 111314, 'test': 113077}}
+
+Reproducibility check (shipped -> rebuilt):
+  [SAME] rows_raw                756,495 ->    756,495
+  [SAME] rows_clean              753,410 ->    753,410
+  [SAME] rows_total_loss          43,412 ->     43,412
+  [SAME] duplicates_removed            0 ->          0
+  [SAME] series                       40 ->         40
+  [SAME] segments                    710 ->        710
+  [SAME] train windows           475,196 ->    475,196
+  [SAME] val windows             111,314 ->    111,314
+  [SAME] test windows            113,077 ->    113,077
+All counts reproduced.
+exit=0
+
+### python 03_train_or_load_model.py
+MODE: inference-only (verified artifacts, numpy forward pass, TensorFlow not required)
+model_version  lstm-20261029-0529   trained 2026-10-29T05:29:40+00:00
+architecture   {'type': 'stacked LSTM', 'units': [64, 32], 'dense': 16, 'dropout': 0.2, 'params': 31393}
+features       ['rtt_avg_ms', 'rtt_min_ms', 'rtt_max_ms', 'jitter_ms', 'loss_pct', 'hour_sin', 'hour_cos']  window 20  target next rtt_avg_ms: log1p, minus log1p(last RTT), standardised
+training       best epoch 8/11, loss huber, Adam(0.001), train windows 475,196, val windows 111,314
+validation     MAE 1.484 ms vs persistence 1.817 ms
+data hash      14f1b4cb814a0e9e... (windows file the model was trained on)
+
+Last 8 held-out TEST predictions for series 1001-25250 (probe 25250, k-root):
+/tmp/claude-0/clean/charles/03_train_or_load_model.py:58: UserWarning: obj.round has no effect with datetime, timedelta, or period dtypes. Use obj.dt.round(...) instead.
+  print(t[["time_utc", "actual_ms", "lstm_ms", "persistence_ms"]].round(2).to_string(index=False))
+                 time_utc  actual_ms  lstm_ms  persistence_ms
+2026-10-27 23:28:59+00:00      31.39    31.63           31.58
+2026-10-27 23:32:57+00:00      31.37    31.43           31.39
+2026-10-27 23:36:58+00:00      31.22    31.41           31.37
+2026-10-27 23:40:58+00:00      32.00    31.27           31.22
+2026-10-27 23:44:59+00:00      31.56    32.01           32.00
+2026-10-27 23:49:00+00:00      31.35    31.60           31.56
+2026-10-27 23:52:59+00:00      31.42    31.39           31.35
+2026-10-27 23:56:59+00:00      31.65    31.47           31.42
+
+series test MAE: LSTM 0.603 ms, persistence 0.756 ms (2,987 windows)
+exit=0
+
+### python 04_evaluate_predictions.py
+2026-10-29 07:35:35,828 INFO lstm         MAE 1.307 ms  RMSE 6.515 ms  skill(MAE) +0.200
+2026-10-29 07:35:35,829 INFO persistence  MAE 1.633 ms  RMSE 7.994 ms  skill(MAE) +0.000
+2026-10-29 07:35:35,829 INFO mean20       MAE 1.781 ms  RMSE 6.688 ms  skill(MAE) -0.091
+2026-10-29 07:35:35,829 INFO ewma         MAE 1.529 ms  RMSE 6.407 ms  skill(MAE) +0.064
+2026-10-29 07:35:35,829 INFO ridge        MAE 1.496 ms  RMSE 6.407 ms  skill(MAE) +0.084
+2026-10-29 07:35:35,829 INFO objective 1 (LSTM beats persistence on MAE and RMSE): True
+
+method        shipped MAE  rebuilt MAE  shipped RMSE  rebuilt RMSE
+lstm               1.3069       1.3069        6.5149        6.5149  OK
+persistence        1.6330       1.6330        7.9936        7.9936  OK
+mean20             1.7814       1.7814        6.6881        6.6881  OK
+ewma               1.5288       1.5288        6.4067        6.4067  OK
+ridge              1.4955       1.4955        6.4067        6.4067  OK
+
+Objective 1 (LSTM beats persistence on MAE and RMSE): True
+Metrics reproduced.
+exit=0
+
+### python -m pytest tests -q
+.........................s                                               [100%]
+25 passed, 1 skipped in 15.03s

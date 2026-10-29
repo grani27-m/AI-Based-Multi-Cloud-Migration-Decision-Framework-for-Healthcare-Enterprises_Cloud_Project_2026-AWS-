@@ -1,0 +1,9 @@
+2026-10-29 07:37:59.889 Could not bind IPv6 wildcard address :::8603; falling back to 0.0.0.0:8603.
+2026-10-29 07:37:59.923 Uvicorn server started on 0.0.0.0:8603
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8603
+  Network URL: http://192.0.2.2:8603
+  External URL: http://160.79.106.129:8603
+

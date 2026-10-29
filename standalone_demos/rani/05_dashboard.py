@@ -112,8 +112,8 @@ with t_send:
     if not dev_tok:
         st.error("device login failed - run 01_initialize_database.py")
     else:
-        l, r = st.columns(2)
-        with l:
+        col_l, col_r = st.columns(2)
+        with col_l:
             st.subheader("Real replay")
             st.caption("RIPE Atlas held-out test windows + PhysioNet BIDMC vitals (real data)")
             n = st.number_input("events", 1, 100, 10)
@@ -125,7 +125,7 @@ with t_send:
                     c, b = call("POST", "/api/v1/events", dev_tok, json=e)
                     out.append(b if c in (200, 201) else {"event_id": e["event_id"], "status": f"HTTP {c}"})
                 st.session_state["sent"] = out
-        with r:
+        with col_r:
             st.subheader("Labelled simulated scenario")
             st.caption("synthetic inputs, real pipeline")
             sc = st.selectbox("scenario", ["normal", "degraded", "emergency", "failure (cloud down)", "both adapters down"])

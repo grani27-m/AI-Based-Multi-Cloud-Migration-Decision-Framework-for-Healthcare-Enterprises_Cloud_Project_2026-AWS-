@@ -8,6 +8,10 @@
 | Tanmay Kapoor | 24BIT0079 | AHP / MCDM decision engine, safety vetoes | [`team_work/tanmay`](team_work/tanmay/README.md) |
 | Rani Gupta | 24BIT0543 | Execution, backend, database, security, alerts, dashboard, ops | [`team_work/rani`](team_work/rani/README.md) |
 
+**Each member's part also runs on its own:** [`standalone_demos/`](standalone_demos/README.md) (`charles/`, `tanmay/`, `rani/` —
+numbered scripts, a dashboard each, tests, verified outside the repository in fresh environments). Workstreams A–E:
+[`docs/WORKSTREAM_MAPPING.md`](docs/WORKSTREAM_MAPPING.md); owner of every file: [`docs/FILE_OWNERSHIP_MATRIX.md`](docs/FILE_OWNERSHIP_MATRIX.md).
+
 For every IoMT reading the system decides whether to process it at the **hospital edge** or in the **cloud**:
 
 ```
@@ -18,17 +22,19 @@ reading (20-round network window + vitals) ──► LSTM forecast of next RTT (
 ```
 
 Research prototype — real public data, no patient identities, HIPAA-*aligned* design, not certified or clinically validated.
-AWS services are designed and scripted but **not deployed** (see [`reports/AWS_DEPLOYMENT_REPORT.md`](reports/AWS_DEPLOYMENT_REPORT.md)).
+AWS (eu-north-1) deployment is prepared as a staged, least-privilege guide that the team executes with their own account:
+[`docs/AWS_DEPLOYMENT.md`](docs/AWS_DEPLOYMENT.md). Nothing is deployed until those steps are run and tested.
 
 ## Verified results (details in `reports/`)
 
 | | |
 |---|---|
-| Real network data | **756,495** RIPE Atlas ping results (msm 1001/1004, 20 Indian probes, 2 Sep – 28 Oct 2026) → 753,410 clean rows, SHA-256 manifest |
+| Real network data | **756,495** RIPE Atlas ping results (msm 1001/1004, 20 Indian probes with data (19 usable: one reported 100 % loss), 2 Sep – 28 Oct 2026) → 753,410 clean rows, SHA-256 manifest |
 | Real vital signs | **53** PhysioNet BIDMC ICU recordings, checksums verified |
 | Forecaster (held-out test, 113,077 windows) | **LSTM MAE 1.307 ms vs persistence 1.633 ms** (−20 %), RMSE 6.515 vs 7.994 ms |
 | AHP weights (verified) | criticality 0.6370 · latency 0.2583 · cost 0.1047, CR 0.0332 |
-| Tests | **122 passed** (unit + integration + e2e + concurrency), lint clean, frontend build OK |
+| Tests | **274 passed** in the main repository (unit + integration + e2e + concurrency + multi-cloud + AWS templates/adapters + package sync); standalone packages 25 (+1 skipped) / 184 / 69 |
+| Dashboard | React portal: **Project tour** (whole framework, live numbers), Overview, Live events, **Request trace** (clickable per-event flow), Devices, Alerts, Decision lab, **Multi-cloud**, Model & data, Audit, System, Admin — screenshots `results/screenshots/final/` |
 | Database | SQLite and PostgreSQL 16, one Alembic migration, persistence across restart verified |
 | Load (p95 of ingestion) | 23 ms (1 sender, SQLite) · 39 ms (1) / 203 ms (10 senders) on PostgreSQL, 4 workers, 2 vCPU |
 
@@ -81,7 +87,7 @@ python -m src.prediction.evaluate
 |---|---|
 | `data_ingestion/` | RIPE Atlas + BIDMC downloaders, real-data replay, labelled simulator |
 | `src/prediction/` | parsing, features, splits, LSTM, training, evaluation, inference service |
-| `src/decision/` | AHP, vetoes, router, partial-NEWS2 criticality |
+| `src/decision/` | AHP, vetoes, router, partial-NEWS2 criticality, multi-cloud candidate ranking |
 | `src/execution/` | edge/cloud adapters, retrying executor |
 | `backend/` | FastAPI app, schema, security, audit, alerts, pipeline, routers |
 | `migrations/` | Alembic |
@@ -90,6 +96,7 @@ python -m src.prediction.evaluate
 | `infra/aws/` | SAM template, Lambda handler, deploy/teardown, service status |
 | `integration/` | API contract, database schema + ER diagram, end-to-end tests |
 | `reports/` | dataset, model, routing, security/test, AWS, contributions, final status |
+| `standalone_demos/` | one runnable package per member (copies kept identical by `export.py`) |
 | `team_work/` | one folder per member: README, module inventory, test plan, evidence index |
 | `architecture/` | report figures + `Implemented_Architecture.png`, `ER_Diagram.png` |
 | `docs/` | report documents, literature survey; `docs/archive/` = superseded drafts with unverified claims |

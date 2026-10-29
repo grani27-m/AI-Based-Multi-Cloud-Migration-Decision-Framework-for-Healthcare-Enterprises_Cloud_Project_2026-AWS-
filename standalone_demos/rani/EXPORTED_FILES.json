@@ -113,9 +113,9 @@
    "source": "dataset/samples/ripe_atlas_test_sample.csv.gz",
    "sha256": "5b24c8a850eb86ecd9ffbbc3ae96d3d38f967bd34b5e760dc68aa71fc9fadd6d"
   },
-  "frontend/dist/assets/index-DdlDJwpX.js": {
-   "source": "frontend/dist/assets/index-DdlDJwpX.js",
-   "sha256": "ae31e605a4fcc612ebb0d6ce6d75761127a1ab2b0cb3f2eae733cb1dae27a06d"
+  "frontend/dist/assets/index-Bsb1haEH.js": {
+   "source": "frontend/dist/assets/index-Bsb1haEH.js",
+   "sha256": "9867c4ea8d8f00b1322289f75746fd5e97f45de016ff4511336c2b3bc06a464f"
   },
   "frontend/dist/assets/index-EReY0DyV.css": {
    "source": "frontend/dist/assets/index-EReY0DyV.css",
@@ -131,11 +131,11 @@
   },
   "frontend/dist/index.html": {
    "source": "frontend/dist/index.html",
-   "sha256": "b23504410ba806360e7b9fa49844be5fa27ba7ffeb400d6608b198fca21f89f4"
+   "sha256": "eb92f11744948096010b1df4b0eca25862d17de95c3862c196a885cb75488ef2"
   },
   "infra/aws/service_status.json": {
    "source": "infra/aws/service_status.json",
-   "sha256": "44f29477cf7681b25ca37dfe6d201f34da421fdb1f55e21b51142e60ea289722"
+   "sha256": "26b3779aedbc4a402095fdadcda5376a63b6db9e4a79227c2c9a0fb73cdc4d0a"
   },
   "integration/API_CONTRACT.md": {
    "source": "integration/API_CONTRACT.md",

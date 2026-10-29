@@ -3,6 +3,14 @@
 **Role:** turn a latency forecast, a patient-criticality score and a cloud-cost index into an explainable EDGE/CLOUD decision,
 with hard clinical-safety vetoes that no score can override.
 
+## Run my part on its own
+**Workstream:** B — Decision engine (see `docs/WORKSTREAM_MAPPING.md`, every file's owner in `docs/FILE_OWNERSHIP_MATRIX.md`).
+
+Standalone package: **`standalone_demos/tanmay/`** — copy the folder anywhere, `python -m venv .venv`, `pip install -r requirements.txt`, then
+`01_load_criteria.py → 02_calculate_ahp.py → 03_compare_candidates.py → 04_explain_decision.py → streamlit run 05_dashboard.py`. Instructions: `standalone_demos/tanmay/README.md`. Verified outside the repository in a fresh environment:
+184 passed — `standalone_demos/tanmay/TEST_REPORT.md`.
+
+
 ## Canonical source (this folder only documents; code lives in one place)
 
 | File | What it does |

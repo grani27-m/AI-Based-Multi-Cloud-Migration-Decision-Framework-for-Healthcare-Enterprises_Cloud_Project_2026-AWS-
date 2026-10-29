@@ -1,0 +1,4 @@
+exceptions: []
+tabs: 6
+metrics: [('Events stored', '28'), ('EDGE decisions', '3'), ('CLOUD decisions', '25'), ('Alerts triggered', '3'), ('Really delivered', '0'), ('Mock-delivered', '2')]
+success: ['Hash chain VALID - 70 entries checked, head 073e58dfaf482dbbeb6c…', 'API online · version 2.0.0']

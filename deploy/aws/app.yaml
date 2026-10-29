@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Healthcare Cloud Framework - application stack (stack name: hcf-app, region eu-north-1). Deployed by a member of the
+  hcf-deployers group. One EC2 instance runs the integrated system (FastAPI + LSTM + AHP engine + execution + React
+  dashboard) and PostgreSQL 16 in Docker on an encrypted EBS volume; S3 holds the release bundle, CLOUD-path objects and
+  database backups (bucket created by scripts/01_create_bucket.sh so the release can be uploaded first); SNS sends alerts by e-mail; CloudWatch receives container logs and health alarms. No SSH: shell access
+  is through SSM Session Manager.
+
+Parameters:
+  AllowedCidr:
+    Type: String
+    Description: Your public IP as a /32 (e.g. 203.0.113.7/32). Only this address can open the dashboard on port 80.
+    AllowedPattern: "^([0-9]{1,3}\\.){3}[0-9]{1,3}/(3[0-2]|[12][0-9]|[0-9])$"
+  AlertEmail:
+    Type: String
+    Description: E-mail subscribed to application alerts and health alarms (you must click the confirmation link)
+    AllowedPattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues: [t3.micro, t3.small]
+    Description: t3.micro (1 GiB + 2 GiB swap) is enough for the demo; t3.small doubles memory and cost.
+  VolumeSizeGiB:
+    Type: Number
+    Default: 16
+    MinValue: 12
+    MaxValue: 30
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+  ReleaseKey:
+    Type: String
+    Default: releases/current.tar.gz
+    Description: S3 key of the release bundle uploaded by deploy/aws/scripts/02_upload_release.sh
+
+Resources:
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: hcf-alerts
+      Subscription: [{Protocol: email, Endpoint: !Ref AlertEmail}]
+      Tags: [{Key: Project, Value: hcf}]
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /hcf/prod
+      RetentionInDays: 14
+
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: hcf dashboard/API on port 80 from one IP only; no SSH
+      SecurityGroupIngress:
+        - {IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: !Ref AllowedCidr, Description: dashboard + API}
+      Tags: [{Key: Project, Value: hcf}, {Key: Name, Value: hcf-web}]
+
+  AppServer:
+    Type: AWS::EC2::Instance
+    CreationPolicy:
+      ResourceSignal: {Count: 1, Timeout: PT30M}
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !ImportValue hcf-ec2-profile-name
+      SecurityGroupIds: [!GetAtt WebSecurityGroup.GroupId]
+      MetadataOptions: {HttpTokens: required, HttpEndpoint: enabled, HttpPutResponseHopLimit: 2}
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs: {VolumeType: gp3, VolumeSize: !Ref VolumeSizeGiB, Encrypted: true, DeleteOnTermination: true}
+      Tags: [{Key: Project, Value: hcf}, {Key: Name, Value: hcf-app-server}]
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euo pipefail
+          exec > >(tee -a /var/log/hcf-bootstrap.log) 2>&1
+          signal() { /opt/aws/bin/cfn-signal -e "$1" --stack ${AWS::StackName} --resource AppServer --region ${AWS::Region} || true; }
+          trap 'signal 1' ERR
+          dnf install -y docker aws-cfn-bootstrap cronie tar gzip
+          mkdir -p /usr/local/lib/docker/cli-plugins
+          curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
+            -o /usr/local/lib/docker/cli-plugins/docker-compose
+          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+          systemctl enable --now docker crond
+          if [ ! -f /swapfile ]; then fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile \
+            && echo '/swapfile none swap sw 0 0' >> /etc/fstab; fi
+          mkdir -p /opt/hcf
+          cat > /etc/hcf.conf <<EOF
+          HCF_BUCKET=hcf-app-${AWS::AccountId}-eu-north-1
+          HCF_RELEASE_KEY=${ReleaseKey}
+          HCF_REGION=${AWS::Region}
+          HCF_SNS_TOPIC_ARN=${AlertTopic}
+          HCF_LOG_GROUP=${LogGroup}
+          EOF
+          aws s3 cp "s3://hcf-app-${AWS::AccountId}-eu-north-1/${ReleaseKey}" /tmp/hcf-release.tar.gz --region ${AWS::Region}
+          tar -xzf /tmp/hcf-release.tar.gz -C /opt/hcf
+          install -m 0755 /opt/hcf/deploy/aws/instance/hcf-update.sh /usr/local/bin/hcf-update
+          install -m 0755 /opt/hcf/deploy/aws/instance/hcf-backup.sh /usr/local/bin/hcf-backup
+          echo '17 2 * * * root /usr/local/bin/hcf-backup >> /var/log/hcf-backup.log 2>&1' > /etc/cron.d/hcf-backup
+          /usr/local/bin/hcf-update --no-download
+          signal 0
+
+  StatusCheckAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: hcf-app-status-check
+      AlarmDescription: EC2 status check failed (instance or system)
+      Namespace: AWS/EC2
+      MetricName: StatusCheckFailed
+      Dimensions: [{Name: InstanceId, Value: !Ref AppServer}]
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions: [!Ref AlertTopic]
+
+  CpuAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: hcf-app-cpu-high
+      AlarmDescription: CPU above 80 % for 15 minutes (t3 burst credits draining)
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Dimensions: [{Name: InstanceId, Value: !Ref AppServer}]
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions: [!Ref AlertTopic]
+
+Outputs:
+  DashboardUrl: {Value: !Sub "http://${AppServer.PublicIp}/", Description: open from the AllowedCidr address only}
+  InstanceId: {Value: !Ref AppServer}
+  BucketName: {Value: !Sub "hcf-app-${AWS::AccountId}-eu-north-1"}
+  AlertTopicArn: {Value: !Ref AlertTopic}
+  LogGroupName: {Value: !Ref LogGroup}

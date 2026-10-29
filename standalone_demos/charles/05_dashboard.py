@@ -9,7 +9,6 @@ metadata, trained model). Predictions are produced live by the shipped model (nu
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st

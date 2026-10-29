@@ -1,0 +1,10 @@
+# Override for validating the production compose on a laptop/CI WITHOUT AWS: local logs, local cloud adapter, port 8080.
+services:
+  postgres:
+    logging: {driver: json-file}
+  api:
+    logging: {driver: json-file}
+    environment:
+      CLOUD_ADAPTER: local
+      SNS_TOPIC_ARN: ""
+    ports: !override ["8080:8000"]
